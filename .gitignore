@@ -1,6 +1,7 @@
 /.phpunit.cache
 /node_modules
-/public/build
+# /public/build SENGAJA di-commit — Hostinger shared tidak bisa `npm run
+# build`, jadi hasil Vite build lokal ikut git supaya deploy cukup pull.
 /public/hot
 /public/storage
 /storage/*.key
