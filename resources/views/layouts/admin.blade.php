@@ -274,7 +274,7 @@
           </a>
       </li>
       <li class="nav-item mb-1">
-          <a href="#"
+          <a href="{{ route('admin.guru.index') }}"
               class="menu-item nav-link {{ request()->routeIs('admin.guru.*') ? 'active' : '' }}"
               data-tooltip="Manage Guru">
               <i class="bi bi-person-badge-fill me-2"></i><span> Guru</span>
@@ -316,14 +316,14 @@
           </a>
       </li>
       <li class="nav-item mb-1">
-          <a href="#"
+          <a href="{{ route('admin.reports') }}"
             class="menu-item nav-link {{ request()->routeIs('admin.reports') ? 'active' : '' }}"
             data-tooltip="Reports">
               <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Reports</span>
           </a>
       </li>
       <li class="nav-item mb-1">
-          <a href="#"
+          <a href="{{ route('admin.help') }}"
             class="menu-item nav-link {{ request()->routeIs('admin.help') ? 'active' : '' }}"
             data-tooltip="Help">
               <i class="bi bi-question-circle-fill me-2"></i><span> Help</span>

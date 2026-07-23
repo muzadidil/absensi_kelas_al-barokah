@@ -57,8 +57,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     // Guru
     Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
+    Route::get('/admin/guru', [GuruController::class, 'manage'])->name('admin.guru.index');
+    Route::delete('/admin/guru/{user}', [GuruController::class, 'destroy'])->name('admin.guru.destroy');
     // Learner
     Route::get('/learner/dashboard', [LearnerController::class, 'index'])->name('learner.dashboard');
+
+    // Reports & Help
+    Route::view('/admin/reports', 'admin.reports.index')->name('admin.reports');
+    Route::view('/admin/help', 'admin.help.index')->name('admin.help');
 
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
