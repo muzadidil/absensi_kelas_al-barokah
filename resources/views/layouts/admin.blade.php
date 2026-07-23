@@ -36,6 +36,7 @@
       }
 
       .sidebar {
+        width: 200px;
         height: 100vh;
         position: fixed;
         top: 0;
