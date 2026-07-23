@@ -1,16 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Registered Users')
+@section('title', 'Pengguna Terdaftar')
 
 @section('content')
 <div class="container">
     <!-- Loader Overlay -->
     <div id="loader">
         <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">Memuat...</span>
         </div>
         <div class="mt-3 text-primary" id="loaderMessage">
-            Loading records...
+            Memuat data...
         </div>
     </div>
 
@@ -18,13 +18,13 @@
     <!-- Sticky header -->
     <div class="sticky-top bg-white shadow-sm py-2 mb-0">
         <div class="d-flex flex-column flex-md-row flex-wrap justify-content-between align-items-start align-items-md-center">
-            <h5 class="mb-2 mb-md-0">Registered Users</h5>
+            <h5 class="mb-2 mb-md-0">Pengguna Terdaftar</h5>
             <div class="d-flex flex-wrap gap-2">
                 <!-- <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-house-door-fill"></i>
                 </a> -->
                 <a href="{{ route('admin.register.form') }}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-person-plus-fill"></i> Register
+                    <i class="bi bi-person-plus-fill"></i> Daftarkan
                 </a>
             </div>
         </div>
@@ -39,11 +39,11 @@
                 <tr>
                     <th style="width:1%"><input type="checkbox" id="selectAll"></th>
                     <th style="width:1%">No.</th>
-                    <th>Name</th>
+                    <th>Nama</th>
                     <th>Email</th>
                     <th>Role</th>
-                    <th>Date Registered</th>
-                    <th class="text-center" style="width:120px;">Actions</th>
+                    <th>Tanggal Daftar</th>
+                    <th class="text-center" style="width:120px;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,21 +53,21 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
-                        <td>{{ $user->getRoleNames()->first() ?? 'No Role' }}</td>
-                        <td>{{ $user->created_at->format('M d, Y h:i A') }}</td>
+                        <td>{{ $user->getRoleNames()->first() ?? 'Tanpa Role' }}</td>
+                        <td>{{ $user->created_at->format('d M Y H:i') }}</td>
                         <td class="text-center">
                             <!-- Edit Button -->
                             <button type="button" class="btn btn-sm btn-outline-secondary me-1" data-bs-toggle="modal" data-bs-target="#editUserModal{{ $user->id }}">
                                 <i class="bi bi-pencil-fill"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" form="delete-user-{{ $user->id }}"
-                                onclick="return confirm('Delete {{ $user->name }}?')">
+                                onclick="return confirm('Hapus {{ $user->name }}?')">
                                 <i class="bi bi-trash3-fill"></i>
                             </button>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="text-center">No users found.</td></tr>
+                    <tr><td colspan="6" class="text-center">Tidak ada pengguna.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -75,14 +75,14 @@
         <!-- Summary & Send Button -->
         <div class="d-flex justify-content-between align-items-center mt-3" style="font-size: 0.85rem;">
             <div class="small text-muted">
-                Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} entries
+                Menampilkan {{ $users->firstItem() }} sampai {{ $users->lastItem() }} dari {{ $users->total() }} data
             </div>
             <div class="pagination-wrapper small">
                 {{ $users->links() }}
             </div>
             <div>
                 <button type="submit" id="sendEmailBtn" class="btn btn-primary btn-sm">
-                    <i class="bi bi-send-fill"></i> Send Email to Selected
+                    <i class="bi bi-send-fill"></i> Kirim Email ke Terpilih
                 </button>
             </div>
         </div>
@@ -97,12 +97,12 @@
                     @method('PUT')
                     <div class="modal-content border border-1 border-primary rounded-4 shadow">
                         <div class="modal-header">
-                            <h5 class="modal-title">Edit User</h5>
+                            <h5 class="modal-title">Edit Pengguna</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label>Name</label>
+                                <label>Nama</label>
                                 <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
                             </div>
                             <div class="mb-3">
@@ -125,9 +125,9 @@
                             <button type="button" class="btn btn-outline-primary rounded-pill px-4"
                                 style="background-color: transparent !important; border-color: #0d6efd; color: #0d6efd;"
                                 data-bs-dismiss="modal">
-                                Cancel
+                                Batal
                             </button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4">Update</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">Simpan</button>
                         </div>
                     </div>
                 </form>
@@ -168,7 +168,7 @@
 <script>
     Swal.fire({
         icon: 'success',
-        title: 'Emails Sent',
+        title: 'Email Terkirim',
         text: '{{ session('emailSuccess') }}',
         timer: 4000,
         showConfirmButton: false
@@ -180,7 +180,7 @@
     <script>
         Swal.fire({
             icon: 'success',
-            title: 'Success!',
+            title: 'Berhasil!',
             text: '{{ session('success') }}',
             timer: 2500,
             showConfirmButton: false
@@ -197,13 +197,13 @@
 
     // Trigger loader ONLY when the send email button is clicked
     sendEmailBtn.addEventListener('click', function () {
-        loaderMessage.textContent = 'Sending welcome email...';
+        loaderMessage.textContent = 'Mengirim email selamat datang...';
         loader.style.display = 'flex';
     });
 
     // Show loader when the page first starts loading
     window.addEventListener('DOMContentLoaded', () => {
-        loaderMessage.textContent = 'Loading records...';
+        loaderMessage.textContent = 'Memuat data...';
         loader.style.display = 'flex';
     });
 

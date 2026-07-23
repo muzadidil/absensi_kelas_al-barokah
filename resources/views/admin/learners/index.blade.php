@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Learner Management')
+@section('title', 'Manajemen Murid')
 
 @section('content')
 <div class="container-fluid px-2">
@@ -11,7 +11,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success',
+                    title: 'Berhasil',
                     text: '{{ session('success') }}',
                     confirmButtonColor: '#3085d6',
                     timer: 3000,
@@ -25,12 +25,12 @@
     <!-- Sticky header -->
     <div class="sticky-top bg-white shadow-sm py-2 mb-0">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
-            <h5 class="mb-0">Learner List</h5>
+            <h5 class="mb-0">Daftar Murid</h5>
 
             <div class="d-flex gap-2">
                 <!-- Add Learner Button -->
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addLearnerModal">
-                    <i class="bi bi-person-plus-fill me-1"></i> Add Learner
+                    <i class="bi bi-person-plus-fill me-1"></i> Tambah Murid
                 </button>
             </div>
         </div>
@@ -42,11 +42,11 @@
             <thead class="table-light">
                 <tr>
                     <th style="width: 1%;">No.</th>
-                    <th class="px-3 py-2 text-left">Name</th>
+                    <th class="px-3 py-2 text-left">Nama</th>
                     <th class="px-3 py-2 text-left">Email</th>
-                    <th class="px-3 py-2 text-left">Grade Level</th>
-                    <th class="px-3 py-2 text-left">Section</th>
-                    <th class="px-3 py-2 text-center">Actions</th>
+                    <th class="px-3 py-2 text-left">Tingkat Kelas</th>
+                    <th class="px-3 py-2 text-left">Kelompok</th>
+                    <th class="px-3 py-2 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -68,7 +68,7 @@
 
                             <!-- Delete Form -->
                             <form action="{{ route('admin.learners.destroy', $learner->id) }}" method="POST"
-                                onsubmit="return confirm('Delete this learner?')" class="d-inline">
+                                onsubmit="return confirm('Hapus murid ini?')" class="d-inline">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-danger btn-sm rounded-pill d-inline-flex align-items-center justify-content-center gap-1 px-3 py-1">
@@ -87,7 +87,7 @@
                               <div class="modal-header py-2 px-3">
                               <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="editLearnerLabel{{ $learner->id }}">
                                   <i class="bi bi-pencil-square"></i>
-                                  Edit Learner
+                                  Edit Murid
                               </h5>
                               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                               </div>
@@ -96,15 +96,15 @@
                               <div class="container-fluid">
                                   <div class="row g-3 mb-3">
                                   <div class="col-md-4">
-                                      <label class="form-label">First Name</label>
+                                      <label class="form-label">Nama Depan</label>
                                       <input type="text" name="fname" class="form-control" value="{{ $learner->fname }}" required>
                                   </div>
                                   <div class="col-md-4">
-                                      <label class="form-label">Middle Name</label>
+                                      <label class="form-label">Nama Tengah</label>
                                       <input type="text" name="mname" class="form-control" value="{{ $learner->mname }}">
                                   </div>
                                   <div class="col-md-4">
-                                      <label class="form-label">Last Name</label>
+                                      <label class="form-label">Nama Belakang</label>
                                       <input type="text" name="lname" class="form-control" value="{{ $learner->lname }}" required>
                                   </div>
                                   </div>
@@ -115,18 +115,18 @@
                                         <input type="email" name="email" class="form-control" value="{{ $learner->email }}" required>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Grade Level</label>
+                                        <label class="form-label">Tingkat Kelas</label>
                                         <select name="grade_level" class="form-select" required>
-                                        <option disabled>Select Grade</option>
+                                        <option disabled>Pilih Tingkat</option>
                                         @foreach(['1st Year','2nd Year','3rd Year','4th Year'] as $year)
                                             <option value="{{ $year }}" @selected($learner->grade_level === $year)>{{ $year }}</option>
                                         @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Section</label>
+                                        <label class="form-label">Kelompok</label>
                                         <select name="section" class="form-select" required>
-                                        <option disabled>Select Section</option>
+                                        <option disabled>Pilih Kelompok</option>
                                         @foreach(['A','B','C','D'] as $sec)
                                             <option value="{{ $sec }}" @selected($learner->section === $sec)>{{ $sec }}</option>
                                         @endforeach
@@ -140,9 +140,9 @@
                               <button type="button" class="btn btn-outline-primary rounded-pill px-4"
                                       style="background-color: transparent !important; border-color: #0d6efd; color: #0d6efd;"
                                       data-bs-dismiss="modal">
-                                      Cancel
+                                      Batal
                                   </button>
-                              <button type="submit" class="btn btn-primary rounded-pill px-4">Update</button>
+                              <button type="submit" class="btn btn-primary rounded-pill px-4">Simpan</button>
                               </div>
                           </form>
                           </div>
@@ -163,7 +163,7 @@
         <div class="modal-header border-bottom-0">
             <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="addLearnerModalLabel">
                 <i class="bi bi-person-plus-fill"></i>
-                Add Learner
+                Tambah Murid
             </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -174,18 +174,18 @@
             <!-- First Row: Names -->
             <div class="row g-3 mb-3">
               <div class="col-md-4">
-                <label for="fname" class="form-label">First Name</label>
-                <input type="text" name="fname" class="form-control rounded-3" placeholder="First Name" required>
+                <label for="fname" class="form-label">Nama Depan</label>
+                <input type="text" name="fname" class="form-control rounded-3" placeholder="Nama Depan" required>
               </div>
 
               <div class="col-md-4">
-                <label for="mname" class="form-label">Middle Name</label>
-                <input type="text" name="mname" class="form-control rounded-3" placeholder="Middle Name">
+                <label for="mname" class="form-label">Nama Tengah</label>
+                <input type="text" name="mname" class="form-control rounded-3" placeholder="Nama Tengah">
               </div>
 
               <div class="col-md-4">
-                <label for="lname" class="form-label">Last Name</label>
-                <input type="text" name="lname" class="form-control rounded-3" placeholder="Last Name" required>
+                <label for="lname" class="form-label">Nama Belakang</label>
+                <input type="text" name="lname" class="form-control rounded-3" placeholder="Nama Belakang" required>
               </div>
             </div>
             <div class="row g-3 mb-3">
@@ -194,9 +194,9 @@
                 <input type="email" name="email" class="form-control rounded-3" placeholder="Email" required>
               </div>
               <div class="col-md-4">
-                <label for="grade_level" class="form-label">Grade Level</label>
+                <label for="grade_level" class="form-label">Tingkat Kelas</label>
                 <select name="grade_level" class="form-select rounded-3" required>
-                  <option selected disabled>Select Year Level</option>
+                  <option selected disabled>Pilih Tingkat</option>
                   <option>1st Year</option>
                   <option>2nd Year</option>
                   <option>3rd Year</option>
@@ -205,9 +205,9 @@
               </div>
 
               <div class="col-md-4">
-                <label for="section" class="form-label">Section</label>
+                <label for="section" class="form-label">Kelompok</label>
                 <select name="section" class="form-select rounded-3" required>
-                  <option selected disabled>Select Section</option>
+                  <option selected disabled>Pilih Kelompok</option>
                   <option>A</option>
                   <option>B</option>
                   <option>C</option>
@@ -224,9 +224,9 @@
             <button type="button" class="btn btn-outline-primary rounded-pill px-4"
                 style="background-color: transparent !important; border-color: #0d6efd; color: #0d6efd;"
                 data-bs-dismiss="modal">
-                Cancel
+                Batal
             </button>
-          <button type="submit" class="btn btn-primary rounded-pill px-4">Save</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4">Simpan</button>
         </div>
       </form>
     </div>

@@ -55,7 +55,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User updated successfully!');
+            ->with('success', 'Pengguna berhasil diperbarui!');
     }
 
 
@@ -65,7 +65,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User deleted successfully.');
+            ->with('success', 'Pengguna berhasil dihapus.');
     }
 
      /**
@@ -99,7 +99,7 @@ class UserController extends Controller
 
         return redirect()
             ->back()
-            ->with('emailSuccess', "Sent to: {$emails}");
+            ->with('emailSuccess', "Terkirim ke: {$emails}");
     }
 
     /* Fetches all users ordered by name.
@@ -132,12 +132,12 @@ class UserController extends Controller
             ));
         }
         $emails = $users->pluck('email')->take(5)->implode(', ');
-        $more = $users->count() > 5 ? ' and others' : '';
+        $more = $users->count() > 5 ? ' dan lainnya' : '';
 
         return redirect()
             ->back() //this would redirect to the previous page
             // ->route('email.logs') // Redirects to the email logs route
-            ->with('emailSuccess', "Custom message has been queued for: {$emails}{$more}");
+            ->with('emailSuccess', "Pesan kustom telah diantrekan untuk: {$emails}{$more}");
 
         // return redirect()->route('email_logs.index')->with('emailSuccess', 'Custom message sent successfully!');
     }

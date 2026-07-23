@@ -262,8 +262,8 @@
       <li class="nav-item mb-1">
         <a href="{{ route('admin.dashboard') }}"
           class="menu-item nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-          data-tooltip="Dashboard">
-          <i class="bi bi-speedometer2 me-2"></i><span> Dashboard</span>
+          data-tooltip="Dasbor">
+          <i class="bi bi-speedometer2 me-2"></i><span> Dasbor</span>
         </a>
       </li>
       <li class="nav-item mb-1">
@@ -283,8 +283,8 @@
       <li class="nav-item mb-1">
           <a href="{{ route('admin.attendance.index') }}"
               class="menu-item nav-link {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}"
-              data-tooltip="View Attendance Logs">
-              <i class="bi bi-clipboard-check-fill me-2"></i><span> Attendance</span>
+              data-tooltip="Lihat Log Absensi">
+              <i class="bi bi-clipboard-check-fill me-2"></i><span> Absensi</span>
           </a>
       </li>
       <!-- <li class="nav-item mb-1">
@@ -297,36 +297,36 @@
       <li class="nav-item mb-1">
         <a href="{{ route('users.index') }}"
           class="menu-item nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
-          data-tooltip="Registered Users">
-          <i class="bi bi-people-fill me-2"></i><span> Registered Users</span>
+          data-tooltip="Pengguna Terdaftar">
+          <i class="bi bi-people-fill me-2"></i><span> Pengguna Terdaftar</span>
         </a>
       </li>
       <li class="nav-item mb-1">
         <a href="{{ route('email.logs') }}"
           class="menu-item nav-link {{ request()->routeIs('email.logs') ? 'active' : '' }}"
-          data-tooltip="Email Audit Log">
-          <i class="bi bi-clipboard-check-fill me-2"></i><span> Email Audit Log</span>
+          data-tooltip="Log Audit Email">
+          <i class="bi bi-clipboard-check-fill me-2"></i><span> Log Audit Email</span>
         </a>
       </li>
       <li class="nav-item mb-1">
           <a href="{{ route('email.custom.form') }}"
             class="menu-item nav-link {{ request()->routeIs('email.custom.form') ? 'active' : '' }}"
-            data-tooltip="Custom Email">
-              <i class="bi bi-chat-square-text-fill me-2"></i><span> Custom Email</span>
+            data-tooltip="Email Kustom">
+              <i class="bi bi-chat-square-text-fill me-2"></i><span> Email Kustom</span>
           </a>
       </li>
       <li class="nav-item mb-1">
           <a href="{{ route('admin.reports') }}"
             class="menu-item nav-link {{ request()->routeIs('admin.reports') ? 'active' : '' }}"
-            data-tooltip="Reports">
-              <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Reports</span>
+            data-tooltip="Laporan">
+              <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Laporan</span>
           </a>
       </li>
       <li class="nav-item mb-1">
           <a href="{{ route('admin.help') }}"
             class="menu-item nav-link {{ request()->routeIs('admin.help') ? 'active' : '' }}"
-            data-tooltip="Help">
-              <i class="bi bi-question-circle-fill me-2"></i><span> Help</span>
+            data-tooltip="Bantuan">
+              <i class="bi bi-question-circle-fill me-2"></i><span> Bantuan</span>
           </a>
       </li>
       <!-- <li class="nav-item">
@@ -339,10 +339,10 @@
       <li class="nav-item">
         <a href="#"
           class="menu-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}"
-          data-tooltip="About"
+          data-tooltip="Tentang"
           data-bs-toggle="modal"
           data-bs-target="#aboutModal">
-          <i class="bi bi-info-circle-fill me-2"></i><span> About</span>
+          <i class="bi bi-info-circle-fill me-2"></i><span> Tentang</span>
         </a>
       </li>
     </ul>
@@ -365,23 +365,23 @@
     <div class="modal-content border border-1 border-primary rounded-4 shadow">
       
       <div class="modal-header py-2 px-3">
-        <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+        <h5 class="modal-title" id="logoutModalLabel">Konfirmasi Logout</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      
+
       <div class="modal-body">
-        Are you sure you want to logout?
+        Apakah Anda yakin ingin logout?
       </div>
-      
+
       <div class="modal-footer">
         <form method="POST" action="{{ route('logout') }}">
           @csrf
-          
+
           <!-- Modern-style Cancel button -->
           <button type="button"
                   class="btn btn-sm border border-primary text-primary bg-white"
                   data-bs-dismiss="modal">
-            Cancel
+            Batal
           </button>
 
           <!-- Primary-style Logout button -->
@@ -411,7 +411,7 @@
 
       <!-- Page Title -->
       <h3 class="mb-0 text-truncate text-ellipsis">
-        Admin Dashboard
+        Dasbor Admin
       </h3>
 
       <!-- Right-side controls -->
@@ -432,7 +432,7 @@
                       <br>
                       <small class="text-muted">{{ Auth::user()->email }}</small>
                       <small class="text-primary text-uppercase">
-                        {{ Auth::user()->getRoleNames()->first() ?? 'No role assigned' }}
+                        {{ Auth::user()->getRoleNames()->first() ?? 'Tanpa role' }}
                       </small>
                   </li>
                   <li><hr class="dropdown-divider"></li>
@@ -441,7 +441,7 @@
                           <i class="bi bi-person-lines-fill me-2"></i>Profile
                       </a> -->
                       <a class="dropdown-item" href="{{ route('admin.profile.edit') }}">
-                          <i class="bi bi-person-lines-fill me-2"></i>Profile
+                          <i class="bi bi-person-lines-fill me-2"></i>Profil
                       </a>
                   </li>
                   <li>
@@ -457,11 +457,11 @@
     <!-- Notification Drawer -->
     <div id="notificationDrawer" class="position-fixed top-0 end-0 bg-white border-start shadow h-100 p-3" style="width: 300px; z-index: 1050; transform: translateX(100%); transition: transform 0.3s;">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Notifications</h5>
+            <h5 class="mb-0">Notifikasi</h5>
             <button class="btn-close" onclick="toggleNotifications()"></button>
         </div>
         <div>
-            <p class="small text-danger">No new notifications.</p>
+            <p class="small text-danger">Tidak ada notifikasi baru.</p>
             <!-- Dynamic notifications can be listed here -->
         </div>
     </div>
@@ -472,22 +472,22 @@
           <div class="modal-content border border-1 border-primary rounded-4 shadow">
               
             <div class="modal-header">
-                <h5 class="modal-title" id="aboutModalLabel">About</h5>
+                <h5 class="modal-title" id="aboutModalLabel">Tentang</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-              
+
               <div class="modal-body">
                 <!-- System Info -->
-                <h6>System Features & Purpose</h6>
+                <h6>Fitur & Tujuan Sistem</h6>
                 <ul class="small mb-4">
-                  <li>Sends batch or individual emails to selected users</li>
-                  <li>Maintains an audit log of every sent email (recipient, subject, timestamp)</li>
-                  <li>Filter, search and paginate through email logs</li>
-                  <li>Register new users directly from the admin dashboard</li>
-                  <li>Real-time notifications for successful or failed sends</li>
+                  <li>Mencatat absensi harian murid (AM IN / AM OUT / PM IN / PM OUT)</li>
+                  <li>Mengelola data murid dan guru</li>
+                  <li>Mengirim email massal atau individual ke pengguna terpilih</li>
+                  <li>Menyimpan log audit setiap email terkirim (penerima, subjek, waktu)</li>
+                  <li>Mendaftarkan pengguna baru langsung dari dashboard admin</li>
                 </ul>
                 <p class="small">
-                  This application streamlines your communication workflow by letting you compose, send, and track emails—all from one intuitive dashboard.
+                  Aplikasi ini menyederhanakan pencatatan absensi dan pengelolaan data kelas Al-Barokah dalam satu dashboard yang mudah digunakan.
                 </p>
 
                 <!-- Developer Info -->
@@ -498,7 +498,7 @@
                     class="mx-auto d-block mb-3"
                     style="max-height: 80px;"
                   >
-                  <h6>Developers</h6><br>
+                  <h6>Pengembang</h6><br>
                   <p class="small mb-0">
                     <strong>Leonard T. Domingo</strong> <br> 
                     <strong>Allyssa Mae T. Ligsay</strong> <br> 
@@ -515,7 +515,7 @@
               </div>
               
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
               </div>
               
             </div>

@@ -41,16 +41,16 @@ class LearnerAttendanceController extends Controller
         // Prevent duplicate logging for the same session
         if (!is_null($attendance->{$request->session})) {
             return $request->expectsJson()
-                ? response()->json(['status' => 'warning', 'message' => 'This session is already logged.'], 200)
-                : redirect()->back()->with('warning', 'This session is already logged.');
+                ? response()->json(['status' => 'warning', 'message' => 'Sesi ini sudah tercatat sebelumnya.'], 200)
+                : redirect()->back()->with('warning', 'Sesi ini sudah tercatat sebelumnya.');
         }
 
         $attendance->{$request->session} = now()->format('H:i:s');
         $attendance->save();
 
         return $request->expectsJson()
-            ? response()->json(['status' => 'success', 'message' => 'Attendance logged successfully.'], 200)
-            : redirect()->back()->with('success', 'Attendance logged successfully.');
+            ? response()->json(['status' => 'success', 'message' => 'Absensi berhasil dicatat.'], 200)
+            : redirect()->back()->with('success', 'Absensi berhasil dicatat.');
     }
 
 }

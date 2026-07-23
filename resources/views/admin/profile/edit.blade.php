@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Profile')
+@section('title', 'Edit Profil')
 
 @section('content')
 <div class="container py-4">
     <h4 class="mb-4 gap-2">
         <i class="bi bi-pencil-square">
-        </i>Edit Profile
+        </i>Edit Profil
     </h4>
 
     <div class="row g-4">

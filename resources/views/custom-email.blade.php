@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Send Custom Email')
+@section('title', 'Kirim Email Kustom')
 
 @push('head')
     <!-- Trix Editor (WYSIWYG) -->
@@ -28,15 +28,15 @@
 
 @section('content')
 <div class="container">
-    <h4 class="mb-4">Send Custom Email to Selected Users</h4>
+    <h4 class="mb-4">Kirim Email Kustom ke Pengguna Terpilih</h4>
 
     <!-- Loader Overlay -->
     <div id="loader">
         <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
-            <span class="visually-hidden">Sending email...</span>
+            <span class="visually-hidden">Mengirim email...</span>
         </div>
         <div class="mt-3 text-primary">
-            Sending custom email...
+            Mengirim email kustom...
         </div>
     </div>
 
@@ -44,30 +44,30 @@
         @csrf
 
         <div class="mb-3">
-            <label class="form-label">Email Subject</label>
+            <label class="form-label">Subjek Email</label>
             <input type="text" name="subject" class="form-control" required>
         </div>
 
         <!-- Form group -->
         <div class="mb-3">
-            <label class="form-label">Message</label>
+            <label class="form-label">Pesan</label>
 
             <!-- Hidden input field that will hold the actual content -->
             <input id="x" type="hidden" name="content" required>
 
             <!-- Trix editor linked to the hidden input -->
-            <trix-editor input="x" placeholder="Compose email here..."></trix-editor>
+            <trix-editor input="x" placeholder="Tulis isi email di sini..."></trix-editor>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Select Recipients</label>
+            <label class="form-label">Pilih Penerima</label>
             <div class="border rounded bg-white p-2" style="max-height: 300px; overflow-y: auto;">
                 <table class="table table-sm table-bordered mb-0">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 1%"><input type="checkbox" id="selectAll"></th>
                             <th style="width: 1%">No.</th>
-                            <th>Name</th>
+                            <th>Nama</th>
                             <th>Email</th>
                         </tr>
                     </thead>
@@ -88,7 +88,7 @@
         </div>
         <div class="d-flex justify-content-end mt-3">
             <button class="btn btn-sm btn-primary">
-                <i class="bi bi-send-fill"></i> Send Message
+                <i class="bi bi-send-fill"></i> Kirim Pesan
             </button>
         </div>
 
@@ -100,7 +100,7 @@
         <script>
             Swal.fire({
                 icon: 'success',
-                title: 'Custom Email Sent',
+                title: 'Email Kustom Terkirim',
                 text: '{{ session('emailSuccess') }}',
                 confirmButtonColor: '#3085d6',
                 timer: 3000

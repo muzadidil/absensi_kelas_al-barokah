@@ -27,7 +27,7 @@
             <div class="card card-border-left card-users text-center shadow-sm">
                 <div class="card-body text-primary">
                     <i class="bi bi-people-fill display-6 mb-2"></i>
-                    <h5 class="card-title">Total Users</h5>
+                    <h5 class="card-title">Total Pengguna</h5>
                     <p class="display-6 mb-0">{{ $userCount }}</p>
                 </div>
             </div>
@@ -38,7 +38,7 @@
             <div class="card card-border-left card-learners text-center shadow-sm">
                 <div class="card-body text-success">
                     <i class="bi bi-person-workspace display-6 mb-2"></i>
-                    <h5 class="card-title">Total Learners</h5>
+                    <h5 class="card-title">Total Murid</h5>
                     <p class="display-6 mb-0">{{ $learnerCount }}</p>
                 </div>
             </div>
@@ -59,7 +59,7 @@
             <div class="card card-border-left card-mails text-center shadow-sm">
                 <div class="card-body text-warning">
                     <i class="bi bi-envelope-paper-fill display-6 mb-2"></i>
-                    <h5 class="card-title">Total Mail Logs</h5>
+                    <h5 class="card-title">Total Log Email</h5>
                     <p class="display-6 mb-0">{{ $mailLogCount }}</p>
                 </div>
             </div>
@@ -70,7 +70,7 @@
             <div class="card card-border-left card-attendance text-center shadow-sm">
                 <div class="card-body text-teal">
                     <i class="bi bi-clipboard2-check-fill display-6 mb-2"></i>
-                    <h5 class="card-title">Total Attendance</h5>
+                    <h5 class="card-title">Total Absensi</h5>
                     <p class="display-6 mb-0">{{ $attendanceCount }}</p>
                 </div>
             </div>
@@ -81,7 +81,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Learner vs Guru Distribution</h5>
+                    <h5 class="card-title mb-3">Distribusi Murid vs Guru</h5>
                     <canvas id="userChart" height="200"></canvas>
                 </div>
             </div>
@@ -89,7 +89,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Email Logs</h5>
+                    <h5 class="card-title mb-3">Log Email</h5>
                     <canvas id="logChart" height="200"></canvas>
                 </div>
             </div>
@@ -106,7 +106,7 @@
         <script>
             Swal.fire({
                 icon: 'success',
-                title: 'Email Sender',
+                title: 'Pengirim Email',
                 text: '{{ session('emailSuccess') }}',
                 confirmButtonColor: '#3085d6',
                 timer: 4000,
@@ -119,7 +119,7 @@
         const userChart = new Chart(document.getElementById('userChart'), {
             type: 'doughnut',
             data: {
-                labels: ['Learners', 'Guru'],
+                labels: ['Murid', 'Guru'],
                 datasets: [{
                     data: [{{ $learnerCount }}, {{ $guruCount }}],
                     backgroundColor: ['#198754', '#6f42c1']
@@ -134,7 +134,7 @@
         const logChart = new Chart(document.getElementById('logChart'), {
             type: 'bar',
             data: {
-                labels: ['Mails'],
+                labels: ['Email'],
                 datasets: [{
                     label: 'Total',
                     data: [{{ $mailLogCount }}],

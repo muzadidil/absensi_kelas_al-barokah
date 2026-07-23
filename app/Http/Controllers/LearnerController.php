@@ -33,7 +33,7 @@ class LearnerController extends Controller
 
         Learner::create($request->all());
 
-        return redirect()->back()->with('success', 'Learner added successfully!');
+        return redirect()->back()->with('success', 'Murid berhasil ditambahkan!');
     }
 
     public function update(Request $request, Learner $learner)
@@ -48,13 +48,13 @@ class LearnerController extends Controller
 
         $learner->update($request->all());
 
-        return redirect()->back()->with('success', 'Learner updated successfully!');
+        return redirect()->back()->with('success', 'Data murid berhasil diperbarui!');
     }
 
     public function destroy(Learner $learner)
     {
         $learner->delete();
 
-        return redirect()->back()->with('success', 'Learner deleted successfully!');
+        return redirect()->back()->with('success', 'Murid berhasil dihapus!');
     }
 }

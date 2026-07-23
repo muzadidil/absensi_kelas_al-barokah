@@ -28,6 +28,6 @@ class GuruController extends Controller
 
         return redirect()
             ->route('admin.guru.index')
-            ->with('success', 'Guru deleted successfully.');
+            ->with('success', 'Guru berhasil dihapus.');
     }
 }

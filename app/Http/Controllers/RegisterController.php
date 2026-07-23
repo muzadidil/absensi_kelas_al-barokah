@@ -41,7 +41,7 @@ class RegisterController extends Controller
 
             if ($response->successful() && array_key_exists('smtp_check', $response->json()) && !$response['smtp_check']) {
                 return redirect()->back()->withInput()->withErrors([
-                    'email' => 'This email appears to be undeliverable or fake.',
+                    'email' => 'Email ini tampaknya tidak valid atau tidak dapat dikirimi.',
                 ]);
             }
         }
@@ -88,7 +88,7 @@ class RegisterController extends Controller
 
 
             return redirect()->back()->withInput()->withErrors([
-                'email' => 'Registration failed. Unable to send verification email. Please check your email address.',
+                'email' => 'Registrasi gagal. Tidak bisa mengirim email verifikasi. Periksa kembali alamat email Anda.',
             ]);
         }
     }
@@ -166,7 +166,7 @@ class RegisterController extends Controller
 
             if ($response->successful() && array_key_exists('smtp_check', $response->json()) && !$response['smtp_check']) {
                 return redirect()->back()->withErrors([
-                    'email' => 'This email appears to be undeliverable or fake.',
+                    'email' => 'Email ini tampaknya tidak valid atau tidak dapat dikirimi.',
                 ])->withInput();
             }
         }
@@ -196,13 +196,13 @@ class RegisterController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.register.form')->with('emailSuccess', 'User registered successfully.');
+            return redirect()->route('admin.register.form')->with('emailSuccess', 'Pengguna berhasil didaftarkan.');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Admin registration error: ' . $e->getMessage());
 
             return redirect()->back()->withInput()->withErrors([
-                'email' => 'Registration failed. Please try again.',
+                'email' => 'Registrasi gagal. Silakan coba lagi.',
             ]);
         }
     }

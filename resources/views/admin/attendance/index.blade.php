@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Attendance')
+@section('title', 'Absensi')
 
 @push('styles')
     <style>
@@ -43,11 +43,11 @@
 @section('content')
 
     <div class="text-center mb-1">
-        <h2 class="fw-bold">Learner Attendance</h2>
-        <p class="text-muted">Select a learner and log the session</p>
+        <h2 class="fw-bold">Absensi Murid</h2>
+        <p class="text-muted">Pilih murid dan catat sesinya</p>
     </div>
     <div class="text-center">
-        <h5 class="fw-semibold mb-1">Current Date and Time</h5>
+        <h5 class="fw-semibold mb-1">Tanggal dan Waktu Saat Ini</h5>
         <div id="realtime-clock" class="fs-5 text-primary fw-bold"></div>
     </div>
 
@@ -57,9 +57,9 @@
             <form method="POST" action="{{ route('admin.attendance.store') }}" class="text-center">
                 @csrf
                 <div class="mb-4 text-start">
-                    <label for="learner_id" class="form-label fw-semibold">Select Learner</label>
+                    <label for="learner_id" class="form-label fw-semibold">Pilih Murid</label>
                     <select name="learner_id" id="learner_id" class="form-select" required>
-                        <option value="" disabled selected>-- Choose a learner --</option>
+                        <option value="" disabled selected>-- Pilih murid --</option>
                         @foreach ($learners as $learner)
                             <option value="{{ $learner->id }}">{{ $learner->lname }}, {{ $learner->fname }}</option>
                         @endforeach
@@ -67,9 +67,9 @@
                 </div>
 
                 <div class="mb-4 text-start">
-                    <label class="form-label">Select Session</label>
+                    <label class="form-label">Pilih Sesi</label>
                     <div class="d-flex flex-wrap gap-3">
-                        @foreach (['am_in' => 'AM IN', 'am_out' => 'AM OUT', 'pm_in' => 'PM IN', 'pm_out' => 'PM OUT'] as $value => $label)
+                        @foreach (['am_in' => 'Masuk Pagi', 'am_out' => 'Keluar Pagi', 'pm_in' => 'Masuk Siang', 'pm_out' => 'Keluar Siang'] as $value => $label)
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="session" id="{{ $value }}" value="{{ $value }}" {{ $loop->first ? 'checked' : '' }}>
                                 <label class="form-check-label small text-dark" for="{{ $value }}">{{ $label }}</label>
@@ -78,23 +78,23 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Log Attendance</button>
+                <button type="submit" class="btn btn-primary w-100">Catat Absensi</button>
             </form>
         </div>
 
         <!-- Attendance Table -->
         <div class="table-container flex-fill">
-            <h6 class="text-muted mb-3">As of {{ \Carbon\Carbon::parse($today)->format('l, F j, Y') }}</h6>
+            <h6 class="text-muted mb-3">Per {{ \Carbon\Carbon::parse($today)->format('d/m/Y') }}</h6>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead class="custom-gray-head">
                         <tr>
                             <th class="text-center" style="width: 1%;">No.</th>
-                            <th>Name</th>
-                            <th>AM IN</th>
-                            <th>AM OUT</th>
-                            <th>PM IN</th>
-                            <th>PM OUT</th>
+                            <th>Nama</th>
+                            <th>Masuk Pagi</th>
+                            <th>Keluar Pagi</th>
+                            <th>Masuk Siang</th>
+                            <th>Keluar Siang</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -102,20 +102,20 @@
                             <tr>
                                 <td class="text-center">{{ ($attendances->currentPage() - 1) * $attendances->perPage() + $loop->iteration }}</td>
                                 <td>{{ $attendance->learner->lname }}, {{ $attendance->learner->fname }}</td>
-                                <td>{{ $attendance->am_in ? \Carbon\Carbon::parse($attendance->am_in)->format('h:i A') : '-' }}</td>
-                                <td>{{ $attendance->am_out ? \Carbon\Carbon::parse($attendance->am_out)->format('h:i A') : '-' }}</td>
-                                <td>{{ $attendance->pm_in ? \Carbon\Carbon::parse($attendance->pm_in)->format('h:i A') : '-' }}</td>
-                                <td>{{ $attendance->pm_out ? \Carbon\Carbon::parse($attendance->pm_out)->format('h:i A') : '-' }}</td>
+                                <td>{{ $attendance->am_in ? \Carbon\Carbon::parse($attendance->am_in)->format('H:i') : '-' }}</td>
+                                <td>{{ $attendance->am_out ? \Carbon\Carbon::parse($attendance->am_out)->format('H:i') : '-' }}</td>
+                                <td>{{ $attendance->pm_in ? \Carbon\Carbon::parse($attendance->pm_in)->format('H:i') : '-' }}</td>
+                                <td>{{ $attendance->pm_out ? \Carbon\Carbon::parse($attendance->pm_out)->format('H:i') : '-' }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="text-center text-warning">No attendance records for today.</td></tr>
+                            <tr><td colspan="6" class="text-center text-warning">Belum ada data absensi hari ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">
-                    Showing {{ $attendances->firstItem() ?? 0 }} to {{ $attendances->lastItem() ?? 0 }} of {{ $attendances->total() }} entries
+                    Menampilkan {{ $attendances->firstItem() ?? 0 }} sampai {{ $attendances->lastItem() ?? 0 }} dari {{ $attendances->total() }} data
                 </small>
                 <div>{{ $attendances->links() }}</div>
             </div>
@@ -147,7 +147,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
                 icon: 'warning',
-                title: 'Warning',
+                title: 'Peringatan',
                 text: @json(session('warning')),
                 confirmButtonColor: '#f0ad4e',
                 timer: 2500,
@@ -169,7 +169,7 @@
             minute: '2-digit',
             second: '2-digit',
         };
-        document.getElementById('realtime-clock').textContent = now.toLocaleString('en-US', options);
+        document.getElementById('realtime-clock').textContent = now.toLocaleString('id-ID', options);
     }
 
     setInterval(updateClock, 1000);

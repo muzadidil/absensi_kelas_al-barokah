@@ -1,19 +1,19 @@
 @extends('layouts.admin')
 
-@section('title', 'Email Audit Log')
+@section('title', 'Log Audit Email')
 
 @section('content')
 <div class="container">
-  <h5>Email Audit Log</h5>
+  <h5>Log Audit Email</h5>
 
   <table class="table table-striped table-compact table-bordered table-hover table-sm">
     <thead>
       <tr>
         <th style="width: 1%;">No.</th>
-        <th>User</th>
+        <th>Pengguna</th>
         <th>Email</th>
-        <th>Subject</th>
-        <th>Sent At</th>
+        <th>Subjek</th>
+        <th>Waktu Kirim</th>
       </tr>
     </thead>
     <tbody>
@@ -23,11 +23,11 @@
           <td>{{ $log->user->name }}</td>
           <td>{{ $log->email }}</td>
           <td>{{ $log->subject }}</td>
-          <td>{{ $log->sent_at->format('M d, Y h:i A') }}</td>
+          <td>{{ $log->sent_at->format('d M Y H:i') }}</td>
         </tr>
       @empty
         <tr>
-          <td colspan="5" class="text-center">No email logs found.</td>
+          <td colspan="5" class="text-center">Belum ada log email.</td>
         </tr>
       @endforelse
     </tbody>
@@ -36,7 +36,7 @@
   <!-- Record Count Summary and Pagination -->
   <div class="d-flex justify-content-between align-items-center">
       <div class="small text-muted mb-0">
-          Showing {{ $logs->firstItem() }} to {{ $logs->lastItem() }} of {{ $logs->total() }} entries
+          Menampilkan {{ $logs->firstItem() }} sampai {{ $logs->lastItem() }} dari {{ $logs->total() }} data
       </div>
       <div class="mb-0">
           <div class="pagination-wrapper small mb-0">
