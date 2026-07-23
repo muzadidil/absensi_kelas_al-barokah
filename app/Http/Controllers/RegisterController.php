@@ -171,80 +171,17 @@ class RegisterController extends Controller
             }
         }
 
-        // Generate OTP
-        $otp = rand(100000, 999999);
-
-        // Temporarily store registration data and OTP in session
-        Session::put('pending_registration', [
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $request->role,
-            'otp' => Hash::make($otp),
-        ]);
-
-        Session::put('otp_created_at', now());
-
-        // Send styled OTP email
-        Mail::html(<<<HTML
-            <p>Dear {$request->name},</p>
-
-            <p>You are receiving this email because a registration has been initiated for your account in the <strong>Learner and Employee Management System (LEMS)</strong>.</p>
-
-            <p>Your One-Time Password (OTP) is:</p>
-
-            <h2 style="color:rgb(18, 2, 251); font-weight: bold; letter-spacing: 2px;">$otp</h2>
-
-            <p>Please enter this 6-digit code on the OTP verification page <strong>within 10 minutes</strong> to complete your registration.</p>
-
-            <p>If you did not request this, you can safely ignore this message.</p>
-
-            <br>
-            <p>Thank you,<br>LEMS Administrator</p>
-        HTML
-        , function ($message) use ($request) {
-            $message->to($request->email)
-                    ->subject('Your One-Time Password (OTP) for LEMS Registration');
-        });
-
-
-        return redirect()->route('admin.otp.verify.form')->with('otpSent', 'An OTP has been sent to the user’s email address.');
-    }
-
-    public function verifyOtp(Request $request)
-    {
-        $request->validate([
-            'otp' => 'required|digits:6',
-        ]);
-
-         // Check if OTP has expired (10 minutes limit)
-        $createdAt = Session::get('otp_created_at');
-
-        if (!$createdAt || now()->diffInMinutes($createdAt) > 10) {
-            Session::forget(['pending_registration', 'otp_created_at']);
-            return redirect()->route('admin.register.form')->withErrors([
-                'otp' => 'OTP expired. Please register the user again.',
-            ]);
-        }
-
-        //  Get session data and verify OTP match
-        $data = Session::get('pending_registration');
-
-       if (!$data || !Hash::check($request->otp, $data['otp'])) {
-            return redirect()->back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
-        }
-
-        //Proceed with user creation
+        // Create the user directly (no OTP verification)
         DB::beginTransaction();
 
         try {
             $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => $data['password'],
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
             ]);
 
-            $user->assignRole($data['role']);
+            $user->assignRole($request->role);
 
             // Send the welcome email
             Mail::to($user->email)->send(new WelcomeMail($user));
@@ -253,27 +190,21 @@ class RegisterController extends Controller
             EmailLog::create([
                 'user_id' => $user->id,
                 'email' => $user->email,
-                'subject' => 'Welcome Email Sent After OTP Verification',
+                'subject' => 'Welcome Message',
                 'sent_at' => now(),
             ]);
 
             DB::commit();
-            Session::forget(['pending_registration', 'otp_created_at']);
 
-            return redirect()->route('admin.register.form')->with('emailSuccess', 'User verified and registered successfully.');
+            return redirect()->route('admin.register.form')->with('emailSuccess', 'User registered successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('OTP Registration Error: ' . $e->getMessage());
+            \Log::error('Admin registration error: ' . $e->getMessage());
 
-            return redirect()->back()->withErrors([
-                'otp' => 'Registration failed after OTP. Please try again.',
+            return redirect()->back()->withInput()->withErrors([
+                'email' => 'Registration failed. Please try again.',
             ]);
         }
     }
-    public function showOtpForm()
-    {
-        return view('admin.verify-otp');
-    }
-
 
 }

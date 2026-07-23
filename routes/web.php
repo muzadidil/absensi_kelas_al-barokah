@@ -51,10 +51,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Show registration form
     Route::get('/register-user', [RegisterController::class, 'showAdminRegisterForm'])->name('admin.register.form');
 
-    // Handle registration and OTP
+    // Handle registration
     Route::post('/register-user', [RegisterController::class, 'registerByAdmin'])->name('admin.register.user');
-    Route::get('/verify-otp', [RegisterController::class, 'showOtpForm'])->name('admin.otp.verify.form');
-    Route::post('/verify-otp', [RegisterController::class, 'verifyOtp'])->name('admin.otp.verify.submit');
 
     // Admin
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
