@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'LEMS')
+@section('title', 'Sistem Absensi Kelas Al-Barokah')
 
 @section('content')
 
@@ -12,9 +12,8 @@
             }
             .card-users { border-color: #0d6efd !important; }
             .card-learners { border-color: #198754 !important; }
-            .card-employees { border-color: #6f42c1 !important; }
+            .card-guru { border-color: #6f42c1 !important; }
             .card-mails { border-color: #fd7e14 !important; }
-            .card-announcements { border-color: #dc3545 !important; }
             .card-attendance { border-color: #20c997 !important; }
 
             .text-purple { color: #6f42c1 !important; }
@@ -44,13 +43,13 @@
                 </div>
             </div>
         </div>
-        <!-- Total Employees -->
+        <!-- Total Guru -->
         <div class="col-md-4 col-xl-3">
-            <div class="card card-border-left card-employees text-center shadow-sm">
+            <div class="card card-border-left card-guru text-center shadow-sm">
                 <div class="card-body text-purple">
                     <i class="bi bi-person-badge-fill display-6 mb-2"></i>
-                    <h5 class="card-title">Total Employees</h5>
-                    <p class="display-6 mb-0">0</p>
+                    <h5 class="card-title">Total Guru</h5>
+                    <p class="display-6 mb-0">{{ $guruCount }}</p>
                 </div>
             </div>
         </div>
@@ -62,17 +61,6 @@
                     <i class="bi bi-envelope-paper-fill display-6 mb-2"></i>
                     <h5 class="card-title">Total Mail Logs</h5>
                     <p class="display-6 mb-0">{{ $mailLogCount }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Announcements -->
-        <div class="col-md-4 col-xl-3">
-            <div class="card card-border-left card-announcements text-center shadow-sm">
-                <div class="card-body text-danger">
-                    <i class="bi bi-megaphone-fill display-6 mb-2"></i>
-                    <h5 class="card-title">Total Announcements</h5>
-                    <p class="display-6 mb-0">{{ $announcementCount }}</p>
                 </div>
             </div>
         </div>
@@ -93,7 +81,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Learner vs Employee Distribution</h5>
+                    <h5 class="card-title mb-3">Learner vs Guru Distribution</h5>
                     <canvas id="userChart" height="200"></canvas>
                 </div>
             </div>
@@ -101,7 +89,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Email & Announcement Logs</h5>
+                    <h5 class="card-title mb-3">Email Logs</h5>
                     <canvas id="logChart" height="200"></canvas>
                 </div>
             </div>
@@ -131,9 +119,9 @@
         const userChart = new Chart(document.getElementById('userChart'), {
             type: 'doughnut',
             data: {
-                labels: ['Learners', 'Employees'],
+                labels: ['Learners', 'Guru'],
                 datasets: [{
-                    data: [{{ $learnerCount }}, 0], // replace 0 with $employeeCount when available
+                    data: [{{ $learnerCount }}, {{ $guruCount }}],
                     backgroundColor: ['#198754', '#6f42c1']
                 }]
             },
@@ -146,11 +134,11 @@
         const logChart = new Chart(document.getElementById('logChart'), {
             type: 'bar',
             data: {
-                labels: ['Mails', 'Announcements'],
+                labels: ['Mails'],
                 datasets: [{
                     label: 'Total',
-                    data: [{{ $mailLogCount }}, {{ $announcementCount }}],
-                    backgroundColor: ['#fd7e14', '#dc3545']
+                    data: [{{ $mailLogCount }}],
+                    backgroundColor: ['#fd7e14']
                 }]
             },
             options: {

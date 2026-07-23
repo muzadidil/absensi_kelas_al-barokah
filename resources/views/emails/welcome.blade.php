@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LEMS | Email Welcome</title>
+    <title>Sistem Absensi Kelas Al-Barokah | Email Welcome</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -50,10 +50,10 @@
 </head>
 <body>
     <div class="email-container">
-        <h2>Welcome to LEMS, {{ $user->name }}!</h2>
+        <h2>Welcome, {{ $user->name }}!</h2>
 
         <p>
-            We are thrilled to welcome you to the <strong>Learner and Employee Management System (LEMS)</strong> — a platform designed to help streamline recordkeeping, communication, and collaboration within our school community.
+            We are thrilled to welcome you to the <strong>Sistem Absensi Kelas Al-Barokah</strong> — a platform designed to help streamline recordkeeping, communication, and collaboration within our school community.
         </p>
 
         <p>
@@ -70,7 +70,7 @@
 
         <div class="footer">
             Respectfully,<br>
-            <strong>LEMS Project Team</strong>
+            <strong>Al-Barokah Project Team</strong>
             Bachelor of Science in Information Technology
         </div>
     </div>

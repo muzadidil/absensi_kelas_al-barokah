@@ -27,7 +27,7 @@ class WelcomeMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Learner & Employee Management System')
+        return $this->subject('Sistem Absensi Kelas Al-Barokah')
                     ->view('emails.welcome')
                     ->with([
                         'user' => $this->user

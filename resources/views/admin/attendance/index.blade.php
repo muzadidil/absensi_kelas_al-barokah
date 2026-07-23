@@ -13,9 +13,6 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- QR Code Scanner -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
-
     <style>
                 body {
             background-color: #0f172a;
@@ -76,7 +73,7 @@
        
     <div class="text-center mb-1">
         <h2 class="fw-bold">Learner Attendance</h2>
-        <p class="text-gray-300">Scan the QR code and log your session</p>
+        <p class="text-gray-300">Select a learner and log the session</p>
     </div>
     <div class="text-center">
         <h5 class="fw-semibold mb-1">Current Date and Time</h5>
@@ -84,17 +81,18 @@
     </div>
 
     <div class="attendance-container">
-        <!-- QR Form -->
+        <!-- Attendance Form -->
         <div class="qr-form-container flex-fill">
             <form method="POST" action="{{ route('admin.attendance.store') }}" class="text-center">
                 @csrf
-                <div class="mb-2">
-                    <label class="form-label fw-semibold">Scan Learner QR Code</label>
-                    <div id="qr-reader" style="width: 100%; max-width: 300px; margin: auto; border-radius: 12px;"></div>
-                    <input type="hidden" id="qr_code" name="qr_code">
-                    <div id="learner-info" class="alert alert-primary d-none mt-3">
-                        <strong>Learner:</strong> <span id="learner-name">-</span>
-                    </div>
+                <div class="mb-4 text-start">
+                    <label for="learner_id" class="form-label fw-semibold">Select Learner</label>
+                    <select name="learner_id" id="learner_id" class="form-select" required>
+                        <option value="" disabled selected>-- Choose a learner --</option>
+                        @foreach ($learners as $learner)
+                            <option value="{{ $learner->id }}">{{ $learner->lname }}, {{ $learner->fname }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4 text-start">
@@ -108,6 +106,8 @@
                         @endforeach
                     </div>
                 </div>
+
+                <button type="submit" class="btn btn-primary w-100">Log Attendance</button>
             </form>
         </div>
 
@@ -186,121 +186,6 @@
 @endif
 
 <script>
-    let isSubmitting = false;
-    const successSound = new Audio("https://notificationsounds.com/storage/sounds/file-sounds-1143-success.mp3");
-
-    function onScanSuccess(decodedText, decodedResult) {
-        if (isSubmitting) return;
-        isSubmitting = true;
-
-        fetch("{{ route('admin.attendance.lookup-learner') }}", {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ qr_code: decodedText })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'found') {
-                document.getElementById('learner-name').textContent = data.learner.name;
-                document.getElementById('learner-info').classList.remove('d-none');
-
-                setTimeout(() => logAttendance(decodedText), 1500);
-            } else {
-                isSubmitting = false;
-                Swal.fire({
-                    icon: 'error',
-                    title: 'QR Code Not Recognized',
-                    text: 'This QR code is not registered in the system.',
-                });
-            }
-        })
-        .catch(error => {
-            isSubmitting = false;
-            Swal.fire({
-                icon: 'error',
-                title: 'Lookup Failed',
-                text: 'Error finding learner by QR code.',
-            });
-        });
-    }
-
-    function logAttendance(qrCode) {
-        const sessionValue = document.querySelector('input[name="session"]:checked')?.value;
-        const formData = new FormData();
-
-        fetch("{{ route('admin.attendance.lookup-learner') }}", {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ qr_code: qrCode })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'found') {
-                formData.append('learner_id', data.learner.id);
-                formData.append('session', sessionValue);
-
-                return fetch("{{ route('admin.attendance.store') }}", {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-            } else {
-                throw new Error('Learner not found during re-lookup.');
-            }
-        })
-        .then(async response => {
-            const data = await response.json();
-            isSubmitting = false;
-
-            if (data.status === 'success') {
-                successSound.play();
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    html: `<span style="color:#212529;">${data.message}</span>`,
-                    title: data.message,
-                    showConfirmButton: false,
-                    timer: 2500,
-                    customClass: { popup: 'custom-toast-border' }
-                });
-                setTimeout(() => window.location.reload(), 2500);
-            } else {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Warning',
-                    text: data.message,
-                    timer: 2500
-                });
-            }
-        })
-        .catch(error => {
-            isSubmitting = false;
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Could not submit attendance.',
-            });
-        });
-    }
-
-    let html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess);
-
     function updateClock() {
         const now = new Date();
         const options = {

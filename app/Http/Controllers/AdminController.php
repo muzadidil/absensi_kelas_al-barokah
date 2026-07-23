@@ -13,16 +13,14 @@ class AdminController extends Controller
     {
         $userCount = User::count();
         $learnerCount = DB::table('learners')->count();
-        // $employeeCount = DB::table('employees')->count();
+        $guruCount = User::whereHas('roles', fn ($q) => $q->where('name', 'guru'))->count();
         $mailLogCount = DB::table('email_logs')->count();
-        $announcementCount = DB::table('announcements')->count();
         $attendanceCount = DB::table('learner_attendance')->count();
 
         return view('admin.dashboard', compact(
             'userCount',
             'learnerCount',
-            // 'employeeCount',
-            'announcementCount',
+            'guruCount',
             'attendanceCount',
             'mailLogCount'
         ));

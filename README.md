@@ -1,6 +1,6 @@
-# 📚 Learner and Employee Management System (LEMS)
+# 📚 Sistem Absensi Kelas Al-Barokah
 
-**LEMS** is a Laravel-based web platform that simplifies school administrative tasks through QR code attendance, role-based access, OTP-secured email registration, and targeted email announcements — all in a clean, responsive user interface.
+A Laravel-based web platform that simplifies school administrative tasks through button-based attendance logging, role-based access, and email registration — all in a clean, responsive user interface.
 
 > "Build systems not just for grades, but for real-world impact."
 
@@ -8,10 +8,8 @@
 
 ## 🚀 Features
 
-- 📌 QR Code-based learner attendance logging  
-- 👤 Role-based access control (Admin, Employee, Learner)  
-- 📧 Email-based announcement system (filter by users or grade level and section)  
-- 🔐 Email OTP verification for registration  
+- 📌 Button-based learner attendance logging
+- 👤 Role-based access control (Admin, Guru, Learner)
 - 📊 Dashboard and user management  
 - ✅ Responsive and mobile-friendly UI  
 - 🗂️ Modular and scalable Laravel 12 codebase  

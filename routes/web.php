@@ -3,13 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\GuruController;
 use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\EmailLogController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\LearnerAttendanceController;
-use App\Http\Controllers\AnnouncementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +31,7 @@ Route::get('/dashboard', function () {
 
     return match (true) {
         $user->hasRole('admin') => redirect('/admin/dashboard'),
-        $user->hasRole('employee') => redirect('/employee/dashboard'),
+        $user->hasRole('guru') => redirect('/guru/dashboard'),
         $user->hasRole('learner') => redirect('/learner/dashboard'),
         default => abort(403),
     };
@@ -56,8 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    // Employee
-    Route::get('/employee/dashboard', [EmployeeController::class, 'index'])->name('employee.dashboard');
+    // Guru
+    Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
     // Learner
     Route::get('/learner/dashboard', [LearnerController::class, 'index'])->name('learner.dashboard');
 
@@ -101,39 +100,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('attendance', [LearnerAttendanceController::class, 'index'])->name('admin.attendance.index');
     Route::post('attendance/store', [LearnerAttendanceController::class, 'store'])->name('admin.attendance.store');
-    Route::post('attendance/lookup-learner', [LearnerAttendanceController::class, 'lookupLearner'])
-    ->middleware(['auth', 'verified'])
-    ->name('admin.attendance.lookup-learner');
-});
-
-Route::middleware(['auth', 'verified'])
-    ->prefix('admin/announcements')
-    ->name('admin.announcements.')
-    ->group(function () {
-
-       // List & create announcements
-    Route::get('/', [AnnouncementController::class, 'index'])->name('index');
-    Route::post('/', [AnnouncementController::class, 'store'])->name('store');
-
-    // Show send form
-    Route::get('/send', [AnnouncementController::class, 'sendForm'])->name('sendForm');
-
-    //  Process sending to selected recipients
-    Route::post('/send', [AnnouncementController::class, 'processSend'])->name('processSend');
-
-    // Send a specific announcement by ID (e.g. quick resend)
-    Route::get('/{id}/send', [AnnouncementController::class, 'send'])->name('send');
-
-    // View logs
-    Route::get('/logs', [AnnouncementController::class, 'logs'])->name('logs');
 });
 
 
 // Temporarily allow public access for testing purposes~
 Route::resource('learners', LearnerController::class)->names('admin.learners');
-    // Route::resource('employees', EmployeeController::class);
     // Route::resource('attendance', AttendanceController::class);
-    // Route::resource('announcements', AnnouncementController::class);
 Route::delete('/learners/{id}', [LearnerController::class, 'destroy'])->name('learners.destroy');
 
 

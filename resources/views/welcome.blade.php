@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LEMS | Learner and Employee Management System</title>
+    <title>Sistem Absensi Kelas Al-Barokah</title>
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -45,8 +45,8 @@
             <img src="{{ asset('images/developer.png') }}" alt="Logo" class="h-20 w-20 logo-animation">
             <!-- <img src="https://laravel.com/img/logomark.min.svg" alt="Laravel Logo" class="h-20 w-20 logo-animation"> -->
         </div>
-        <h1 class="text-3xl font-semibold mb-2">Welcome to LEMS</h1>
-        <p class="text-lg mb-6">Learner and Employee Management System</p>
+        <h1 class="text-3xl font-semibold mb-2">Selamat Datang</h1>
+        <p class="text-lg mb-6">Sistem Absensi Kelas Al-Barokah</p>
 
         <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
             <a href="{{ route('login') }}" style="background-color: #2563eb; color: white;" class="px-5 py-2 rounded-full font-medium transition-all duration-200">Login</a>

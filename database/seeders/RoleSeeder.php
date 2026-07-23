@@ -23,7 +23,13 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['admin', 'employee', 'learner'] as $role) {
+        // Rename legacy 'employee' role to 'guru' if it still exists (production data)
+        $legacyEmployeeRole = Role::where('name', 'employee')->where('guard_name', 'web')->first();
+        if ($legacyEmployeeRole) {
+            $legacyEmployeeRole->update(['name' => 'guru']);
+        }
+
+        foreach (['admin', 'guru', 'learner'] as $role) {
             Role::findOrCreate($role, 'web');
         }
 

@@ -67,7 +67,7 @@
 <body class="min-h-screen flex items-center justify-center font-sans text-white antialiased bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-4">
      <div class="w-full sm:max-w-md mt-6 px-6 py-8 glass rounded-3xl shadow-lg">
         <div class="flex justify-center  mt-4">
-            <img src="/images/developer.png" alt="LEMS" class="h-20 w-20 logo-animation" />
+            <img src="/images/developer.png" alt="Logo" class="h-20 w-20 logo-animation" />
         </div>
         {{ $slot }}
     </div> 

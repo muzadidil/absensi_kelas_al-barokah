@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Register User | LEMS')
+@section('title', 'Register User | Sistem Absensi Kelas Al-Barokah')
 
 @section('content')
 <div class="container mt-3">
@@ -64,7 +64,7 @@
               <select name="role" class="form-select border border-secondary-subtle" required>
                   <option value="">-- Select Role --</option>
                   <option value="learner">Learner</option>
-                  <option value="employee">Employee</option>
+                  <option value="guru">Guru</option>
                   <option value="admin">Admin</option>
               </select>
           </div>

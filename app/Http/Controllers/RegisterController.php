@@ -152,7 +152,7 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
-            'role' => 'required|in:admin,employee,learner',
+            'role' => 'required|in:admin,guru,learner',
         ]);
 
         // Check email deliverability using MailboxLayer (skip gracefully if unavailable)

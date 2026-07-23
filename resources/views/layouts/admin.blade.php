@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'LEMS') | Dashboard</title>
+    <title>@yield('title', 'Sistem Absensi Kelas Al-Barokah') | Dashboard</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -248,13 +248,13 @@
       <!-- Logo -->
       <img
         src="{{ asset('images/developer.png') }}"
-        alt="LEMS Logo"
+        alt="Logo"
         class="system-logo mx-auto d-block mb-3"
         style="max-height: 80px;"
       >
 
       <!-- System Name -->
-      <h4 class="system-name text-white mb-4">LEMS</h4>
+      <h4 class="system-name text-white mb-4">Absensi Al-Barokah</h4>
     </div>
 
     <ul class="nav nav-pills flex-column mb-auto">
@@ -274,9 +274,9 @@
       </li>
       <li class="nav-item mb-1">
           <a href="#"
-              class="menu-item nav-link {{ request()->routeIs('admin.employees.*') ? 'active' : '' }}"
-              data-tooltip="Manage Employees">
-              <i class="bi bi-person-badge-fill me-2"></i><span> Employees</span>
+              class="menu-item nav-link {{ request()->routeIs('admin.guru.*') ? 'active' : '' }}"
+              data-tooltip="Manage Guru">
+              <i class="bi bi-person-badge-fill me-2"></i><span> Guru</span>
           </a>
       </li>
       <li class="nav-item mb-1">
@@ -285,55 +285,6 @@
               data-tooltip="View Attendance Logs">
               <i class="bi bi-clipboard-check-fill me-2"></i><span> Attendance</span>
           </a>
-      </li>
-      <li class="nav-item mb-1">
-          <a class="menu-item nav-link d-flex justify-content-between align-items-center {{ request()->routeIs('admin.announcements.*') ? '' : 'collapsed' }}"
-              data-bs-toggle="collapse"
-              href="#announcementSubmenu"
-              role="button"
-              aria-expanded="{{ request()->routeIs('admin.announcements.*') ? 'true' : 'false' }}"
-              data-tooltip="Manage Announcements">
-              <span><i class="bi bi-megaphone-fill me-2"></i> Announce</span>
-              <i class="bi bi-chevron-down small"></i>
-          </a>
-
-          <div class="collapse {{ request()->routeIs('admin.announcements.*') ? 'show' : '' }}" id="announcementSubmenu">
-              <ul class="nav flex-column ms-4 mt-1">
-                  <li class="nav-item">
-                      @if(Route::has('admin.announcements.index'))
-                          <a href="{{ route('admin.announcements.index') }}"
-                            class="menu-item nav-link {{ request()->routeIs('admin.announcements.index') ? 'active' : '' }}"
-                            data-tooltip="Compose Announcement">
-                              Compose
-                          </a>
-                      @else
-                          <a href="#" class="menu-item nav-link disabled" data-tooltip="Coming soon">Compose</a>
-                      @endif
-                  </li>
-                  <li class="nav-item">
-                      @if(Route::has('admin.announcements.sendForm'))
-                          <a href="{{ route('admin.announcements.sendForm') }}"
-                            class="menu-item nav-link {{ request()->routeIs('admin.announcements.sendForm') ? 'active' : '' }}"
-                            data-tooltip="Send Announcement">
-                              Send
-                          </a>
-                      @else
-                          <a href="#" class="menu-item nav-link disabled" data-tooltip="Coming soon">Send</a>
-                      @endif
-                  </li>
-                  <li class="nav-item">
-                      @if(Route::has('admin.announcements.logs'))
-                          <a href="{{ route('admin.announcements.logs') }}"
-                            class="menu-item nav-link {{ request()->routeIs('admin.announcements.logs') ? 'active' : '' }}"
-                            data-tooltip="View Logs">
-                              Logs
-                          </a>
-                      @else
-                          <a href="#" class="menu-item nav-link disabled" data-tooltip="Coming soon">Logs</a>
-                      @endif
-                  </li>
-              </ul>
-          </div>
       </li>
       <!-- <li class="nav-item mb-1">
           <a href="{{ route('admin.register.form') }}"
@@ -578,7 +529,7 @@
     <!-- Footer -->
     <footer class="text-center py-3 mt-auto bg-light" style="font-size: 0.85rem;">
       <div class="container">
-        <span class="text-muted">© {{ date('Y') }} Learner and Employee Management System. All rights reserved.</span>
+        <span class="text-muted">© {{ date('Y') }} Sistem Absensi Kelas Al-Barokah. All rights reserved.</span>
       </div>
     </footer>
 
