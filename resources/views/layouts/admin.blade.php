@@ -269,8 +269,8 @@
       <li class="nav-item mb-1">
           <a href="{{ route('admin.learners.index') }}"
             class="menu-item nav-link {{ request()->routeIs('admin.learners.*') ? 'active' : '' }}"
-            data-tooltip="Manage Learners">
-              <i class="bi bi-people-fill me-2"></i><span> Learners</span>
+            data-tooltip="Manage Murid">
+              <i class="bi bi-people-fill me-2"></i><span> Murid</span>
           </a>
       </li>
       <li class="nav-item mb-1">

@@ -1,29 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Learner Attendance</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@extends('layouts.admin')
 
-    <!-- Bootstrap CSS & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+@section('title', 'Attendance')
 
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+@push('styles')
     <style>
-                body {
-            background-color: #0f172a;
-            font-family: 'Segoe UI', sans-serif;
-            color: #f1f5f9;
-        }
-
-        h2, label, .form-label {
-            color: white !important;
-        }
-
         .qr-form-container,
         .table-container {
             background: #ffffff;
@@ -34,7 +14,7 @@
         }
 
         .custom-gray-head {
-            background-color: #eaeaea !important;
+            background-color: rgb(90, 88, 88) !important;
         }
 
         .form-check-input:checked {
@@ -48,9 +28,6 @@
             gap: 20px;
             margin-top: 30px;
         }
-        .custom-gray-head {
-            background-color: rgb(90, 88, 88) !important;
-        }
         .custom-toast-border {
             border: 1px solid rgb(47, 15, 253) !important;
             border-radius: 8px !important;
@@ -61,19 +38,13 @@
             border-radius: 12px !important;
         }
     </style>
-</head>
-<body>
+@endpush
 
-<div class="container position-relative">
-    <!-- X Close Button -->
-    <a href="{{ url('/') }}"
-       class="position-absolute top-0 end-0 m-3 text-white fs-4 text-decoration-none"
-       title="Back to Home"
-       style="z-index: 10;">&times;</a>
-       
+@section('content')
+
     <div class="text-center mb-1">
         <h2 class="fw-bold">Learner Attendance</h2>
-        <p class="text-gray-300">Select a learner and log the session</p>
+        <p class="text-muted">Select a learner and log the session</p>
     </div>
     <div class="text-center">
         <h5 class="fw-semibold mb-1">Current Date and Time</h5>
@@ -150,9 +121,10 @@
             </div>
         </div>
     </div>
-</div>
 
+@endsection
 
+@push('scripts')
 @if(session('success'))
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -203,6 +175,4 @@
     setInterval(updateClock, 1000);
     updateClock(); // initial call
 </script>
-
-</body>
-</html>
+@endpush
