@@ -28,6 +28,9 @@
             <h5 class="mb-0">Daftar Murid</h5>
 
             <div class="d-flex gap-2">
+                <a href="{{ route('admin.class-settings.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-gear-fill me-1"></i> Kelola Tingkat Kelas & Kelompok
+                </a>
                 <!-- Add Learner Button -->
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addLearnerModal">
                     <i class="bi bi-person-plus-fill me-1"></i> Tambah Murid
@@ -35,6 +38,14 @@
             </div>
         </div>
     </div>
+
+    @if($gradeLevels->isEmpty() || $sections->isEmpty())
+        <div class="alert alert-warning mt-2">
+            Belum ada data Tingkat Kelas / Kelompok. Silakan
+            <a href="{{ route('admin.class-settings.index') }}">tambahkan dulu di sini</a>
+            sebelum menambah data murid.
+        </div>
+    @endif
 
     <!-- Learner Table -->
     <div class="overflow-auto rounded-lg border border-gray-300 shadow-sm">
@@ -118,8 +129,8 @@
                                         <label class="form-label">Tingkat Kelas</label>
                                         <select name="grade_level" class="form-select" required>
                                         <option disabled>Pilih Tingkat</option>
-                                        @foreach(['1st Year','2nd Year','3rd Year','4th Year'] as $year)
-                                            <option value="{{ $year }}" @selected($learner->grade_level === $year)>{{ $year }}</option>
+                                        @foreach($gradeLevels as $gradeLevel)
+                                            <option value="{{ $gradeLevel->name }}" @selected($learner->grade_level === $gradeLevel->name)>{{ $gradeLevel->name }}</option>
                                         @endforeach
                                         </select>
                                     </div>
@@ -127,8 +138,8 @@
                                         <label class="form-label">Kelompok</label>
                                         <select name="section" class="form-select" required>
                                         <option disabled>Pilih Kelompok</option>
-                                        @foreach(['A','B','C','D'] as $sec)
-                                            <option value="{{ $sec }}" @selected($learner->section === $sec)>{{ $sec }}</option>
+                                        @foreach($sections as $section)
+                                            <option value="{{ $section->name }}" @selected($learner->section === $section->name)>{{ $section->name }}</option>
                                         @endforeach
                                         </select>
                                     </div>
@@ -196,22 +207,20 @@
               <div class="col-md-4">
                 <label for="grade_level" class="form-label">Tingkat Kelas</label>
                 <select name="grade_level" class="form-select rounded-3" required>
-                  <option selected disabled>Pilih Tingkat</option>
-                  <option>1st Year</option>
-                  <option>2nd Year</option>
-                  <option>3rd Year</option>
-                  <option>4th Year</option>
+                  <option value="" selected disabled>Pilih Tingkat</option>
+                  @foreach($gradeLevels as $gradeLevel)
+                      <option value="{{ $gradeLevel->name }}">{{ $gradeLevel->name }}</option>
+                  @endforeach
                 </select>
               </div>
 
               <div class="col-md-4">
                 <label for="section" class="form-label">Kelompok</label>
                 <select name="section" class="form-select rounded-3" required>
-                  <option selected disabled>Pilih Kelompok</option>
-                  <option>A</option>
-                  <option>B</option>
-                  <option>C</option>
-                  <option>D</option>
+                  <option value="" selected disabled>Pilih Kelompok</option>
+                  @foreach($sections as $section)
+                      <option value="{{ $section->name }}">{{ $section->name }}</option>
+                  @endforeach
                 </select>
               </div>
             </div>

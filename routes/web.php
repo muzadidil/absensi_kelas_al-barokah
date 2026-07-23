@@ -8,6 +8,7 @@ use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\LearnerAttendanceController;
+use App\Http\Controllers\Admin\ClassSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('attendance', [LearnerAttendanceController::class, 'index'])->name('admin.attendance.index');
     Route::post('attendance/store', [LearnerAttendanceController::class, 'store'])->name('admin.attendance.store');
+
+    // Class Settings (Tingkat Kelas & Kelompok)
+    Route::get('/admin/class-settings', [ClassSettingController::class, 'index'])->name('admin.class-settings.index');
+    Route::post('/admin/grade-levels', [ClassSettingController::class, 'storeGradeLevel'])->name('admin.grade-levels.store');
+    Route::put('/admin/grade-levels/{gradeLevel}', [ClassSettingController::class, 'updateGradeLevel'])->name('admin.grade-levels.update');
+    Route::delete('/admin/grade-levels/{gradeLevel}', [ClassSettingController::class, 'destroyGradeLevel'])->name('admin.grade-levels.destroy');
+    Route::post('/admin/sections', [ClassSettingController::class, 'storeSection'])->name('admin.sections.store');
+    Route::put('/admin/sections/{section}', [ClassSettingController::class, 'updateSection'])->name('admin.sections.update');
+    Route::delete('/admin/sections/{section}', [ClassSettingController::class, 'destroySection'])->name('admin.sections.destroy');
 });
 
 

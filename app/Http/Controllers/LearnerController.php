@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Learner;
+use App\Models\GradeLevel;
+use App\Models\Section;
 use Illuminate\Support\Facades\DB;
 
 
@@ -18,7 +20,9 @@ class LearnerController extends Controller
     // For admin viewing learner records
         // $learners = Learner::all();
          $learners = Learner::orderByRaw("CONCAT(lname, fname, mname) ASC")->get();
-        return view('admin.learners.index', compact('learners'));
+         $gradeLevels = GradeLevel::orderBy('name')->get();
+         $sections = Section::orderBy('name')->get();
+        return view('admin.learners.index', compact('learners', 'gradeLevels', 'sections'));
     }
 
     public function store(Request $request)
@@ -27,8 +31,8 @@ class LearnerController extends Controller
             'fname' => 'required',
             'lname' => 'required',
             'email' => 'required|email|unique:learners,email',
-            'grade_level' => 'required',
-            'section' => 'required',
+            'grade_level' => 'required|exists:grade_levels,name',
+            'section' => 'required|exists:sections,name',
         ]);
 
         Learner::create($request->all());
@@ -42,8 +46,8 @@ class LearnerController extends Controller
             'fname' => 'required',
             'lname' => 'required',
             'email' => 'required|email|unique:learners,email,' . $learner->id,
-            'grade_level' => 'required',
-            'section' => 'required',
+            'grade_level' => 'required|exists:grade_levels,name',
+            'section' => 'required|exists:sections,name',
         ]);
 
         $learner->update($request->all());
