@@ -19,11 +19,10 @@ Live di: `https://al-barokah.zasha.online` (hosting: Hostinger, akses server via
 app/
 ├── Http/Controllers/
 │   ├── AdminController.php              # Dashboard admin (hitung statistik)
-│   ├── GuruController.php               # Dashboard guru
+│   ├── GuruController.php               # Dashboard guru + kelola daftar guru (admin)
 │   ├── LearnerController.php            # Dashboard & CRUD data siswa
 │   ├── RegisterController.php           # Registrasi user oleh admin
-│   ├── UserController.php               # Manajemen user & kirim email custom
-│   ├── EmailLogController.php           # Riwayat email terkirim
+│   ├── UserController.php               # Manajemen "Pengguna Terdaftar" & kirim welcome email
 │   ├── Admin/
 │   │   └── LearnerAttendanceController.php  # Logika absensi (index + store)
 │   └── Auth/
@@ -38,14 +37,17 @@ app/
 
 resources/views/
 ├── admin/
-│   ├── dashboard.blade.php              # Dashboard admin
+│   ├── dashboard.blade.php              # Dashboard admin (pakai layouts.admin, ada sidebar)
 │   ├── register-user.blade.php          # Form tambah user baru
-│   └── attendance/index.blade.php       # Halaman absensi (dropdown + tombol)
-├── guru/dashboard.blade.php             # Dashboard guru
-├── learner/dashboard.blade.php          # Dashboard siswa
+│   ├── guru/index.blade.php             # Daftar guru (admin) — lihat & hapus akun guru
+│   ├── learners/index.blade.php         # Daftar murid (admin) — tambah/edit/hapus
+│   ├── reports/index.blade.php          # Placeholder "Laporan" (Coming Soon)
+│   └── attendance/index.blade.php       # Halaman absensi (dropdown + tombol), pakai layouts.admin
+├── guru/dashboard.blade.php             # Dashboard guru (pakai layouts.app, TANPA sidebar admin)
+├── learner/dashboard.blade.php          # Dashboard siswa (pakai layouts.app, TANPA sidebar admin)
 ├── layouts/
-│   ├── admin.blade.php                  # Layout sidebar admin
-│   ├── app.blade.php / guest.blade.php  # Layout umum & halaman tamu
+│   ├── admin.blade.php                  # Layout sidebar admin (dipakai Admin saja)
+│   ├── app.blade.php / guest.blade.php  # Layout sederhana (dipakai Guru & Murid, tanpa sidebar)
 └── emails/welcome.blade.php             # Template email selamat datang
 
 routes/web.php                           # Semua route utama aplikasi
@@ -58,11 +60,20 @@ database/
 
 ## 3. Role & Alur Login
 
-| Role     | Redirect setelah login | Dashboard                          |
+**Login memakai satu halaman yang sama untuk semua role** (`/login`) — tidak ada form login terpisah per role. Setelah login berhasil, sistem mengecek role akun dan otomatis redirect:
+
+| Role     | Redirect setelah login | Layout & Tampilan Dashboard |
 |----------|-------------------------|-------------------------------------|
-| admin    | `/admin/dashboard`      | Statistik lengkap, kelola user & absensi |
-| guru     | `/guru/dashboard`       | Lihat absensi, edit profil          |
-| learner  | `/learner/dashboard`    | Lihat absensi, edit profil          |
+| admin    | `/admin/dashboard`      | Layout `layouts.admin` (ada sidebar lengkap: Dasbor, Murid, Guru, Absensi, Pengguna Terdaftar, Laporan) + statistik & grafik |
+| guru     | `/guru/dashboard`       | Layout `layouts.app` (**tanpa sidebar**) — cuma 2 kartu: Log Absensi & Profil Saya |
+| learner  | `/learner/dashboard`    | Layout `layouts.app` (**tanpa sidebar**) — cuma 2 kartu: Absensi & Profil Saya |
+
+Jadi dashboard Admin **jauh lebih lengkap** (sidebar + kelola semua data) dibanding dashboard Guru/Murid yang sengaja dibuat sangat sederhana (hanya akses ke absensi & profil sendiri).
+
+**Cara membuat akun berbeda per role:**
+- **Murid**: bisa daftar akun **sendiri** lewat halaman publik `/register` — otomatis dapat role `learner`, tidak bisa pilih role lain dari sana.
+- **Guru & Admin**: **tidak bisa** membuat akun sendiri. Akunnya hanya bisa dibuat oleh Admin lewat menu "Daftarkan Pengguna" (`/register-user`), yang punya pilihan role Admin/Guru/Murid.
+- Begitu akun dibuat (baik oleh admin atau daftar sendiri), pemiliknya bisa login sendiri kapan saja tanpa perlu bantuan admin lagi.
 
 Role disimpan menggunakan package **Spatie Laravel Permission**. Role awal dibuat lewat `RoleSeeder`, yang **aman dijalankan berulang** (idempotent) — dan sejak revisi terbaru juga otomatis mengganti nama role lama `employee` menjadi `guru` jika masih ada di database produksi:
 
@@ -105,6 +116,30 @@ php artisan db:seed --class=RoleSeeder --force
 ### 4.7 Ganti nama brand sistem
 - Nama sistem diganti dari **"Learner and Employee Management System (LEMS)"** menjadi **"Sistem Absensi Kelas Al-Barokah"** di seluruh judul halaman, sidebar, footer, dan template email.
 
+### 4.8 Perbaikan layout sidebar admin
+- Sidebar admin tidak punya `width` CSS aktif sejak awal (definisi `width: 200px` ternyata ada di dalam blok CSS yang ter-comment), sementara area konten sudah mengasumsikan sidebar selebar 200px — menyebabkan tampilan berantakan/konten terpotong. Diperbaiki dengan menambahkan `width: 200px` ke class `.sidebar` yang aktif.
+- Halaman **Attendance** sebelumnya adalah file HTML mandiri (punya `<html>`/`<head>` sendiri), sehingga saat dibuka dari sidebar tampilannya jadi full-screen tanpa sidebar. Diperbaiki dengan mengubahnya jadi `@extends('layouts.admin')` seperti halaman admin lainnya.
+- Label menu sidebar "Learners" diganti jadi "Murid".
+
+### 4.9 Aktivasi tombol sidebar yang sebelumnya mati
+Tiga menu sidebar sebelumnya cuma `href="#"` tanpa halaman tujuan:
+- **Guru**: dibuatkan halaman baru `admin.guru.index` (daftar user dengan role guru, bisa dihapus) — `GuruController::manage()`.
+- **Reports** dan **Help**: awalnya dibuatkan halaman placeholder "Coming Soon", namun keduanya **dihapus total** lagi di langkah 4.10 di bawah (kecuali Reports/Laporan yang tetap dipertahankan sebagai placeholder).
+
+### 4.10 Terjemahkan seluruh UI admin panel ke Bahasa Indonesia
+Semua label, tombol, judul halaman, pesan sukses/error, dan teks modal diterjemahkan ke Bahasa Indonesia — mencakup: sidebar & topbar, dashboard, halaman Murid, Guru, Absensi, Register User, Registered Users, Email Audit Log, Custom Email, Profile (edit/password/hapus akun), serta dashboard Guru dan Murid. Pesan flash dari controller (`LearnerController`, `UserController`, `RegisterController`, `GuruController`, `LearnerAttendanceController`) turut diterjemahkan karena tampil langsung ke pengguna.
+
+### 4.11 Penghapusan fitur Tentang, Bantuan, Email Kustom, dan Log Audit Email
+Setelah dievaluasi, 4 menu berikut dihapus **total** (bukan cuma disembunyikan) karena dianggap tidak diperlukan:
+- **Tentang**: modal "About" beserta link menunya dihapus dari `layouts/admin.blade.php`.
+- **Bantuan**: halaman placeholder, route `admin.help`, dan link menu dihapus.
+- **Email Kustom**: `UserController::customEmailForm()`/`sendCustomEmail()`, Mailable `CustomMessageMail`, view `custom-email.blade.php`, route `email.custom.*`, dan link menu dihapus.
+- **Log Audit Email**: `EmailLogController`, view `email_logs/index.blade.php`, route `email.logs`, dan link menu dihapus.
+
+Catatan: model `EmailLog` dan tabel `email_logs` **tetap dipertahankan** karena masih dipakai untuk logging saat registrasi user & fitur "Send Email to Selected" di halaman Registered Users (`UserController::sendMail()`), serta ditampilkan sebagai statistik "Total Log Email" di dashboard admin — hanya halaman *daftar log*-nya saja yang dihapus.
+
+Sidebar admin sekarang tersisa: **Dasbor, Murid, Guru, Absensi, Pengguna Terdaftar, Laporan**.
+
 ---
 
 ## 5. Cara Deploy Perubahan ke Server (Hostinger via SSH)
@@ -126,5 +161,6 @@ php artisan optimize:clear         # wajib, agar cache/OPcache tidak pakai kode 
 ## 6. Catatan Teknis Lain
 
 - **Kolom `qr_code` di tabel `learners`** masih ada di database (tidak dihapus), meski fiturnya sudah tidak dipakai — aman dibiarkan, tidak mengganggu.
-- **Fitur email custom** (`UserController::sendMail()`, `customEmailForm()`/`sendCustomEmail()`) **berbeda** dari fitur "Announcement" yang sudah dihapus — ini tetap ada dan tidak termasuk dalam penghapusan.
-- **`WelcomeMail`** dan **`EmailLog`** juga terpisah dari fitur Announcement (dipakai khusus saat registrasi user baru), tidak ikut terhapus.
+- **`UserController::sendMail()`** (fitur "Kirim Email ke Terpilih" di halaman Pengguna Terdaftar, mengirim ulang welcome email) **tetap ada** — ini berbeda dari fitur "Email Kustom" (`customEmailForm()`/`sendCustomEmail()`) yang sudah dihapus total di bagian 4.11.
+- **`WelcomeMail`** dan **`EmailLog`** juga terpisah dari fitur-fitur yang sudah dihapus (Announcement, Email Kustom, Log Audit Email) — dipakai khusus saat registrasi user baru & fitur kirim ulang welcome email, tidak ikut terhapus.
+- **Locale aplikasi** (`config/app.php` → `APP_LOCALE`) masih default `en`. Terjemahan UI ke Bahasa Indonesia (bagian 4.10) dilakukan dengan mengganti teks langsung di setiap file Blade/controller, **bukan** lewat sistem i18n Laravel (`resources/lang`) — jadi kalau ke depan butuh multi-bahasa yang proper, perlu direfaktor ke sistem lang file.
