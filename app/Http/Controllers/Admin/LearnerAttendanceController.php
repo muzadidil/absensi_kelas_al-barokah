@@ -81,7 +81,7 @@ class LearnerAttendanceController extends Controller
                 : redirect()->back()->with('warning', 'This session is already logged.');
         }
 
-        $attendance->{$request->session} = now();
+        $attendance->{$request->session} = now()->format('H:i:s');
         $attendance->save();
 
         return $request->expectsJson()
