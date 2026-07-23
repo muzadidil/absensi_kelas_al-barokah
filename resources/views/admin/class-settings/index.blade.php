@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Tingkat Kelas & Kelompok')
+@section('title', 'Tingkat Kelas & Tahun Ajaran')
 
 @section('content')
 <div class="container-fluid px-2">
@@ -106,11 +106,11 @@
             </div>
         </div>
 
-        <!-- Kelompok -->
+        <!-- Tahun Ajaran -->
         <div class="col-md-6">
             <div class="sticky-top bg-white shadow-sm py-2 mb-0">
                 <div class="d-flex flex-wrap justify-content-between align-items-center">
-                    <h5 class="mb-0">Kelompok</h5>
+                    <h5 class="mb-0">Tahun Ajaran</h5>
                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addSectionModal">
                         <i class="bi bi-plus-lg me-1"></i> Tambah
                     </button>
@@ -137,7 +137,7 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                     <form action="{{ route('admin.sections.destroy', $section->id) }}" method="POST"
-                                        onsubmit="return confirm('Hapus kelompok ini?')" class="d-inline">
+                                        onsubmit="return confirm('Hapus tahun ajaran ini?')" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-danger btn-sm rounded-pill px-2 py-1">
@@ -155,7 +155,7 @@
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header py-2 px-3">
-                                                <h5 class="modal-title">Edit Kelompok</h5>
+                                                <h5 class="modal-title">Edit Tahun Ajaran</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
@@ -173,7 +173,7 @@
                                 </div>
                             </div>
                         @empty
-                            <tr><td colspan="3" class="text-center text-muted">Belum ada kelompok.</td></tr>
+                            <tr><td colspan="3" class="text-center text-muted">Belum ada tahun ajaran.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -217,13 +217,13 @@
                 @csrf
                 <div class="modal-header border-bottom-0">
                     <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
-                        <i class="bi bi-plus-lg"></i> Tambah Kelompok
+                        <i class="bi bi-plus-lg"></i> Tambah Tahun Ajaran
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body pt-0">
                     <label class="form-label">Nama</label>
-                    <input type="text" name="name" class="form-control rounded-3" placeholder="Contoh: Kelompok Ikhwan" required>
+                    <input type="text" name="name" class="form-control rounded-3" placeholder="Contoh: 2026/2027" required>
                 </div>
                 <div class="modal-footer border-top-0 d-flex justify-content-end">
                     <button type="button" class="btn btn-outline-primary rounded-pill px-4"

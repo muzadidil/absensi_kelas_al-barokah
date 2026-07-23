@@ -54,7 +54,7 @@ class ClassSettingController extends Controller
 
         Section::create($request->only('name'));
 
-        return redirect()->back()->with('success', 'Kelompok berhasil ditambahkan!');
+        return redirect()->back()->with('success', 'Tahun ajaran berhasil ditambahkan!');
     }
 
     public function updateSection(Request $request, Section $section)
@@ -65,13 +65,13 @@ class ClassSettingController extends Controller
 
         $section->update($request->only('name'));
 
-        return redirect()->back()->with('success', 'Kelompok berhasil diperbarui!');
+        return redirect()->back()->with('success', 'Tahun ajaran berhasil diperbarui!');
     }
 
     public function destroySection(Section $section)
     {
         $section->delete();
 
-        return redirect()->back()->with('success', 'Kelompok berhasil dihapus!');
+        return redirect()->back()->with('success', 'Tahun ajaran berhasil dihapus!');
     }
 }

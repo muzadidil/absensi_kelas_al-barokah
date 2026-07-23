@@ -29,7 +29,7 @@
 
             <div class="d-flex gap-2">
                 <a href="{{ route('admin.class-settings.index') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-gear-fill me-1"></i> Kelola Tingkat Kelas & Kelompok
+                    <i class="bi bi-gear-fill me-1"></i> Kelola Tingkat Kelas & Tahun Ajaran
                 </a>
                 <!-- Add Learner Button -->
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addLearnerModal">
@@ -41,7 +41,7 @@
 
     @if($gradeLevels->isEmpty() || $sections->isEmpty())
         <div class="alert alert-warning mt-2">
-            Belum ada data Tingkat Kelas / Kelompok. Silakan
+            Belum ada data Tingkat Kelas / Tahun Ajaran. Silakan
             <a href="{{ route('admin.class-settings.index') }}">tambahkan dulu di sini</a>
             sebelum menambah data murid.
         </div>
@@ -56,7 +56,7 @@
                     <th class="px-3 py-2 text-left">Nama</th>
                     <th class="px-3 py-2 text-left">Email</th>
                     <th class="px-3 py-2 text-left">Tingkat Kelas</th>
-                    <th class="px-3 py-2 text-left">Kelompok</th>
+                    <th class="px-3 py-2 text-left">Tahun Ajaran</th>
                     <th class="px-3 py-2 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -135,9 +135,9 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Kelompok</label>
+                                        <label class="form-label">Tahun Ajaran</label>
                                         <select name="section" class="form-select" required>
-                                        <option disabled>Pilih Kelompok</option>
+                                        <option disabled>Pilih Tahun Ajaran</option>
                                         @foreach($sections as $section)
                                             <option value="{{ $section->name }}" @selected($learner->section === $section->name)>{{ $section->name }}</option>
                                         @endforeach
@@ -215,9 +215,9 @@
               </div>
 
               <div class="col-md-4">
-                <label for="section" class="form-label">Kelompok</label>
+                <label for="section" class="form-label">Tahun Ajaran</label>
                 <select name="section" class="form-select rounded-3" required>
-                  <option value="" selected disabled>Pilih Kelompok</option>
+                  <option value="" selected disabled>Pilih Tahun Ajaran</option>
                   @foreach($sections as $section)
                       <option value="{{ $section->name }}">{{ $section->name }}</option>
                   @endforeach

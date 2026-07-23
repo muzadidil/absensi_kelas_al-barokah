@@ -276,8 +276,8 @@
       <li class="nav-item mb-1">
           <a href="{{ route('admin.class-settings.index') }}"
               class="menu-item nav-link {{ request()->routeIs('admin.class-settings.*') ? 'active' : '' }}"
-              data-tooltip="Tingkat Kelas & Kelompok">
-              <i class="bi bi-diagram-3-fill me-2"></i><span> Kelas & Kelompok</span>
+              data-tooltip="Tingkat Kelas & Tahun Ajaran">
+              <i class="bi bi-diagram-3-fill me-2"></i><span> Kelas & Tahun Ajaran</span>
           </a>
       </li>
       <li class="nav-item mb-1">
