@@ -30,18 +30,20 @@ class RegisterController extends Controller
             'password' => 'required|min:6|confirmed',
         ]);
 
-        // Validate email using MailboxLayer or similar
-        $response = Http::get('https://apilayer.net/api/check', [
-            'access_key' => env('MAILBOXLAYER_API_KEY'),
-            'email' => $request->email,
-            'smtp' => 1,
-            'format' => 1,
-        ]);
-
-        if (!$response['smtp_check']) {
-            return redirect()->back()->withInput()->withErrors([
-                'email' => 'This email appears to be undeliverable or fake.',
+        // Validate email using MailboxLayer or similar (skip gracefully if unavailable)
+        if (env('MAILBOXLAYER_API_KEY')) {
+            $response = Http::get('https://apilayer.net/api/check', [
+                'access_key' => env('MAILBOXLAYER_API_KEY'),
+                'email' => $request->email,
+                'smtp' => 1,
+                'format' => 1,
             ]);
+
+            if ($response->successful() && array_key_exists('smtp_check', $response->json()) && !$response['smtp_check']) {
+                return redirect()->back()->withInput()->withErrors([
+                    'email' => 'This email appears to be undeliverable or fake.',
+                ]);
+            }
         }
 
         // Continue with registration only if email is valid
@@ -153,18 +155,20 @@ class RegisterController extends Controller
             'role' => 'required|in:admin,employee,learner',
         ]);
 
-        // Check email deliverability using MailboxLayer
-        $response = Http::get('https://apilayer.net/api/check', [
-            'access_key' => env('MAILBOXLAYER_API_KEY'),
-            'email' => $request->email,
-            'smtp' => 1,
-            'format' => 1,
-        ]);
+        // Check email deliverability using MailboxLayer (skip gracefully if unavailable)
+        if (env('MAILBOXLAYER_API_KEY')) {
+            $response = Http::get('https://apilayer.net/api/check', [
+                'access_key' => env('MAILBOXLAYER_API_KEY'),
+                'email' => $request->email,
+                'smtp' => 1,
+                'format' => 1,
+            ]);
 
-        if (!$response['smtp_check']) {
-            return redirect()->back()->withErrors([
-                'email' => 'This email appears to be undeliverable or fake.',
-            ])->withInput();
+            if ($response->successful() && array_key_exists('smtp_check', $response->json()) && !$response['smtp_check']) {
+                return redirect()->back()->withErrors([
+                    'email' => 'This email appears to be undeliverable or fake.',
+                ])->withInput();
+            }
         }
 
         // Generate OTP
