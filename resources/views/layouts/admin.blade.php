@@ -302,31 +302,10 @@
         </a>
       </li>
       <li class="nav-item mb-1">
-        <a href="{{ route('email.logs') }}"
-          class="menu-item nav-link {{ request()->routeIs('email.logs') ? 'active' : '' }}"
-          data-tooltip="Log Audit Email">
-          <i class="bi bi-clipboard-check-fill me-2"></i><span> Log Audit Email</span>
-        </a>
-      </li>
-      <li class="nav-item mb-1">
-          <a href="{{ route('email.custom.form') }}"
-            class="menu-item nav-link {{ request()->routeIs('email.custom.form') ? 'active' : '' }}"
-            data-tooltip="Email Kustom">
-              <i class="bi bi-chat-square-text-fill me-2"></i><span> Email Kustom</span>
-          </a>
-      </li>
-      <li class="nav-item mb-1">
           <a href="{{ route('admin.reports') }}"
             class="menu-item nav-link {{ request()->routeIs('admin.reports') ? 'active' : '' }}"
             data-tooltip="Laporan">
               <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Laporan</span>
-          </a>
-      </li>
-      <li class="nav-item mb-1">
-          <a href="{{ route('admin.help') }}"
-            class="menu-item nav-link {{ request()->routeIs('admin.help') ? 'active' : '' }}"
-            data-tooltip="Bantuan">
-              <i class="bi bi-question-circle-fill me-2"></i><span> Bantuan</span>
           </a>
       </li>
       <!-- <li class="nav-item">
@@ -336,15 +315,6 @@
           <i class="bi bi-envelope-fill me-2"></i><span> LEMS</span>
         </a>
       </li> -->
-      <li class="nav-item">
-        <a href="#"
-          class="menu-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}"
-          data-tooltip="Tentang"
-          data-bs-toggle="modal"
-          data-bs-target="#aboutModal">
-          <i class="bi bi-info-circle-fill me-2"></i><span> Tentang</span>
-        </a>
-      </li>
     </ul>
     
     <!-- <hr>
@@ -465,62 +435,6 @@
             <!-- Dynamic notifications can be listed here -->
         </div>
     </div>
-
-    <!-- About Modal -->
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border border-1 border-primary rounded-4 shadow">
-              
-            <div class="modal-header">
-                <h5 class="modal-title" id="aboutModalLabel">Tentang</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-              <div class="modal-body">
-                <!-- System Info -->
-                <h6>Fitur & Tujuan Sistem</h6>
-                <ul class="small mb-4">
-                  <li>Mencatat absensi harian murid (AM IN / AM OUT / PM IN / PM OUT)</li>
-                  <li>Mengelola data murid dan guru</li>
-                  <li>Mengirim email massal atau individual ke pengguna terpilih</li>
-                  <li>Menyimpan log audit setiap email terkirim (penerima, subjek, waktu)</li>
-                  <li>Mendaftarkan pengguna baru langsung dari dashboard admin</li>
-                </ul>
-                <p class="small">
-                  Aplikasi ini menyederhanakan pencatatan absensi dan pengelolaan data kelas Al-Barokah dalam satu dashboard yang mudah digunakan.
-                </p>
-
-                <!-- Developer Info -->
-                <div class="text-center">
-                  <img
-                    src="{{ asset('images/developer.png') }}"
-                    alt="App Mailer Logo"
-                    class="mx-auto d-block mb-3"
-                    style="max-height: 80px;"
-                  >
-                  <h6>Pengembang</h6><br>
-                  <p class="small mb-0">
-                    <strong>Leonard T. Domingo</strong> <br> 
-                    <strong>Allyssa Mae T. Ligsay</strong> <br> 
-                    <strong>Airiz Krizzle Placido </strong> <br> 
-                    <strong>Mary Ann S. Cabagui</strong> <br> 
-                    <strong>Karylle Mia Abella</strong> <br> 
-                    <strong>Alexis Jane Labinay Tabunan</strong> <br> 
-                    <strong>Mariz Jocel L. Tomas</strong> <br> 
-                    <strong>David John Caliboso</strong> <br> 
-                    Bachelor of Science in Information Technology<br>
-                    <a href="mailto:leonardtdomingovida@gmail.com">lems@gmail.com</a>
-                  </p>
-                </div>
-              </div>
-              
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-              </div>
-              
-            </div>
-          </div>
-        </div>
 
     <!-- Main Content -->
     <div class="content py-0">

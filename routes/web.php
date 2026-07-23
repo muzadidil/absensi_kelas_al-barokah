@@ -6,7 +6,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\EmailLogController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\LearnerAttendanceController;
 
@@ -62,9 +61,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Learner
     Route::get('/learner/dashboard', [LearnerController::class, 'index'])->name('learner.dashboard');
 
-    // Reports & Help
+    // Reports
     Route::view('/admin/reports', 'admin.reports.index')->name('admin.reports');
-    Route::view('/admin/help', 'admin.help.index')->name('admin.help');
 
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -72,13 +70,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/sendmail', [UserController::class, 'sendMail'])->name('users.sendmail');
     Route::get('/users/sendmail', fn() => redirect()->route('users.index'));
-
-    // Email Logs
-    Route::get('/email-logs', [EmailLogController::class, 'index'])->name('email.logs');
-
-    // Custom Email
-    Route::get('/custom-email', [UserController::class, 'customEmailForm'])->name('email.custom.form');
-    Route::post('/custom-email/send', [UserController::class, 'sendCustomEmail'])->name('email.custom.send');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

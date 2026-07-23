@@ -20,8 +20,6 @@ use App\Mail\WelcomeMail;
 // Imports the WelcomeMail mailable class, which encapsulates
 // the email content, subject, and view template for welcome messages.
 
-use App\Mail\CustomMessageMail;
-
 use App\Models\EmailLog;
 use Illuminate\Support\Facades\DB;
 
@@ -100,46 +98,6 @@ class UserController extends Controller
         return redirect()
             ->back()
             ->with('emailSuccess', "Terkirim ke: {$emails}");
-    }
-
-    /* Fetches all users ordered by name.
-    Passes them to the Blade view resources/views/custom-email.blade.php.*/
-    public function customEmailForm()
-    {
-        $users = User::orderBy('name')->get();
-        return view('custom-email', compact('users'));
-    }
-
-    /*
-     * Validates subject, content, and recipient IDs.
-     * Sends a rich-text custom email to each selected user using CustomMessageMail.
-     * Redirects to the user list with a success message.
-     */
-    public function sendCustomEmail(Request $request)
-    {
-        $request->validate([
-            'subject' => 'required|string|max:255',
-            'content' => 'required|string',
-            'recipients' => 'required|array'
-        ]);
-
-        $users = User::whereIn('id', $request->recipients)->get();
-
-        foreach ($users as $user) {
-            Mail::to($user->email)->send(new CustomMessageMail(
-                $request->subject,
-                $request->content
-            ));
-        }
-        $emails = $users->pluck('email')->take(5)->implode(', ');
-        $more = $users->count() > 5 ? ' dan lainnya' : '';
-
-        return redirect()
-            ->back() //this would redirect to the previous page
-            // ->route('email.logs') // Redirects to the email logs route
-            ->with('emailSuccess', "Pesan kustom telah diantrekan untuk: {$emails}{$more}");
-
-        // return redirect()->route('email_logs.index')->with('emailSuccess', 'Custom message sent successfully!');
     }
 
 }
