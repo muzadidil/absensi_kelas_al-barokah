@@ -94,10 +94,23 @@ class AssignmentController extends Controller
             'assignmentLearners.learner',
         ]);
 
+        // Tandai murid mana yang masih punya soal essay yang belum dinilai,
+        // supaya tabel "Murid yang Ditugaskan" bisa kasih peringatan.
+        $essayQuestionIds = $assignment->questions->where('type', 'essay')->pluck('id');
+        $ungradedByLearner = [];
+        if ($essayQuestionIds->isNotEmpty()) {
+            $ungradedByLearner = LearnerAnswer::whereIn('assignment_question_id', $essayQuestionIds)
+                ->whereNull('score')
+                ->pluck('learner_id')
+                ->unique()
+                ->flip()
+                ->toArray();
+        }
+
         $gradeLevels = GradeLevel::orderBy('name')->get();
         $learners = Learner::orderBy('nama_lengkap')->get();
 
-        return view('admin.assignments.show', compact('assignment', 'gradeLevels', 'learners'));
+        return view('admin.assignments.show', compact('assignment', 'gradeLevels', 'learners', 'ungradedByLearner'));
     }
 
     public function destroy(Assignment $assignment)
@@ -153,5 +166,64 @@ class AssignmentController extends Controller
 
         return redirect()->route('admin.assignments.show', $assignment->id)
             ->with('success', 'Penugasan murid berhasil dihapus!');
+    }
+
+    /**
+     * Tampilkan semua jawaban satu murid untuk satu tugas — hanya kalau
+     * murid ini sudah menyelesaikan (submit) tugasnya.
+     */
+    public function showLearnerAnswers(Assignment $assignment, Learner $learner)
+    {
+        $assignmentLearner = AssignmentLearner::where('assignment_id', $assignment->id)
+            ->where('learner_id', $learner->id)
+            ->firstOrFail();
+
+        abort_if($assignmentLearner->status !== 'selesai', 404);
+
+        $assignment->load(['questions' => fn ($query) => $query->orderBy('sort_order')]);
+
+        $answers = LearnerAnswer::where('learner_id', $learner->id)
+            ->whereIn('assignment_question_id', $assignment->questions->pluck('id'))
+            ->get()
+            ->keyBy('assignment_question_id');
+
+        return view('admin.assignments.learner-answers', compact('assignment', 'learner', 'assignmentLearner', 'answers'));
+    }
+
+    /**
+     * Simpan nilai soal essay yang diisi admin, lalu hitung ulang total_score
+     * (gabungan pilgan yang sudah auto-koreksi + essay yang baru dinilai).
+     */
+    public function gradeLearnerAnswers(Request $request, Assignment $assignment, Learner $learner)
+    {
+        $assignmentLearner = AssignmentLearner::where('assignment_id', $assignment->id)
+            ->where('learner_id', $learner->id)
+            ->firstOrFail();
+
+        $assignment->load('questions');
+        $essayQuestions = $assignment->questions->where('type', 'essay');
+
+        $rules = [];
+        foreach ($essayQuestions as $question) {
+            $rules["scores.{$question->id}"] = "required|integer|min:0|max:{$question->points}";
+        }
+
+        $data = $request->validate($rules);
+
+        foreach ($essayQuestions as $question) {
+            LearnerAnswer::where('learner_id', $learner->id)
+                ->where('assignment_question_id', $question->id)
+                ->update(['score' => $data['scores'][$question->id]]);
+        }
+
+        $totalScore = LearnerAnswer::where('learner_id', $learner->id)
+            ->whereIn('assignment_question_id', $assignment->questions->pluck('id'))
+            ->whereNotNull('score')
+            ->sum('score');
+
+        $assignmentLearner->update(['total_score' => $totalScore]);
+
+        return redirect()->route('admin.assignments.learner-answers', [$assignment->id, $learner->id])
+            ->with('success', 'Nilai berhasil disimpan!');
     }
 }

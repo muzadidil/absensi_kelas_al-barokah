@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LearnerAttendanceController;
 use App\Http\Controllers\Admin\ClassSettingController;
 use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\AssignmentQuestionController;
+use App\Http\Controllers\Admin\RaportController;
 use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
@@ -137,6 +138,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Assign / Unassign Murid ke Tugas
         Route::post('admin/assignments/{assignment}/assign', [AssignmentController::class, 'assignLearners'])->name('admin.assignments.assign');
         Route::delete('admin/assignments/{assignment}/unassign/{learner}', [AssignmentController::class, 'unassignLearner'])->name('admin.assignments.unassign');
+
+        // Nilai Jawaban Murid (Essay)
+        Route::get('admin/assignments/{assignment}/learner/{learner}', [AssignmentController::class, 'showLearnerAnswers'])->name('admin.assignments.learner-answers');
+        Route::post('admin/assignments/{assignment}/learner/{learner}/grade', [AssignmentController::class, 'gradeLearnerAnswers'])->name('admin.assignments.learner-answers.grade');
+
+        // Raport Siswa
+        Route::get('admin/raport', [RaportController::class, 'index'])->name('admin.raport.index');
+        Route::get('admin/raport/{learner}', [RaportController::class, 'show'])->name('admin.raport.show');
     });
 });
 

@@ -357,10 +357,10 @@
         </a>
       </li>
       <li class="nav-item mb-1">
-          <a href="{{ route('admin.reports') }}"
-            class="menu-item nav-link {{ request()->routeIs('admin.reports') ? 'active' : '' }}"
-            data-tooltip="Laporan">
-              <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Laporan</span>
+          <a href="{{ route('admin.raport.index') }}"
+            class="menu-item nav-link {{ request()->routeIs('admin.raport.*') ? 'active' : '' }}"
+            data-tooltip="Raport Siswa">
+              <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Raport</span>
           </a>
       </li>
       <!-- <li class="nav-item">

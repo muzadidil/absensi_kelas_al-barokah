@@ -389,8 +389,23 @@
                                         {{ $al->status === 'selesai' ? 'Selesai' : 'Belum' }}
                                     </span>
                                 </td>
-                                <td class="px-3 py-1">{{ $al->total_score ?? '-' }}</td>
+                                <td class="px-3 py-1">
+                                    @if($al->status === 'selesai')
+                                        {{ $al->total_score ?? 0 }}
+                                        @if(isset($ungradedByLearner[$al->learner_id]))
+                                            <span class="text-warning small d-block">* (essay belum dinilai)</span>
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="px-3 py-1 text-center">
+                                    @if($al->status === 'selesai')
+                                        <a href="{{ route('admin.assignments.learner-answers', [$assignment->id, $al->learner_id]) }}"
+                                            class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="bi bi-clipboard-check"></i> Nilai
+                                        </a>
+                                    @endif
                                     <form action="{{ route('admin.assignments.unassign', [$assignment->id, $al->learner_id]) }}" method="POST" class="d-inline"
                                         onsubmit="return confirm('Hapus penugasan murid ini? Jawaban yang sudah diisi juga akan dihapus.')">
                                         @csrf
