@@ -24,6 +24,12 @@ class ProfileController extends Controller
             ]);
         }
 
+        if ($request->user()->hasRole('guru')) {
+            return view('guru.profile', [
+                'user' => $request->user(),
+            ]);
+        }
+
         // Default Breeze view
         return view('profile.edit', [
             'user' => $request->user(),

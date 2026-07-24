@@ -73,7 +73,7 @@ class AttendanceController extends Controller
             }
         }
 
-        $layout = $isGuru ? 'layouts.app' : 'layouts.admin';
+        $layout = $isGuru ? 'layouts.guru' : 'layouts.admin';
 
         return view('attendance.index', compact(
             'tanggal', 'hari', 'kelas', 'gradeLevels', 'jamPelajaranList',

@@ -22,23 +22,27 @@
         </div>
     @endif
 
-    <h5 class="mb-3">Absensi Murid</h5>
+    <h5 class="fw-bold mb-3">Absensi Murid</h5>
 
-    <form method="GET" class="row g-2 align-items-end mb-3">
-        <div class="col-auto">
-            <label class="form-label small mb-1">Tanggal</label>
-            <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ $tanggal }}" onchange="this.form.submit()">
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label small text-muted text-uppercase fw-semibold mb-1" style="font-size:.72rem;">Tanggal</label>
+                    <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" onchange="this.form.submit()">
+                </div>
+                <div class="col-auto">
+                    <label class="form-label small text-muted text-uppercase fw-semibold mb-1" style="font-size:.72rem;">Kelas</label>
+                    <select name="kelas" class="form-select" onchange="this.form.submit()">
+                        <option value="semua" @selected($kelas === 'semua' || !$kelas)>Semua Kelas</option>
+                        @foreach($gradeLevels as $gradeLevel)
+                            <option value="{{ $gradeLevel->name }}" @selected($kelas === $gradeLevel->name)>{{ $gradeLevel->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </form>
         </div>
-        <div class="col-auto">
-            <label class="form-label small mb-1">Kelas</label>
-            <select name="kelas" class="form-select form-select-sm" onchange="this.form.submit()">
-                <option value="semua" @selected($kelas === 'semua' || !$kelas)>Semua Kelas</option>
-                @foreach($gradeLevels as $gradeLevel)
-                    <option value="{{ $gradeLevel->name }}" @selected($kelas === $gradeLevel->name)>{{ $gradeLevel->name }}</option>
-                @endforeach
-            </select>
-        </div>
-    </form>
+    </div>
 
     @if(!$hari)
         <div class="alert alert-warning">Tanggal yang dipilih adalah hari Minggu — tidak ada jadwal pelajaran.</div>

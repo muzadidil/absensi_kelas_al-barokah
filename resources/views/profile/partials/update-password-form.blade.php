@@ -1,8 +1,8 @@
 <section>
     <div class="mb-4">
-        <h4 class="fw-bold">{{ __('Update Password') }}</h4>
+        <h4 class="fw-bold">{{ __('Perbarui Kata Sandi') }}</h4>
         <p class="text-muted small">
-            {{ __('Ensure your account is using a long, random password to stay secure.') }}
+            {{ __('Pastikan akun Anda menggunakan kata sandi yang panjang dan acak agar tetap aman.') }}
         </p>
     </div>
 
@@ -11,7 +11,7 @@
         @method('put')
 
         <div class="mb-3">
-            <label for="current_password" class="form-label">{{ __('Current Password') }}</label>
+            <label for="current_password" class="form-label">{{ __('Kata Sandi Saat Ini') }}</label>
             <input type="password"
                    name="current_password"
                    id="current_password"
@@ -23,7 +23,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="password" class="form-label">{{ __('New Password') }}</label>
+            <label for="password" class="form-label">{{ __('Kata Sandi Baru') }}</label>
             <input type="password"
                    name="password"
                    id="password"
@@ -35,7 +35,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="password_confirmation" class="form-label">{{ __('Confirm Password') }}</label>
+            <label for="password_confirmation" class="form-label">{{ __('Konfirmasi Kata Sandi') }}</label>
             <input type="password"
                    name="password_confirmation"
                    id="password_confirmation"
@@ -48,11 +48,11 @@
 
         <div class="d-flex align-items-center gap-3">
             <button type="submit" class="btn btn-primary">
-                {{ __('Save') }}
+                {{ __('Simpan') }}
             </button>
 
             @if (session('status') === 'password-updated')
-                <span class="text-success small">{{ __('Saved.') }}</span>
+                <span class="text-success small">{{ __('Tersimpan.') }}</span>
             @endif
         </div>
     </form>
