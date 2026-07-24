@@ -19,6 +19,7 @@ class AssignmentQuestionController extends Controller
             'question_text' => $data['question_text'],
             'options' => $data['type'] === 'pilgan' ? array_values($data['options']) : null,
             'correct_answer' => $data['type'] === 'pilgan' ? $data['correct_answer'] : null,
+            'answer_key' => $data['type'] === 'essay' ? ($data['answer_key'] ?? null) : null,
             'points' => $data['points'],
             'sort_order' => $assignment->questions()->count() + 1,
         ]);
@@ -36,6 +37,7 @@ class AssignmentQuestionController extends Controller
             'question_text' => $data['question_text'],
             'options' => $data['type'] === 'pilgan' ? array_values($data['options']) : null,
             'correct_answer' => $data['type'] === 'pilgan' ? $data['correct_answer'] : null,
+            'answer_key' => $data['type'] === 'essay' ? ($data['answer_key'] ?? null) : null,
             'points' => $data['points'],
         ]);
 
@@ -59,6 +61,7 @@ class AssignmentQuestionController extends Controller
             'options' => 'required_if:type,pilgan|array|min:2|max:5',
             'options.*' => 'string',
             'correct_answer' => 'required_if:type,pilgan|string',
+            'answer_key' => 'nullable|string',
             'points' => 'required|integer|min:1',
         ]);
     }

@@ -55,7 +55,7 @@
                                     {{ $isSelesai ? 'disabled' : '' }}
                                     @checked($existingAnswer && $existingAnswer->answer_text === $option)>
                                 <label class="form-check-label" for="q{{ $question->id }}_{{ $i }}">
-                                    {{ $option }}
+                                    {{ chr(97 + $i) }}. {{ $option }}
                                 </label>
                             </div>
                         @endforeach
@@ -82,6 +82,11 @@
                                     <span class="text-success fw-semibold">
                                         <i class="bi bi-check-circle-fill me-1"></i>Nilai: {{ $existingAnswer->score }} poin
                                     </span>
+                                    @if($existingAnswer->feedback)
+                                        <div class="small text-muted mt-1">
+                                            <span class="fw-semibold">Catatan guru:</span> {{ $existingAnswer->feedback }}
+                                        </div>
+                                    @endif
                                 @else
                                     <span class="text-muted fst-italic">
                                         <i class="bi bi-hourglass-split me-1"></i>Menunggu penilaian

@@ -11,6 +11,7 @@ class LearnerAnswer extends Model
         'assignment_question_id',
         'answer_text',
         'score',
+        'feedback',
     ];
 
     public function learner()

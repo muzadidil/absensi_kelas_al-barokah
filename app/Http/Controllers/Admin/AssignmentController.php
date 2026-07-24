@@ -206,6 +206,7 @@ class AssignmentController extends Controller
         $rules = [];
         foreach ($essayQuestions as $question) {
             $rules["scores.{$question->id}"] = "required|integer|min:0|max:{$question->points}";
+            $rules["feedback.{$question->id}"] = 'nullable|string';
         }
 
         $data = $request->validate($rules);
@@ -213,7 +214,10 @@ class AssignmentController extends Controller
         foreach ($essayQuestions as $question) {
             LearnerAnswer::where('learner_id', $learner->id)
                 ->where('assignment_question_id', $question->id)
-                ->update(['score' => $data['scores'][$question->id]]);
+                ->update([
+                    'score' => $data['scores'][$question->id],
+                    'feedback' => $data['feedback'][$question->id] ?? null,
+                ]);
         }
 
         $totalScore = LearnerAnswer::where('learner_id', $learner->id)

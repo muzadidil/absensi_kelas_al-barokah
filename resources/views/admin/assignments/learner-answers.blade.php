@@ -75,11 +75,17 @@
                             @endif
                         </div>
                     @else
+                        @if($question->answer_key)
+                            <div class="mb-3">
+                                <span class="text-muted small d-block mb-1">Kunci Jawaban Acuan:</span>
+                                <div class="border rounded-3 p-2 bg-light-subtle border-primary-subtle">{{ $question->answer_key }}</div>
+                            </div>
+                        @endif
                         <div class="mb-3">
                             <span class="text-muted small d-block mb-1">Jawaban Murid:</span>
                             <div class="border rounded-3 p-2 bg-light">{{ $answer->answer_text ?: '(tidak dijawab)' }}</div>
                         </div>
-                        <div class="row g-2 align-items-center">
+                        <div class="row g-2 align-items-center mb-2">
                             <div class="col-auto">
                                 <label class="form-label mb-0">Nilai (maks {{ $question->points }})</label>
                             </div>
@@ -88,6 +94,10 @@
                                     style="max-width: 120px;" value="{{ $answer->score ?? '' }}"
                                     min="0" max="{{ $question->points }}" required>
                             </div>
+                        </div>
+                        <div>
+                            <label class="form-label mb-1">Feedback / Komentar <span class="text-muted small">(opsional)</span></label>
+                            <textarea name="feedback[{{ $question->id }}]" class="form-control" rows="2">{{ $answer->feedback ?? '' }}</textarea>
                         </div>
                     @endif
                 </div>

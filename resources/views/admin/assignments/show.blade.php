@@ -146,13 +146,17 @@
 
                             @if($question->type === 'pilgan' && $question->options)
                                 <ul class="list-unstyled mb-0 small">
-                                    @foreach($question->options as $option)
+                                    @foreach($question->options as $i => $option)
                                         <li class="{{ $option === $question->correct_answer ? 'text-success fw-semibold' : '' }}">
                                             <i class="bi {{ $option === $question->correct_answer ? 'bi-check-circle-fill' : 'bi-circle' }} me-1"></i>
-                                            {{ $option }}
+                                            {{ chr(97 + $i) }}. {{ $option }}
                                         </li>
                                     @endforeach
                                 </ul>
+                            @elseif($question->type === 'essay' && $question->answer_key)
+                                <div class="small text-muted">
+                                    <span class="fw-semibold">Kunci jawaban acuan:</span> {{ $question->answer_key }}
+                                </div>
                             @endif
                         </div>
                         <div class="d-flex gap-1 flex-shrink-0">
@@ -208,9 +212,10 @@
                                       @foreach($existingOptions as $i => $option)
                                           <div class="input-group mb-2">
                                               <span class="input-group-text">
-                                                  <input class="form-check-input mt-0" type="radio" name="correct_option" value="{{ $i }}" @checked($option !== null && $option === $question->correct_answer)>
+                                                  {{ chr(97 + $i) }}.
+                                                  <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="{{ $i }}" @checked($option !== null && $option === $question->correct_answer)>
                                               </span>
-                                              <input type="text" name="options[]" class="form-control option-input" value="{{ $option }}" placeholder="Opsi {{ $i + 1 }}" {{ $question->type === 'pilgan' ? 'required' : '' }}>
+                                              <input type="text" name="options[]" class="form-control option-input" value="{{ $option }}" placeholder="Opsi {{ chr(97 + $i) }}" {{ $question->type === 'pilgan' ? 'required' : '' }}>
                                           </div>
                                       @endforeach
                                   </div>
@@ -218,6 +223,11 @@
                                       <i class="bi bi-plus"></i> Tambah Opsi
                                   </button>
                                   <input type="hidden" name="correct_answer" value="{{ $question->correct_answer }}">
+                              </div>
+
+                              <div class="essay-section {{ $question->type === 'essay' ? '' : 'd-none' }}">
+                                  <label class="form-label">Kunci Jawaban Acuan <span class="text-muted small">(opsional, panduan untuk guru saat menilai)</span></label>
+                                  <textarea name="answer_key" class="form-control" rows="2">{{ $question->answer_key }}</textarea>
                               </div>
 
                               <div class="mb-3 mt-3">
@@ -274,21 +284,28 @@
                       <div class="options-list">
                           <div class="input-group mb-2">
                               <span class="input-group-text">
-                                  <input class="form-check-input mt-0" type="radio" name="correct_option" value="0" checked>
+                                  a.
+                                  <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="0" checked>
                               </span>
-                              <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi 1" required>
+                              <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi a" required>
                           </div>
                           <div class="input-group mb-2">
                               <span class="input-group-text">
-                                  <input class="form-check-input mt-0" type="radio" name="correct_option" value="1">
+                                  b.
+                                  <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="1">
                               </span>
-                              <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi 2" required>
+                              <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi b" required>
                           </div>
                       </div>
                       <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addOptionField(this.closest('.options-section').querySelector('.options-list'))">
                           <i class="bi bi-plus"></i> Tambah Opsi
                       </button>
                       <input type="hidden" name="correct_answer">
+                  </div>
+
+                  <div class="essay-section d-none">
+                      <label class="form-label">Kunci Jawaban Acuan <span class="text-muted small">(opsional, panduan untuk guru saat menilai)</span></label>
+                      <textarea name="answer_key" class="form-control" rows="2"></textarea>
                   </div>
 
                   <div class="mb-3 mt-3">
@@ -448,21 +465,25 @@
         const count = list.querySelectorAll('.option-input').length;
         if (count >= 5) return;
 
+        const letter = String.fromCharCode(97 + count);
         const row = document.createElement('div');
         row.className = 'input-group mb-2';
         row.innerHTML = `
             <span class="input-group-text">
-                <input class="form-check-input mt-0" type="radio" name="correct_option" value="${count}">
+                ${letter}.
+                <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="${count}">
             </span>
-            <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi ${count + 1}">
+            <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi ${letter}">
         `;
         list.appendChild(row);
     }
 
     function toggleQuestionType(form) {
         const isPilgan = form.querySelector('input[name="type"]:checked').value === 'pilgan';
-        const section = form.querySelector('.options-section');
-        section.classList.toggle('d-none', !isPilgan);
+        const optionsSection = form.querySelector('.options-section');
+        const essaySection = form.querySelector('.essay-section');
+        optionsSection.classList.toggle('d-none', !isPilgan);
+        essaySection.classList.toggle('d-none', isPilgan);
         form.querySelectorAll('.option-input').forEach(el => el.required = isPilgan);
     }
 

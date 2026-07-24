@@ -12,6 +12,7 @@ class AssignmentQuestion extends Model
         'question_text',
         'options',
         'correct_answer',
+        'answer_key',
         'points',
         'sort_order',
     ];
