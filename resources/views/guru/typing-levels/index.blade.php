@@ -2,6 +2,20 @@
 
 @section('title', 'Master Latihan Mengetik')
 
+@push('styles')
+<style>
+    .rule-chip {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        font-size: 0.72rem; font-weight: 600;
+        padding: 0.2rem 0.5rem; border-radius: 999px;
+    }
+    .rule-on  { background: rgba(25,135,84,.12); color: #157347; }
+    .rule-off { background: rgba(220,53,69,.12); color: #b02a37; }
+    .rule-info{ background: rgba(79,70,229,.10); color: #4f46e5; }
+    .criteria-box { background: #f8f9fc; border: 1px solid var(--lems-border, #e7e8ee); border-radius: 0.6rem; padding: 0.85rem; }
+</style>
+@endpush
+
 @section('content')
 
 @if(session('success'))
@@ -24,7 +38,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h5 class="fw-bold mb-1">Master Latihan Mengetik 10 Jari</h5>
-        <p class="text-muted mb-0 small">Atur tahapan &amp; tombol yang dilatih di setiap tahap. Murid berlatih lewat menu "Latihan Mengetik".</p>
+        <p class="text-muted mb-0 small">Atur tahapan, tombol, mode ketik (backspace/spasi), dan syarat lulus. Murid harus lulus satu tahap untuk membuka tahap berikutnya.</p>
     </div>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLevelModal">
         <i class="bi bi-plus-lg me-1"></i> Tambah Tahap
@@ -64,6 +78,31 @@
                             <span class="badge bg-secondary-subtle text-secondary-emphasis">Belum ada bank kata (teks acak)</span>
                         @endif
                     </div>
+
+                    <!-- Mode ketik -->
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        <span class="rule-chip {{ $level->allow_backspace ? 'rule-on' : 'rule-off' }}">
+                            <i class="bi bi-backspace"></i> Backspace {{ $level->allow_backspace ? 'boleh' : 'tidak' }}
+                        </span>
+                        <span class="rule-chip {{ $level->allow_space ? 'rule-on' : 'rule-off' }}">
+                            <i class="bi bi-space"></i> Spasi {{ $level->allow_space ? 'boleh' : 'tidak' }}
+                        </span>
+                        @if($level->hasTimeLimit())
+                            <span class="rule-chip rule-info"><i class="bi bi-stopwatch"></i> {{ $level->time_limit_seconds }} dtk</span>
+                        @endif
+                    </div>
+
+                    <!-- Syarat lulus -->
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        @if($level->hasPassCriteria())
+                            <span class="rule-chip rule-info"><i class="bi bi-speedometer2"></i> ≥ {{ $level->min_wpm }} WPM</span>
+                            <span class="rule-chip rule-info"><i class="bi bi-check2-circle"></i> Benar ≥ {{ $level->min_accuracy }}%</span>
+                            <span class="rule-chip rule-info"><i class="bi bi-x-circle"></i> Salah ≤ {{ $level->max_error_percent }}%</span>
+                        @else
+                            <span class="rule-chip" style="background:#eef0f4;color:#6b7280;">Tanpa syarat lulus (bebas lanjut)</span>
+                        @endif
+                    </div>
+
                     <div class="text-muted small">
                         <i class="bi bi-clipboard-data me-1"></i> {{ $level->attempts_count }} kali percobaan oleh murid
                     </div>
@@ -73,36 +112,17 @@
 
         <!-- Edit Modal -->
         <div class="modal fade" id="editLevelModal{{ $level->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <form action="{{ route('guru.typing-levels.update', $level->id) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="modal-header">
-                            <h5 class="modal-title">Edit Tahap</h5>
+                            <h5 class="modal-title">Edit Tahap {{ $level->level_number }}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Nomor Tahap</label>
-                                <input type="number" name="level_number" class="form-control" value="{{ $level->level_number }}" min="1" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nama Tahap</label>
-                                <input type="text" name="name" class="form-control" value="{{ $level->name }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Tombol yang Dilatih <span class="text-muted small">(ketik huruf/simbol tanpa spasi, mis. asdfghjkl;)</span></label>
-                                <input type="text" name="allowed_keys" class="form-control" value="{{ $level->allowed_keys }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Bank Kata <span class="text-muted small">(opsional — kata sungguhan untuk dilatih, pisahkan dengan koma/spasi/baris baru. Kalau kosong, teks latihan dibuat acak dari tombol di atas)</span></label>
-                                <textarea name="word_bank" class="form-control" rows="6" placeholder="contoh: ada, akad, akal, gagah, salah, ...">{{ $level->word_bank }}</textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Deskripsi <span class="text-muted small">(opsional)</span></label>
-                                <textarea name="description" class="form-control" rows="2">{{ $level->description }}</textarea>
-                            </div>
+                            @include('guru.typing-levels._form-fields', ['level' => $level])
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
@@ -124,7 +144,7 @@
 
 <!-- Add Modal -->
 <div class="modal fade" id="addLevelModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <form action="{{ route('guru.typing-levels.store') }}" method="POST">
                 @csrf
@@ -133,26 +153,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nomor Tahap</label>
-                        <input type="number" name="level_number" class="form-control" min="1" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nama Tahap</label>
-                        <input type="text" name="name" class="form-control" placeholder="Contoh: Tahap 4: Angka" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tombol yang Dilatih <span class="text-muted small">(ketik huruf/simbol tanpa spasi, mis. asdfghjkl;)</span></label>
-                        <input type="text" name="allowed_keys" class="form-control" placeholder="asdfghjkl;" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Bank Kata <span class="text-muted small">(opsional — kata sungguhan untuk dilatih, pisahkan dengan koma/spasi/baris baru. Kalau kosong, teks latihan dibuat acak dari tombol di atas)</span></label>
-                        <textarea name="word_bank" class="form-control" rows="6" placeholder="contoh: ada, akad, akal, gagah, salah, ..."></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Deskripsi <span class="text-muted small">(opsional)</span></label>
-                        <textarea name="description" class="form-control" rows="2"></textarea>
-                    </div>
+                    @include('guru.typing-levels._form-fields', ['level' => null])
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>

@@ -11,7 +11,15 @@ class TypingAttempt extends Model
         'typing_level_id',
         'wpm',
         'accuracy',
+        'correct_words',
+        'wrong_words',
+        'total_words',
+        'passed',
         'duration_seconds',
+    ];
+
+    protected $casts = [
+        'passed' => 'boolean',
     ];
 
     public function learner()
