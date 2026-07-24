@@ -212,18 +212,21 @@
                               <div class="options-section {{ $question->type === 'pilgan' ? '' : 'd-none' }}">
                                   <label class="form-label d-block">Opsi Jawaban <span class="text-muted small">(pilih salah satu sebagai jawaban benar)</span></label>
                                   <div class="options-list">
-                                      @php $existingOptions = $question->options ?: [null, null]; @endphp
+                                      @php
+                                          $existingOptions = $question->options ?: [];
+                                          $existingOptions = array_pad($existingOptions, 5, null);
+                                      @endphp
                                       @foreach($existingOptions as $i => $option)
                                           <div class="input-group mb-2">
                                               <span class="input-group-text">
                                                   {{ chr(97 + $i) }}.
                                                   <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="{{ $i }}" @checked($option !== null && $option === $question->correct_answer)>
                                               </span>
-                                              <input type="text" name="options[]" class="form-control option-input" value="{{ $option }}" placeholder="Opsi {{ chr(97 + $i) }}" {{ $question->type === 'pilgan' ? 'required' : '' }}>
+                                              <input type="text" name="options[]" class="form-control option-input" value="{{ $option }}" placeholder="Opsi {{ chr(97 + $i) }}" {{ ($question->type === 'pilgan' && $i < 2) ? 'required' : '' }}>
                                           </div>
                                       @endforeach
                                   </div>
-                                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addOptionField(this.closest('.options-section').querySelector('.options-list'))">
+                                  <button type="button" class="btn btn-sm btn-outline-secondary d-none" onclick="addOptionField(this.closest('.options-section').querySelector('.options-list'))">
                                       <i class="bi bi-plus"></i> Tambah Opsi
                                   </button>
                                   <input type="hidden" name="correct_answer" value="{{ $question->correct_answer }}">
@@ -288,26 +291,18 @@
                   </div>
 
                   <div class="options-section">
-                      <label class="form-label d-block">Opsi Jawaban <span class="text-muted small">(pilih salah satu sebagai jawaban benar)</span></label>
+                      <label class="form-label d-block">Opsi Jawaban <span class="text-muted small">(pilih salah satu sebagai jawaban benar; kosongkan opsi yang tidak dipakai)</span></label>
                       <div class="options-list">
-                          <div class="input-group mb-2">
-                              <span class="input-group-text">
-                                  a.
-                                  <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="0" checked>
-                              </span>
-                              <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi a" required>
-                          </div>
-                          <div class="input-group mb-2">
-                              <span class="input-group-text">
-                                  b.
-                                  <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="1">
-                              </span>
-                              <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi b" required>
-                          </div>
+                          @foreach(['a', 'b', 'c', 'd', 'e'] as $i => $letter)
+                              <div class="input-group mb-2">
+                                  <span class="input-group-text">
+                                      {{ $letter }}.
+                                      <input class="form-check-input mt-0 ms-2" type="radio" name="correct_option" value="{{ $i }}" {{ $i === 0 ? 'checked' : '' }}>
+                                  </span>
+                                  <input type="text" name="options[]" class="form-control option-input" placeholder="Opsi {{ $letter }}" {{ $i < 2 ? 'required' : '' }}>
+                              </div>
+                          @endforeach
                       </div>
-                      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addOptionField(this.closest('.options-section').querySelector('.options-list'))">
-                          <i class="bi bi-plus"></i> Tambah Opsi
-                      </button>
                       <input type="hidden" name="correct_answer">
                   </div>
 
@@ -498,6 +493,10 @@
             if (checkedRadio && optionInputs[parseInt(checkedRadio.value, 10)]) {
                 hidden.value = optionInputs[parseInt(checkedRadio.value, 10)].value;
             }
+            // Opsi yang dikosongkan (mis. cuma isi a-c dari 5 slot) tidak ikut terkirim.
+            optionInputs.forEach(el => {
+                if (!el.value.trim()) el.disabled = true;
+            });
         } else {
             // Soal essay: nonaktifkan field opsi supaya tidak ikut terkirim
             // (kalau tetap terkirim sebagai string kosong, validasi options.* akan gagal).

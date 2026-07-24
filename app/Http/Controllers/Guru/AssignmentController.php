@@ -46,14 +46,17 @@ class AssignmentController extends Controller
             'deadline' => 'nullable|date|after:now',
         ]);
 
-        Assignment::create([
+        $assignment = Assignment::create([
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'grade_level' => $data['target_type'] === 'kelas' ? $data['grade_level'] : null,
             'deadline' => $data['deadline'] ?? null,
         ]);
 
-        return redirect()->route('guru.assignments.index')->with('success', 'Tugas berhasil dibuat!');
+        // Langsung ke halaman detail supaya guru bisa lanjut tambah soal
+        // (Pilihan Ganda / Essay / Praktek) tanpa harus cari-cari dulu.
+        return redirect()->route('guru.assignments.show', $assignment->id)
+            ->with('success', 'Tugas berhasil dibuat! Sekarang tambahkan soalnya di bawah.');
     }
 
     /**
