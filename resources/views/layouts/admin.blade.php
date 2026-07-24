@@ -351,13 +351,6 @@
               <i class="bi bi-calendar-week-fill me-2"></i><span> Jadwal Pelajaran</span>
           </a>
       </li>
-      <li class="nav-item mb-1">
-          <a href="{{ route('admin.assignments.index') }}"
-              class="menu-item nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}"
-              data-tooltip="Pantau Tugas (dibuat oleh Guru)">
-              <i class="bi bi-journal-text me-2"></i><span> Pantau Tugas</span>
-          </a>
-      </li>
       <!-- <li class="nav-item mb-1">
           <a href="{{ route('admin.register.form') }}"
               class="menu-item nav-link {{ request()->routeIs('admin.register.form') ? 'active' : '' }}"

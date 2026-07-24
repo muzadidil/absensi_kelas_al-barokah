@@ -8,7 +8,7 @@
     <!-- Sticky header -->
     <div class="sticky-top bg-white shadow-sm py-2 mb-3">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
-            <h5 class="mb-0">Raport Siswa</h5>
+            <h5 class="mb-0">Raport Siswa — Kuis Pilihan Ganda</h5>
 
             <!-- Filter Kelas -->
             <select id="filterKelas" class="form-select form-select-sm" style="width: auto;"
@@ -21,6 +21,8 @@
         </div>
     </div>
 
+    <p class="text-muted small mb-2"><i class="bi bi-info-circle me-1"></i> Fokus <strong>kegigihan</strong>: makin banyak percobaan = makin gigih. "Tahap" = tahap yang sudah ditembus.</p>
+
     <div class="overflow-auto rounded-lg border border-gray-300 shadow-sm">
         <table class="table table-sm table-compact table-bordered table-hover bg-white">
             <thead class="table-light">
@@ -28,12 +30,10 @@
                     <th style="width: 1%;">No.</th>
                     <th class="px-3 py-2 text-left">Nama Siswa</th>
                     <th class="px-3 py-2 text-left">Kelas</th>
-                    <th class="px-3 py-2 text-left">Tugas Selesai</th>
-                    <th class="px-3 py-2 text-left">Rata-rata Nilai</th>
+                    <th class="px-3 py-2 text-left">Tahap Tembus</th>
+                    <th class="px-3 py-2 text-left">Progres</th>
+                    <th class="px-3 py-2 text-left">Total Percobaan</th>
                     <th class="px-3 py-2 text-left">Predikat</th>
-                    <th class="px-3 py-2 text-left">Kuis (Tahap)</th>
-                    <th class="px-3 py-2 text-left">Percobaan</th>
-                    <th class="px-3 py-2 text-left">Predikat Kuis</th>
                     <th class="px-3 py-2 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -43,19 +43,8 @@
                         <td class="px-3 py-1">{{ $loop->iteration }}</td>
                         <td class="px-3 py-1">{{ $row['learner']->nama_lengkap }}</td>
                         <td class="px-3 py-1">{{ $row['learner']->grade_level }}</td>
-                        <td class="px-3 py-1">{{ $row['jumlah_selesai'] }} / {{ $row['jumlah_total'] }}</td>
-                        <td class="px-3 py-1">{{ $row['rata_rata'] }}%</td>
-                        <td class="px-3 py-1">
-                            <span class="badge {{ match(true) {
-                                $row['predikat'] === 'Sangat Baik' => 'bg-success',
-                                $row['predikat'] === 'Baik' => 'bg-primary',
-                                $row['predikat'] === 'Cukup' => 'bg-warning text-dark',
-                                default => 'bg-danger',
-                            } }}">
-                                {{ $row['predikat'] }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-1">{{ $row['kuis']['tahap_tembus'] }} / {{ $row['kuis']['total_tahap'] }} ({{ $row['kuis']['progres_persen'] }}%)</td>
+                        <td class="px-3 py-1">{{ $row['kuis']['tahap_tembus'] }} / {{ $row['kuis']['total_tahap'] }}</td>
+                        <td class="px-3 py-1">{{ $row['kuis']['progres_persen'] }}%</td>
                         <td class="px-3 py-1 fw-semibold text-primary">{{ $row['kuis']['total_percobaan'] }}×</td>
                         <td class="px-3 py-1">
                             <span class="badge {{ match($row['kuis']['predikat']) {
@@ -74,7 +63,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted py-3">Belum ada data murid.</td>
+                        <td colspan="8" class="text-center text-muted py-3">Belum ada data murid.</td>
                     </tr>
                 @endforelse
             </tbody>

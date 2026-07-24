@@ -281,13 +281,6 @@
         </a>
       </li>
       <li class="nav-item mb-1">
-        <a href="{{ route('learner.assignments.index') }}"
-          class="menu-item nav-link {{ request()->routeIs('learner.assignments.*') ? 'active' : '' }}"
-          data-tooltip="Tugas">
-          <i class="bi bi-journal-text me-2"></i><span> Tugas</span>
-        </a>
-      </li>
-      <li class="nav-item mb-1">
         <a href="{{ route('learner.quiz.index') }}"
           class="menu-item nav-link {{ request()->routeIs('learner.quiz.*') ? 'active' : '' }}"
           data-tooltip="Kuis Pilihan Ganda">

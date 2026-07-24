@@ -6,14 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Learner;
 use App\Models\GradeLevel;
 use App\Models\Section;
-use App\Support\CalculatesRaport;
+use App\Support\CalculatesQuizProgress;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 
 class LearnerController extends Controller
 {
-    use CalculatesRaport;
+    use CalculatesQuizProgress;
 
     public function index(Request $request)
     {
@@ -45,13 +45,9 @@ class LearnerController extends Controller
     {
         $learner = Learner::find(session('learner_id'));
 
-        $assignmentLearners = $learner->assignmentLearners()->with('assignment.questions')->get();
-        $belumCount = $assignmentLearners->where('status', 'belum')->count();
-        $selesai = $assignmentLearners->where('status', 'selesai');
-        $selesaiCount = $selesai->count();
-        $rataRata = $this->hitungRataRataPersen($selesai);
+        $kuis = $this->hitungProgresKuis($learner);
 
-        return view('learner.dashboard', compact('learner', 'belumCount', 'selesaiCount', 'rataRata'));
+        return view('learner.dashboard', compact('learner', 'kuis'));
     }
 
     public function store(Request $request)

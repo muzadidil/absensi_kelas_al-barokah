@@ -317,13 +317,6 @@
           </a>
       </li>
       <li class="nav-item mb-1">
-          <a href="{{ route('guru.assignments.index') }}"
-              class="menu-item nav-link {{ request()->routeIs('guru.assignments.*') ? 'active' : '' }}"
-              data-tooltip="Tugas">
-              <i class="bi bi-journal-text me-2"></i><span> Tugas</span>
-          </a>
-      </li>
-      <li class="nav-item mb-1">
           <a href="{{ route('guru.quiz-levels.index') }}"
               class="menu-item nav-link {{ request()->routeIs('guru.quiz-levels.*') || request()->routeIs('guru.quiz-questions.*') ? 'active' : '' }}"
               data-tooltip="Master Kuis Pilihan Ganda">

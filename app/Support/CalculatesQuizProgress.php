@@ -9,8 +9,9 @@ use App\Models\QuizLevel;
 /**
  * Ringkasan progres Kuis Pilihan Ganda untuk raport — fokus KEGIGIHAN:
  * berapa tahap tembus, berapa total percobaan (makin banyak = makin gigih),
- * plus predikat dari progres. Dipakai bersama Admin\RaportController &
- * Learner\AssignmentController agar angkanya konsisten.
+ * plus predikat dari progres. Dipakai bersama Admin\RaportController,
+ * Learner\RaportController, & LearnerController (dashboard) agar angkanya
+ * konsisten.
  */
 trait CalculatesQuizProgress
 {

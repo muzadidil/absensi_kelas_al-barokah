@@ -108,8 +108,8 @@
                 <a href="{{ route('attendance.index') }}" class="btn btn-outline-primary mb-2 text-start">
                     <i class="bi bi-clipboard2-check-fill me-2"></i> Isi Absensi Murid
                 </a>
-                <a href="{{ route('guru.assignments.index') }}" class="btn btn-outline-primary mb-2 text-start">
-                    <i class="bi bi-journal-text me-2"></i> Kelola Tugas
+                <a href="{{ route('guru.quiz-levels.index') }}" class="btn btn-outline-primary mb-2 text-start">
+                    <i class="bi bi-ui-checks me-2"></i> Master Kuis Pilihan Ganda
                 </a>
                 <a href="{{ route('guru.typing-levels.index') }}" class="btn btn-outline-primary mb-2 text-start">
                     <i class="bi bi-keyboard me-2"></i> Master Latihan Mengetik

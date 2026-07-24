@@ -53,7 +53,7 @@
 
     <div class="mb-3">
         <h4 class="fw-bold mb-1">👋 Selamat Datang, {{ $learner->nama_lengkap }}</h4>
-        <p class="text-muted mb-0">Ini adalah dasbor kamu. Pantau tugas dan nilai di sini.</p>
+        <p class="text-muted mb-0">Ini dasbor kamu. Terus berlatih, makin sering coba makin jago!</p>
     </div>
 
     <div class="row g-3 mt-1">
@@ -61,24 +61,11 @@
             <div class="card stat-card">
                 <div class="card-body">
                     <div>
-                        <p class="stat-label mb-2">Belum Dikerjakan</p>
-                        <p class="stat-value mb-0">{{ $belumCount }}</p>
-                    </div>
-                    <div class="stat-icon stat-icon-belum">
-                        <i class="bi bi-hourglass-split"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div>
-                        <p class="stat-label mb-2">Tugas Selesai</p>
-                        <p class="stat-value mb-0">{{ $selesaiCount }}</p>
+                        <p class="stat-label mb-2">Tahap Tembus</p>
+                        <p class="stat-value mb-0">{{ $kuis['tahap_tembus'] }} / {{ $kuis['total_tahap'] }}</p>
                     </div>
                     <div class="stat-icon stat-icon-selesai">
-                        <i class="bi bi-check-circle"></i>
+                        <i class="bi bi-patch-check"></i>
                     </div>
                 </div>
             </div>
@@ -87,11 +74,24 @@
             <div class="card stat-card">
                 <div class="card-body">
                     <div>
-                        <p class="stat-label mb-2">Rata-rata Nilai</p>
-                        <p class="stat-value mb-0">{{ $rataRata }}%</p>
+                        <p class="stat-label mb-2">Progres Kuis</p>
+                        <p class="stat-value mb-0">{{ $kuis['progres_persen'] }}%</p>
                     </div>
                     <div class="stat-icon stat-icon-rata">
                         <i class="bi bi-graph-up"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div>
+                        <p class="stat-label mb-2">Total Percobaan</p>
+                        <p class="stat-value mb-0">{{ $kuis['total_percobaan'] }}×</p>
+                    </div>
+                    <div class="stat-icon stat-icon-belum">
+                        <i class="bi bi-arrow-repeat"></i>
                     </div>
                 </div>
             </div>
@@ -103,10 +103,10 @@
             <div class="card stat-card">
                 <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-1"><i class="bi bi-journal-text me-1"></i> Tugas Saya</h5>
-                        <p class="text-muted mb-0">Lihat dan kerjakan tugas yang ditugaskan untukmu.</p>
+                        <h5 class="mb-1"><i class="bi bi-ui-checks me-1"></i> Kuis Pilihan Ganda</h5>
+                        <p class="text-muted mb-0">Tembus tiap tahap tanpa salah untuk buka tahap berikutnya.</p>
                     </div>
-                    <a href="{{ route('learner.assignments.index') }}" class="btn btn-primary">Buka Tugas</a>
+                    <a href="{{ route('learner.quiz.index') }}" class="btn btn-primary">Mulai Kuis</a>
                 </div>
             </div>
         </div>

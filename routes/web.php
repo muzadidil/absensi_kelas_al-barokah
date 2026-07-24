@@ -8,19 +8,16 @@ use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\ClassSettingController;
-use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\RaportController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\Guru\AssignmentController as GuruAssignmentController;
-use App\Http\Controllers\Guru\AssignmentQuestionController as GuruAssignmentQuestionController;
 use App\Http\Controllers\Guru\TypingLevelController;
 use App\Http\Controllers\Guru\QuizLevelController;
 use App\Http\Controllers\Guru\QuizQuestionController;
-use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
 use App\Http\Controllers\Learner\TypingController as LearnerTypingController;
 use App\Http\Controllers\Learner\QuizController as LearnerQuizController;
+use App\Http\Controllers\Learner\RaportController as LearnerRaportController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
@@ -74,20 +71,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ------------------------------------------------------------------
-    // Guru-only routes: kelola Tugas (soal, penugasan ke murid) sepenuhnya
-    // jadi tanggung jawab Guru. Admin hanya memantau & menilai (lihat grup
-    // role:admin di bawah).
+    // Guru-only routes
     // ------------------------------------------------------------------
     Route::middleware('role:guru')->group(function () {
-        Route::resource('guru/assignments', GuruAssignmentController::class)->names('guru.assignments');
-
-        Route::post('guru/assignments/{assignment}/questions', [GuruAssignmentQuestionController::class, 'store'])->name('guru.assignments.questions.store');
-        Route::put('guru/assignments/{assignment}/questions/{question}', [GuruAssignmentQuestionController::class, 'update'])->name('guru.assignments.questions.update');
-        Route::delete('guru/assignments/{assignment}/questions/{question}', [GuruAssignmentQuestionController::class, 'destroy'])->name('guru.assignments.questions.destroy');
-
-        Route::post('guru/assignments/{assignment}/assign', [GuruAssignmentController::class, 'assignLearners'])->name('guru.assignments.assign');
-        Route::delete('guru/assignments/{assignment}/unassign/{learner}', [GuruAssignmentController::class, 'unassignLearner'])->name('guru.assignments.unassign');
-
         // Master Latihan Mengetik 10 Jari (tahap & tombol yang dilatih)
         Route::get('guru/typing-levels', [TypingLevelController::class, 'index'])->name('guru.typing-levels.index');
         Route::post('guru/typing-levels', [TypingLevelController::class, 'store'])->name('guru.typing-levels.store');
@@ -184,14 +170,6 @@ Route::middleware(['auth'])->group(function () {
         // Learners (data murid) — was public with no auth at all, now admin-only
         Route::resource('learners', LearnerController::class)->names('admin.learners');
 
-        // Tugas (read-only, dibuat & dikelola oleh Guru)
-        Route::get('admin/assignments', [AssignmentController::class, 'index'])->name('admin.assignments.index');
-        Route::get('admin/assignments/{assignment}', [AssignmentController::class, 'show'])->name('admin.assignments.show');
-
-        // Nilai Jawaban Murid (Essay) — evaluasi tetap tugas Admin
-        Route::get('admin/assignments/{assignment}/learner/{learner}', [AssignmentController::class, 'showLearnerAnswers'])->name('admin.assignments.learner-answers');
-        Route::post('admin/assignments/{assignment}/learner/{learner}/grade', [AssignmentController::class, 'gradeLearnerAnswers'])->name('admin.assignments.learner-answers.grade');
-
         // Raport Siswa
         Route::get('admin/raport', [RaportController::class, 'index'])->name('admin.raport.index');
         Route::get('admin/raport/{learner}', [RaportController::class, 'show'])->name('admin.raport.show');
@@ -212,13 +190,8 @@ Route::middleware('auth.learner')->group(function () {
     Route::get('/learner/dashboard', [LearnerController::class, 'learnerDashboard'])->name('learner.dashboard');
     Route::post('/learner-logout', [LearnerLoginController::class, 'logout'])->name('learner.logout');
 
-    // Tugas (dikerjakan oleh murid)
-    Route::get('/learner/tugas', [LearnerAssignmentController::class, 'index'])->name('learner.assignments.index');
-    Route::get('/learner/tugas/{assignment}', [LearnerAssignmentController::class, 'show'])->name('learner.assignments.show');
-    Route::post('/learner/tugas/{assignment}/submit', [LearnerAssignmentController::class, 'submit'])->name('learner.assignments.submit');
-
-    // Raport (read-only)
-    Route::get('/learner/raport', [LearnerAssignmentController::class, 'raport'])->name('learner.raport');
+    // Raport (fokus Kuis Pilihan Ganda)
+    Route::get('/learner/raport', [LearnerRaportController::class, 'index'])->name('learner.raport');
 
     // Latihan Mengetik 10 Jari
     Route::get('/learner/mengetik', [LearnerTypingController::class, 'index'])->name('learner.typing.index');
