@@ -49,7 +49,7 @@
         top: 0;
         left: 0;
         overflow-y: auto;
-        overflow: visible; /* allow tooltip to show outside */
+        overflow-x: visible; /* allow tooltip to show outside, tanpa mematikan scroll vertikal */
         z-index: 1000;     /* make sure it's on top */
         background: linear-gradient(180deg, var(--lems-sidebar-from), var(--lems-sidebar-to));
         color: white;
