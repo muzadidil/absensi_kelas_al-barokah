@@ -111,6 +111,9 @@
                 <a href="{{ route('guru.assignments.index') }}" class="btn btn-outline-primary mb-2 text-start">
                     <i class="bi bi-journal-text me-2"></i> Kelola Tugas
                 </a>
+                <a href="{{ route('guru.typing-levels.index') }}" class="btn btn-outline-primary mb-2 text-start">
+                    <i class="bi bi-keyboard me-2"></i> Master Latihan Mengetik
+                </a>
                 <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary text-start">
                     <i class="bi bi-person-gear me-2"></i> Edit Profil Saya
                 </a>

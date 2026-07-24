@@ -110,5 +110,16 @@
                 </div>
             </div>
         </div>
+        <div class="col-12">
+            <div class="card stat-card">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1"><i class="bi bi-keyboard me-1"></i> Latihan Mengetik 10 Jari</h5>
+                        <p class="text-muted mb-0">Latih kecepatan &amp; akurasi mengetikmu bertahap.</p>
+                    </div>
+                    <a href="{{ route('learner.typing.index') }}" class="btn btn-primary">Mulai Latihan</a>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection

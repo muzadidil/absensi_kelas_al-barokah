@@ -14,7 +14,9 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Guru\AssignmentController as GuruAssignmentController;
 use App\Http\Controllers\Guru\AssignmentQuestionController as GuruAssignmentQuestionController;
+use App\Http\Controllers\Guru\TypingLevelController;
 use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
+use App\Http\Controllers\Learner\TypingController as LearnerTypingController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
@@ -81,6 +83,12 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('guru/assignments/{assignment}/assign', [GuruAssignmentController::class, 'assignLearners'])->name('guru.assignments.assign');
         Route::delete('guru/assignments/{assignment}/unassign/{learner}', [GuruAssignmentController::class, 'unassignLearner'])->name('guru.assignments.unassign');
+
+        // Master Latihan Mengetik 10 Jari (tahap & tombol yang dilatih)
+        Route::get('guru/typing-levels', [TypingLevelController::class, 'index'])->name('guru.typing-levels.index');
+        Route::post('guru/typing-levels', [TypingLevelController::class, 'store'])->name('guru.typing-levels.store');
+        Route::put('guru/typing-levels/{typingLevel}', [TypingLevelController::class, 'update'])->name('guru.typing-levels.update');
+        Route::delete('guru/typing-levels/{typingLevel}', [TypingLevelController::class, 'destroy'])->name('guru.typing-levels.destroy');
     });
 
     // Profile
@@ -190,6 +198,11 @@ Route::middleware('auth.learner')->group(function () {
 
     // Raport (read-only)
     Route::get('/learner/raport', [LearnerAssignmentController::class, 'raport'])->name('learner.raport');
+
+    // Latihan Mengetik 10 Jari
+    Route::get('/learner/mengetik', [LearnerTypingController::class, 'index'])->name('learner.typing.index');
+    Route::get('/learner/mengetik/{typingLevel}', [LearnerTypingController::class, 'show'])->name('learner.typing.show');
+    Route::post('/learner/mengetik/{typingLevel}/submit', [LearnerTypingController::class, 'submit'])->name('learner.typing.submit');
 });
 
 

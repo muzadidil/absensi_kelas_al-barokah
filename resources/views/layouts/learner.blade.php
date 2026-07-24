@@ -281,6 +281,13 @@
           <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Raport</span>
         </a>
       </li>
+      <li class="nav-item mb-1">
+        <a href="{{ route('learner.typing.index') }}"
+          class="menu-item nav-link {{ request()->routeIs('learner.typing.*') ? 'active' : '' }}"
+          data-tooltip="Latihan Mengetik">
+          <i class="bi bi-keyboard me-2"></i><span> Latihan Mengetik</span>
+        </a>
+      </li>
     </ul>
 
     <!-- Tombol Keluar -->

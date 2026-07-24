@@ -153,6 +153,9 @@
             <a href="{{ route('guru.assignments.index') }}" class="{{ request()->routeIs('guru.assignments.*') ? 'active' : '' }}">
                 <i class="bi bi-journal-text"></i> Tugas
             </a>
+            <a href="{{ route('guru.typing-levels.index') }}" class="{{ request()->routeIs('guru.typing-levels.*') ? 'active' : '' }}">
+                <i class="bi bi-keyboard"></i> Master Latihan Mengetik
+            </a>
 
             <div class="nav-section-label">Akun</div>
             <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
