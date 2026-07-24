@@ -60,7 +60,7 @@ class TypingLevelController extends Controller
     {
         $data = $request->validate([
             'level_number' => [
-                'required', 'integer', 'min:1', 'max:50',
+                'required', 'integer', 'min:1', 'max:255',
                 Rule::unique('typing_levels', 'level_number')->ignore($ignoreId),
             ],
             'name' => 'required|string|max:255',
