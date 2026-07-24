@@ -27,7 +27,9 @@ Route::get('/', function () {
 
 // Murid login lewat Kelas + Nama + PIN (bukan email/password, terpisah dari Auth::user())
 Route::get('/api/learners-by-grade/{gradeLevel}', [LearnerLoginController::class, 'getByGrade']);
-Route::post('/learner-login', [LearnerLoginController::class, 'login'])->name('learner.login');
+Route::post('/learner-login', [LearnerLoginController::class, 'login'])
+    ->middleware('throttle:20,1')
+    ->name('learner.login');
 
 
 /*

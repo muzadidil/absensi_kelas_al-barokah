@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GradeLevel;
 use App\Models\Learner;
+use App\Support\CalculatesRaport;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class RaportController extends Controller
 {
+    use CalculatesRaport;
+
     public function index(Request $request)
     {
         $kelas = $request->query('kelas');
@@ -59,28 +61,4 @@ class RaportController extends Controller
         ));
     }
 
-    private function hitungRataRataPersen(Collection $assignmentLearnersSelesai): float
-    {
-        if ($assignmentLearnersSelesai->isEmpty()) {
-            return 0;
-        }
-
-        $persentasePerTugas = $assignmentLearnersSelesai->map(function ($al) {
-            $maxScore = $al->assignment->questions->sum('points');
-
-            return $maxScore > 0 ? ($al->total_score / $maxScore) * 100 : 0;
-        });
-
-        return round($persentasePerTugas->avg(), 1);
-    }
-
-    private function hitungPredikat(float $rataRata): string
-    {
-        return match (true) {
-            $rataRata >= 90 => 'Sangat Baik',
-            $rataRata >= 75 => 'Baik',
-            $rataRata >= 60 => 'Cukup',
-            default => 'Perlu Perbaikan',
-        };
-    }
 }

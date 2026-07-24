@@ -6,11 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Learner;
 use App\Models\GradeLevel;
 use App\Models\Section;
+use App\Support\CalculatesRaport;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 
 class LearnerController extends Controller
 {
+    use CalculatesRaport;
+
     public function index(Request $request)
     {
          if (auth()->user()->hasRole('learner')) {
@@ -50,25 +54,6 @@ class LearnerController extends Controller
         return view('learner.dashboard', compact('learner', 'belumCount', 'selesaiCount', 'rataRata'));
     }
 
-    /**
-     * Rata-rata nilai dalam bentuk persentase (score/max tiap tugas selesai,
-     * dirata-rata) — dipakai juga oleh raport supaya angkanya konsisten.
-     */
-    private function hitungRataRataPersen($assignmentLearnersSelesai): float
-    {
-        if ($assignmentLearnersSelesai->isEmpty()) {
-            return 0;
-        }
-
-        $persentasePerTugas = $assignmentLearnersSelesai->map(function ($al) {
-            $maxScore = $al->assignment->questions->sum('points');
-
-            return $maxScore > 0 ? ($al->total_score / $maxScore) * 100 : 0;
-        });
-
-        return round($persentasePerTugas->avg(), 1);
-    }
-
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -80,6 +65,7 @@ class LearnerController extends Controller
         ]);
 
         $data['email'] = $data['email'] ?: null;
+        $data['pin'] = $data['pin'] ? Hash::make($data['pin']) : null;
 
         Learner::create($data);
 
@@ -101,6 +87,8 @@ class LearnerController extends Controller
         // PIN opsional saat edit: kosongkan input berarti PIN lama tidak diubah
         if (empty($data['pin'])) {
             unset($data['pin']);
+        } else {
+            $data['pin'] = Hash::make($data['pin']);
         }
 
         $learner->update($data);

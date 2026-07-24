@@ -7,10 +7,13 @@ use App\Models\Assignment;
 use App\Models\AssignmentLearner;
 use App\Models\Learner;
 use App\Models\LearnerAnswer;
+use App\Support\CalculatesRaport;
 use Illuminate\Http\Request;
 
 class AssignmentController extends Controller
 {
+    use CalculatesRaport;
+
     /**
      * Daftar tugas milik murid yang sedang login (lewat session learner_id).
      */
@@ -157,28 +160,4 @@ class AssignmentController extends Controller
         ));
     }
 
-    private function hitungRataRataPersen($assignmentLearnersSelesai): float
-    {
-        if ($assignmentLearnersSelesai->isEmpty()) {
-            return 0;
-        }
-
-        $persentasePerTugas = $assignmentLearnersSelesai->map(function ($al) {
-            $maxScore = $al->assignment->questions->sum('points');
-
-            return $maxScore > 0 ? ($al->total_score / $maxScore) * 100 : 0;
-        });
-
-        return round($persentasePerTugas->avg(), 1);
-    }
-
-    private function hitungPredikat(float $rataRata): string
-    {
-        return match (true) {
-            $rataRata >= 90 => 'Sangat Baik',
-            $rataRata >= 75 => 'Baik',
-            $rataRata >= 60 => 'Cukup',
-            default => 'Perlu Perbaikan',
-        };
-    }
 }

@@ -63,10 +63,10 @@
               <label class="form-label fw-semibold">Role</label>
               <select name="role" class="form-select border border-secondary-subtle" required>
                   <option value="">-- Pilih Role --</option>
-                  <option value="learner">Murid</option>
                   <option value="guru">Guru</option>
                   <option value="admin">Admin</option>
               </select>
+              <div class="form-text">Untuk menambah akun Murid, gunakan menu "Murid" (login memakai PIN, bukan email/password).</div>
           </div>
       </div>
 
