@@ -41,6 +41,21 @@ class TypingLevelController extends Controller
         return redirect()->back()->with('success', 'Tahap latihan berhasil dihapus!');
     }
 
+    /**
+     * Salin (duplikat) sebuah tahap beserta seluruh pengaturannya sebagai tahap
+     * baru di urutan paling akhir. Nomor tahap otomatis (unik) dan nama diberi
+     * penanda "(salinan)" agar Guru tinggal mengubah nomor & namanya.
+     */
+    public function duplicate(TypingLevel $typingLevel)
+    {
+        $copy = $typingLevel->replicate();
+        $copy->level_number = (int) TypingLevel::max('level_number') + 1;
+        $copy->name = mb_substr($typingLevel->name . ' (salinan)', 0, 255);
+        $copy->save();
+
+        return redirect()->back()->with('success', 'Tahap berhasil disalin! Silakan ubah nomor & nama tahap salinan sesuai kebutuhan.');
+    }
+
     private function validateLevel(Request $request, ?int $ignoreId = null): array
     {
         $data = $request->validate([

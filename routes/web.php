@@ -88,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
         // Master Latihan Mengetik 10 Jari (tahap & tombol yang dilatih)
         Route::get('guru/typing-levels', [TypingLevelController::class, 'index'])->name('guru.typing-levels.index');
         Route::post('guru/typing-levels', [TypingLevelController::class, 'store'])->name('guru.typing-levels.store');
+        Route::post('guru/typing-levels/{typingLevel}/duplicate', [TypingLevelController::class, 'duplicate'])->name('guru.typing-levels.duplicate');
         Route::put('guru/typing-levels/{typingLevel}', [TypingLevelController::class, 'update'])->name('guru.typing-levels.update');
         Route::delete('guru/typing-levels/{typingLevel}', [TypingLevelController::class, 'destroy'])->name('guru.typing-levels.destroy');
     });

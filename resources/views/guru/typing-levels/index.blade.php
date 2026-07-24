@@ -61,14 +61,19 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <span class="badge bg-primary">Tahap {{ $level->level_number }}</span>
                         <div class="d-flex gap-1">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editLevelModal{{ $level->id }}">
+                            <form action="{{ route('guru.typing-levels.duplicate', $level->id) }}" method="POST"
+                                onsubmit="return confirm('Salin tahap ini sebagai tahap baru?')">
+                                @csrf
+                                <button class="btn btn-sm btn-outline-primary" title="Salin tahap ini"><i class="bi bi-files"></i></button>
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" title="Edit tahap" data-bs-toggle="modal" data-bs-target="#editLevelModal{{ $level->id }}">
                                 <i class="bi bi-pencil-square"></i>
                             </button>
                             <form action="{{ route('guru.typing-levels.destroy', $level->id) }}" method="POST"
                                 onsubmit="return confirm('Hapus tahap ini? Semua riwayat percobaan murid untuk tahap ini juga akan terhapus.')">
                                 @csrf
                                 @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" title="Hapus tahap"><i class="bi bi-trash3-fill"></i></button>
                             </form>
                         </div>
                     </div>
