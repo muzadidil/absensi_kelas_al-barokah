@@ -324,6 +324,13 @@
           </a>
       </li>
       <li class="nav-item mb-1">
+          <a href="{{ route('guru.quiz-levels.index') }}"
+              class="menu-item nav-link {{ request()->routeIs('guru.quiz-levels.*') || request()->routeIs('guru.quiz-questions.*') ? 'active' : '' }}"
+              data-tooltip="Master Kuis Pilihan Ganda">
+              <i class="bi bi-ui-checks me-2"></i><span> Kuis Pilihan Ganda</span>
+          </a>
+      </li>
+      <li class="nav-item mb-1">
           <a href="{{ route('guru.typing-levels.index') }}"
               class="menu-item nav-link {{ request()->routeIs('guru.typing-levels.*') ? 'active' : '' }}"
               data-tooltip="Master Latihan Mengetik">

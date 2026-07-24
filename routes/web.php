@@ -16,6 +16,8 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Guru\AssignmentController as GuruAssignmentController;
 use App\Http\Controllers\Guru\AssignmentQuestionController as GuruAssignmentQuestionController;
 use App\Http\Controllers\Guru\TypingLevelController;
+use App\Http\Controllers\Guru\QuizLevelController;
+use App\Http\Controllers\Guru\QuizQuestionController;
 use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
 use App\Http\Controllers\Learner\TypingController as LearnerTypingController;
 use App\Http\Controllers\Auth\LearnerLoginController;
@@ -91,6 +93,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('guru/typing-levels/{typingLevel}/duplicate', [TypingLevelController::class, 'duplicate'])->name('guru.typing-levels.duplicate');
         Route::put('guru/typing-levels/{typingLevel}', [TypingLevelController::class, 'update'])->name('guru.typing-levels.update');
         Route::delete('guru/typing-levels/{typingLevel}', [TypingLevelController::class, 'destroy'])->name('guru.typing-levels.destroy');
+
+        // Master Kuis Pilihan Ganda berjenjang (tahap + soal + opsi)
+        Route::get('guru/quiz-levels', [QuizLevelController::class, 'index'])->name('guru.quiz-levels.index');
+        Route::post('guru/quiz-levels', [QuizLevelController::class, 'store'])->name('guru.quiz-levels.store');
+        Route::get('guru/quiz-levels/{quizLevel}', [QuizLevelController::class, 'show'])->name('guru.quiz-levels.show');
+        Route::post('guru/quiz-levels/{quizLevel}/duplicate', [QuizLevelController::class, 'duplicate'])->name('guru.quiz-levels.duplicate');
+        Route::put('guru/quiz-levels/{quizLevel}', [QuizLevelController::class, 'update'])->name('guru.quiz-levels.update');
+        Route::delete('guru/quiz-levels/{quizLevel}', [QuizLevelController::class, 'destroy'])->name('guru.quiz-levels.destroy');
+
+        Route::post('guru/quiz-levels/{quizLevel}/questions', [QuizQuestionController::class, 'store'])->name('guru.quiz-questions.store');
+        Route::put('guru/quiz-levels/{quizLevel}/questions/{question}', [QuizQuestionController::class, 'update'])->name('guru.quiz-questions.update');
+        Route::delete('guru/quiz-levels/{quizLevel}/questions/{question}', [QuizQuestionController::class, 'destroy'])->name('guru.quiz-questions.destroy');
     });
 
     // Profile
