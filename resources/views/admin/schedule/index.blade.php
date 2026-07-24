@@ -144,7 +144,7 @@
                                 <td>{{ \Carbon\Carbon::parse($jp->jam_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($jp->jam_selesai)->format('H:i') }}</td>
                                 <td>{{ $jp->grade_level }}</td>
                                 <td>{{ $jp->subject->name }}</td>
-                                <td>{{ $jp->guru->name }}</td>
+                                <td>{{ $jp->guru->name }} <span class="text-muted small">({{ $jp->guru->email }})</span></td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-secondary btn-sm rounded-pill px-2 py-1 me-1"
                                         data-bs-toggle="modal" data-bs-target="#editJamPelajaranModal{{ $jp->id }}">
@@ -213,7 +213,7 @@
                                                         <label class="form-label">Guru</label>
                                                         <select name="guru_id" class="form-select" required>
                                                             @foreach($gurus as $guru)
-                                                                <option value="{{ $guru->id }}" @selected($jp->guru_id === $guru->id)>{{ $guru->name }}</option>
+                                                                <option value="{{ $guru->id }}" @selected($jp->guru_id === $guru->id)>{{ $guru->display_name }}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -323,7 +323,7 @@
                             <select name="guru_id" class="form-select" required>
                                 <option value="" selected disabled>-- Pilih Guru --</option>
                                 @foreach($gurus as $guru)
-                                    <option value="{{ $guru->id }}">{{ $guru->name }}</option>
+                                    <option value="{{ $guru->id }}">{{ $guru->display_name }}</option>
                                 @endforeach
                             </select>
                         </div>

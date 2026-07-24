@@ -18,6 +18,18 @@ class ScheduleController extends Controller
         $gradeLevels = GradeLevel::orderBy('name')->get();
         $gurus = User::whereHas('roles', fn ($q) => $q->where('name', 'guru'))->orderBy('name')->get();
 
+        // Tandai nama yang bentrok (misal akun admin yang juga punya role guru,
+        // namanya sama persis dengan akun guru asli) supaya dropdown tidak
+        // ambigu saat memilih — tanpa ini, admin bisa salah pilih akun guru.
+        $namaGuruCount = $gurus->countBy('name');
+        $gurus = $gurus->map(function (User $guru) use ($namaGuruCount) {
+            $guru->display_name = $namaGuruCount[$guru->name] > 1
+                ? "{$guru->name} ({$guru->email})"
+                : $guru->name;
+
+            return $guru;
+        });
+
         $kelas = $request->query('kelas');
 
         $jadwalQuery = JamPelajaran::with(['subject', 'guru'])
