@@ -9,10 +9,11 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\ClassSettingController;
 use App\Http\Controllers\Admin\AssignmentController;
-use App\Http\Controllers\Admin\AssignmentQuestionController;
 use App\Http\Controllers\Admin\RaportController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\Guru\AssignmentController as GuruAssignmentController;
+use App\Http\Controllers\Guru\AssignmentQuestionController as GuruAssignmentQuestionController;
 use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
@@ -64,6 +65,22 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:admin|guru')->group(function () {
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    });
+
+    // ------------------------------------------------------------------
+    // Guru-only routes: kelola Tugas (soal, penugasan ke murid) sepenuhnya
+    // jadi tanggung jawab Guru. Admin hanya memantau & menilai (lihat grup
+    // role:admin di bawah).
+    // ------------------------------------------------------------------
+    Route::middleware('role:guru')->group(function () {
+        Route::resource('guru/assignments', GuruAssignmentController::class)->names('guru.assignments');
+
+        Route::post('guru/assignments/{assignment}/questions', [GuruAssignmentQuestionController::class, 'store'])->name('guru.assignments.questions.store');
+        Route::put('guru/assignments/{assignment}/questions/{question}', [GuruAssignmentQuestionController::class, 'update'])->name('guru.assignments.questions.update');
+        Route::delete('guru/assignments/{assignment}/questions/{question}', [GuruAssignmentQuestionController::class, 'destroy'])->name('guru.assignments.questions.destroy');
+
+        Route::post('guru/assignments/{assignment}/assign', [GuruAssignmentController::class, 'assignLearners'])->name('guru.assignments.assign');
+        Route::delete('guru/assignments/{assignment}/unassign/{learner}', [GuruAssignmentController::class, 'unassignLearner'])->name('guru.assignments.unassign');
     });
 
     // Profile
@@ -142,19 +159,11 @@ Route::middleware(['auth'])->group(function () {
         // Learners (data murid) — was public with no auth at all, now admin-only
         Route::resource('learners', LearnerController::class)->names('admin.learners');
 
-        // Assignments (Tugas)
-        Route::resource('admin/assignments', AssignmentController::class)->names('admin.assignments');
+        // Tugas (read-only, dibuat & dikelola oleh Guru)
+        Route::get('admin/assignments', [AssignmentController::class, 'index'])->name('admin.assignments.index');
+        Route::get('admin/assignments/{assignment}', [AssignmentController::class, 'show'])->name('admin.assignments.show');
 
-        // Assignment Questions (Soal)
-        Route::post('admin/assignments/{assignment}/questions', [AssignmentQuestionController::class, 'store'])->name('admin.assignments.questions.store');
-        Route::put('admin/assignments/{assignment}/questions/{question}', [AssignmentQuestionController::class, 'update'])->name('admin.assignments.questions.update');
-        Route::delete('admin/assignments/{assignment}/questions/{question}', [AssignmentQuestionController::class, 'destroy'])->name('admin.assignments.questions.destroy');
-
-        // Assign / Unassign Murid ke Tugas
-        Route::post('admin/assignments/{assignment}/assign', [AssignmentController::class, 'assignLearners'])->name('admin.assignments.assign');
-        Route::delete('admin/assignments/{assignment}/unassign/{learner}', [AssignmentController::class, 'unassignLearner'])->name('admin.assignments.unassign');
-
-        // Nilai Jawaban Murid (Essay)
+        // Nilai Jawaban Murid (Essay) — evaluasi tetap tugas Admin
         Route::get('admin/assignments/{assignment}/learner/{learner}', [AssignmentController::class, 'showLearnerAnswers'])->name('admin.assignments.learner-answers');
         Route::post('admin/assignments/{assignment}/learner/{learner}/grade', [AssignmentController::class, 'gradeLearnerAnswers'])->name('admin.assignments.learner-answers.grade');
 

@@ -352,8 +352,8 @@
       <li class="nav-item mb-1">
           <a href="{{ route('admin.assignments.index') }}"
               class="menu-item nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}"
-              data-tooltip="Kelola Tugas">
-              <i class="bi bi-journal-text me-2"></i><span> Tugas</span>
+              data-tooltip="Pantau Tugas (dibuat oleh Guru)">
+              <i class="bi bi-journal-text me-2"></i><span> Pantau Tugas</span>
           </a>
       </li>
       <!-- <li class="nav-item mb-1">

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
@@ -24,7 +24,7 @@ class AssignmentQuestionController extends Controller
             'sort_order' => $assignment->questions()->count() + 1,
         ]);
 
-        return redirect()->route('admin.assignments.show', $assignment->id)
+        return redirect()->route('guru.assignments.show', $assignment->id)
             ->with('success', 'Soal berhasil ditambahkan!');
     }
 
@@ -41,7 +41,7 @@ class AssignmentQuestionController extends Controller
             'points' => $data['points'],
         ]);
 
-        return redirect()->route('admin.assignments.show', $assignment->id)
+        return redirect()->route('guru.assignments.show', $assignment->id)
             ->with('success', 'Soal berhasil diperbarui!');
     }
 
@@ -49,7 +49,7 @@ class AssignmentQuestionController extends Controller
     {
         $question->delete();
 
-        return redirect()->route('admin.assignments.show', $assignment->id)
+        return redirect()->route('guru.assignments.show', $assignment->id)
             ->with('success', 'Soal berhasil dihapus!');
     }
 
