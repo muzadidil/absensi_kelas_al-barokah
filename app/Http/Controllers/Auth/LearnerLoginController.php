@@ -12,19 +12,38 @@ class LearnerLoginController extends Controller
 {
     /**
      * Daftar murid (id + nama lengkap) berdasarkan tingkat kelas,
-     * dipakai untuk mengisi dropdown "Pilih Nama" via AJAX di halaman login.
+     * dipakai untuk mengisi dropdown "Pilih Nama" via AJAX di halaman login
+     * DAN dropdown "Assign Individual" di halaman detail tugas (admin).
      */
     public function getByGrade(string $gradeLevel): JsonResponse
     {
         $learners = Learner::where('grade_level', $gradeLevel)
             ->orderBy('nama_lengkap')
-            ->get()
-            ->map(fn (Learner $learner) => [
-                'id' => $learner->id,
-                'name' => $learner->nama_lengkap,
-            ]);
+            ->orderBy('id')
+            ->get();
 
-        return response()->json($learners);
+        // Kalau ada dua murid dengan nama_lengkap yang sama persis, dropdown
+        // (baik di halaman login murid maupun "Assign Individual" admin) akan
+        // menampilkan opsi yang terlihat identik — orang yang memilih tidak
+        // bisa membedakan mana yang mana, sehingga bisa salah pilih ID murid.
+        // Tambahkan penanda ID hanya untuk nama yang bentrok, supaya kasus
+        // normal (nama unik) tetap tampil bersih tanpa noise.
+        $namaCount = $learners->countBy('nama_lengkap');
+
+        $result = $learners->map(function (Learner $learner) use ($namaCount) {
+            $name = $learner->nama_lengkap;
+
+            if ($namaCount[$name] > 1) {
+                $name .= ' (ID ' . $learner->id . ')';
+            }
+
+            return [
+                'id' => $learner->id,
+                'name' => $name,
+            ];
+        });
+
+        return response()->json($result);
     }
 
     /**
