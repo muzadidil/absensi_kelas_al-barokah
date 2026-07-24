@@ -335,6 +335,13 @@
               <i class="bi bi-clipboard-check-fill me-2"></i><span> Absensi</span>
           </a>
       </li>
+      <li class="nav-item mb-1">
+          <a href="{{ route('admin.assignments.index') }}"
+              class="menu-item nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}"
+              data-tooltip="Kelola Tugas">
+              <i class="bi bi-journal-text me-2"></i><span> Tugas</span>
+          </a>
+      </li>
       <!-- <li class="nav-item mb-1">
           <a href="{{ route('admin.register.form') }}"
               class="menu-item nav-link {{ request()->routeIs('admin.register.form') ? 'active' : '' }}"

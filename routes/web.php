@@ -9,6 +9,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\LearnerAttendanceController;
 use App\Http\Controllers\Admin\ClassSettingController;
+use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
@@ -122,6 +123,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Learners (data murid) — was public with no auth at all, now admin-only
         Route::resource('learners', LearnerController::class)->names('admin.learners');
+
+        // Assignments (Tugas)
+        Route::resource('admin/assignments', AssignmentController::class)->names('admin.assignments');
     });
 });
 
