@@ -8,11 +8,13 @@ use App\Models\AssignmentLearner;
 use App\Models\Learner;
 use App\Models\LearnerAnswer;
 use App\Support\CalculatesRaport;
+use App\Support\CalculatesQuizProgress;
 use Illuminate\Http\Request;
 
 class AssignmentController extends Controller
 {
     use CalculatesRaport;
+    use CalculatesQuizProgress;
 
     /**
      * Daftar tugas milik murid yang sedang login (lewat session learner_id).
@@ -155,8 +157,10 @@ class AssignmentController extends Controller
         $rataRata = $this->hitungRataRataPersen($selesai);
         $predikat = $this->hitungPredikat($rataRata);
 
+        $kuis = $this->hitungProgresKuis($learner);
+
         return view('learner.raport', compact(
-            'learner', 'assignmentLearners', 'totalTugas', 'totalSelesai', 'rataRata', 'predikat'
+            'learner', 'assignmentLearners', 'totalTugas', 'totalSelesai', 'rataRata', 'predikat', 'kuis'
         ));
     }
 

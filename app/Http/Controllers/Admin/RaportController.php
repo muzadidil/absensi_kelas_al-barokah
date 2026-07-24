@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\GradeLevel;
 use App\Models\Learner;
 use App\Support\CalculatesRaport;
+use App\Support\CalculatesQuizProgress;
 use Illuminate\Http\Request;
 
 class RaportController extends Controller
 {
     use CalculatesRaport;
+    use CalculatesQuizProgress;
 
     public function index(Request $request)
     {
@@ -35,6 +37,7 @@ class RaportController extends Controller
                 'jumlah_total' => $assignmentLearners->count(),
                 'rata_rata' => $rataRata,
                 'predikat' => $this->hitungPredikat($rataRata),
+                'kuis' => $this->hitungProgresKuis($learner),
             ];
         });
 
@@ -56,8 +59,10 @@ class RaportController extends Controller
         $totalSelesai = $selesai->count();
         $predikat = $this->hitungPredikat($rataRata);
 
+        $kuis = $this->hitungProgresKuis($learner);
+
         return view('admin.raport.show', compact(
-            'learner', 'assignmentLearners', 'totalTugas', 'totalSelesai', 'rataRata', 'predikat'
+            'learner', 'assignmentLearners', 'totalTugas', 'totalSelesai', 'rataRata', 'predikat', 'kuis'
         ));
     }
 

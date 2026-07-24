@@ -31,6 +31,9 @@
                     <th class="px-3 py-2 text-left">Tugas Selesai</th>
                     <th class="px-3 py-2 text-left">Rata-rata Nilai</th>
                     <th class="px-3 py-2 text-left">Predikat</th>
+                    <th class="px-3 py-2 text-left">Kuis (Tahap)</th>
+                    <th class="px-3 py-2 text-left">Percobaan</th>
+                    <th class="px-3 py-2 text-left">Predikat Kuis</th>
                     <th class="px-3 py-2 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -52,6 +55,17 @@
                                 {{ $row['predikat'] }}
                             </span>
                         </td>
+                        <td class="px-3 py-1">{{ $row['kuis']['tahap_tembus'] }} / {{ $row['kuis']['total_tahap'] }} ({{ $row['kuis']['progres_persen'] }}%)</td>
+                        <td class="px-3 py-1 fw-semibold text-primary">{{ $row['kuis']['total_percobaan'] }}×</td>
+                        <td class="px-3 py-1">
+                            <span class="badge {{ match($row['kuis']['predikat']) {
+                                'Tuntas' => 'bg-success',
+                                'Baik' => 'bg-primary',
+                                'Berkembang' => 'bg-info text-dark',
+                                'Mulai Jalan' => 'bg-warning text-dark',
+                                default => 'bg-secondary',
+                            } }}">{{ $row['kuis']['predikat'] }}</span>
+                        </td>
                         <td class="px-3 py-1 text-center">
                             <a href="{{ route('admin.raport.show', $row['learner']->id) }}" class="btn btn-sm btn-primary rounded-pill">
                                 <i class="bi bi-file-earmark-text me-1"></i> Lihat Raport
@@ -60,7 +74,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-3">Belum ada data murid.</td>
+                        <td colspan="10" class="text-center text-muted py-3">Belum ada data murid.</td>
                     </tr>
                 @endforelse
             </tbody>
