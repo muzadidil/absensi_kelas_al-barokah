@@ -20,6 +20,7 @@ use App\Http\Controllers\Guru\QuizLevelController;
 use App\Http\Controllers\Guru\QuizQuestionController;
 use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
 use App\Http\Controllers\Learner\TypingController as LearnerTypingController;
+use App\Http\Controllers\Learner\QuizController as LearnerQuizController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
@@ -223,6 +224,11 @@ Route::middleware('auth.learner')->group(function () {
     Route::get('/learner/mengetik', [LearnerTypingController::class, 'index'])->name('learner.typing.index');
     Route::get('/learner/mengetik/{typingLevel}', [LearnerTypingController::class, 'show'])->name('learner.typing.show');
     Route::post('/learner/mengetik/{typingLevel}/submit', [LearnerTypingController::class, 'submit'])->name('learner.typing.submit');
+
+    // Kuis Pilihan Ganda berjenjang (gauntlet)
+    Route::get('/learner/kuis', [LearnerQuizController::class, 'index'])->name('learner.quiz.index');
+    Route::get('/learner/kuis/{quizLevel}', [LearnerQuizController::class, 'play'])->name('learner.quiz.play');
+    Route::post('/learner/kuis/{quizLevel}/attempt', [LearnerQuizController::class, 'attempt'])->name('learner.quiz.attempt');
 });
 
 

@@ -288,6 +288,13 @@
         </a>
       </li>
       <li class="nav-item mb-1">
+        <a href="{{ route('learner.quiz.index') }}"
+          class="menu-item nav-link {{ request()->routeIs('learner.quiz.*') ? 'active' : '' }}"
+          data-tooltip="Kuis Pilihan Ganda">
+          <i class="bi bi-ui-checks me-2"></i><span> Kuis</span>
+        </a>
+      </li>
+      <li class="nav-item mb-1">
         <a href="{{ route('learner.raport') }}"
           class="menu-item nav-link {{ request()->routeIs('learner.raport') ? 'active' : '' }}"
           data-tooltip="Raport">

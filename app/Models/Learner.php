@@ -15,6 +15,11 @@ class Learner extends Model
         'pin',
         'grade_level',
         'section',
+        'quiz_reset_at',
+    ];
+
+    protected $casts = [
+        'quiz_reset_at' => 'datetime',
     ];
 
     public function attendances()
@@ -30,5 +35,10 @@ class Learner extends Model
     public function learnerAnswers()
     {
         return $this->hasMany(LearnerAnswer::class);
+    }
+
+    public function quizAttempts()
+    {
+        return $this->hasMany(QuizAttempt::class);
     }
 }
