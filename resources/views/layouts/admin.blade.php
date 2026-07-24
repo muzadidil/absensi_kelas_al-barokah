@@ -329,10 +329,24 @@
           </a>
       </li>
       <li class="nav-item mb-1">
-          <a href="{{ route('admin.attendance.index') }}"
-              class="menu-item nav-link {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}"
-              data-tooltip="Lihat Log Absensi">
+          <a href="{{ route('attendance.index') }}"
+              class="menu-item nav-link {{ request()->routeIs('attendance.index') ? 'active' : '' }}"
+              data-tooltip="Isi Absensi">
               <i class="bi bi-clipboard-check-fill me-2"></i><span> Absensi</span>
+          </a>
+      </li>
+      <li class="nav-item mb-1">
+          <a href="{{ route('attendance.rekap') }}"
+              class="menu-item nav-link {{ request()->routeIs('attendance.rekap') ? 'active' : '' }}"
+              data-tooltip="Rekap Absensi">
+              <i class="bi bi-table me-2"></i><span> Rekap Absensi</span>
+          </a>
+      </li>
+      <li class="nav-item mb-1">
+          <a href="{{ route('admin.schedule.index') }}"
+              class="menu-item nav-link {{ request()->routeIs('admin.schedule.*') ? 'active' : '' }}"
+              data-tooltip="Jadwal Pelajaran">
+              <i class="bi bi-calendar-week-fill me-2"></i><span> Jadwal Pelajaran</span>
           </a>
       </li>
       <li class="nav-item mb-1">

@@ -17,9 +17,9 @@ class Learner extends Model
         'section',
     ];
 
-    public function attendance()
+    public function attendances()
     {
-        return $this->hasMany(LearnerAttendance::class);
+        return $this->hasMany(Attendance::class);
     }
 
     public function assignmentLearners()

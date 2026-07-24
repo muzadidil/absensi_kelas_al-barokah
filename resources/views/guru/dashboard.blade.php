@@ -13,9 +13,9 @@
             <div class="card border-0 shadow h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-calendar-check fs-1 text-primary mb-3"></i>
-                    <h5 class="card-title">Log Absensi</h5>
-                    <p class="card-text">Lihat data absensi atau <br>catat kehadiran.</p>
-                    <a href="{{ route('admin.attendance.index') }}" class="btn btn-primary w-100">Lihat Absensi</a>
+                    <h5 class="card-title">Isi Absensi</h5>
+                    <p class="card-text">Catat kehadiran murid untuk <br>jam pelajaran yang Anda ampu.</p>
+                    <a href="{{ route('attendance.index') }}" class="btn btn-primary w-100">Isi Absensi</a>
                 </div>
             </div>
         </div>

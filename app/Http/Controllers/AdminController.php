@@ -15,7 +15,7 @@ class AdminController extends Controller
         $learnerCount = DB::table('learners')->count();
         $guruCount = User::whereHas('roles', fn ($q) => $q->where('name', 'guru'))->count();
         $mailLogCount = DB::table('email_logs')->count();
-        $attendanceCount = DB::table('learner_attendance')->count();
+        $attendanceCount = DB::table('attendances')->count();
 
         return view('admin.dashboard', compact(
             'userCount',

@@ -7,11 +7,12 @@ use App\Http\Controllers\GuruController;
 use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Admin\LearnerAttendanceController;
 use App\Http\Controllers\Admin\ClassSettingController;
 use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\AssignmentQuestionController;
 use App\Http\Controllers\Admin\RaportController;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
@@ -60,6 +61,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Guru
     Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
+
+    // Absensi (Admin & Guru bisa isi)
+    Route::middleware('role:admin|guru')->group(function () {
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    });
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -113,9 +120,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/users/sendmail', [UserController::class, 'sendMail'])->name('users.sendmail');
         Route::get('/users/sendmail', fn() => redirect()->route('users.index'));
 
-        // Attendance
-        Route::get('attendance', [LearnerAttendanceController::class, 'index'])->name('admin.attendance.index');
-        Route::post('attendance/store', [LearnerAttendanceController::class, 'store'])->name('admin.attendance.store');
+        // Rekap Absensi
+        Route::get('/admin/rekap-absensi', [AttendanceController::class, 'rekap'])->name('attendance.rekap');
+
+        // Jadwal Pelajaran (Mata Pelajaran & Jam Pelajaran)
+        Route::get('/admin/schedule', [ScheduleController::class, 'index'])->name('admin.schedule.index');
+        Route::post('/admin/subjects', [ScheduleController::class, 'storeSubject'])->name('admin.subjects.store');
+        Route::put('/admin/subjects/{subject}', [ScheduleController::class, 'updateSubject'])->name('admin.subjects.update');
+        Route::delete('/admin/subjects/{subject}', [ScheduleController::class, 'destroySubject'])->name('admin.subjects.destroy');
+        Route::post('/admin/jam-pelajaran', [ScheduleController::class, 'storeJamPelajaran'])->name('admin.jam-pelajaran.store');
+        Route::put('/admin/jam-pelajaran/{jamPelajaran}', [ScheduleController::class, 'updateJamPelajaran'])->name('admin.jam-pelajaran.update');
+        Route::delete('/admin/jam-pelajaran/{jamPelajaran}', [ScheduleController::class, 'destroyJamPelajaran'])->name('admin.jam-pelajaran.destroy');
 
         // Class Settings (Tingkat Kelas & Kelompok)
         Route::get('/admin/class-settings', [ClassSettingController::class, 'index'])->name('admin.class-settings.index');
