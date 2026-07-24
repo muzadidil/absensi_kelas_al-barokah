@@ -214,6 +214,16 @@ Ditemukan lewat `git pull` — perubahan besar berikut **dikembangkan di luar se
 
 **e) Perubahan pendukung lain**: middleware baru `auth.learner` didaftarkan di `bootstrap/app.php`; View Composer baru di `AppServiceProvider` untuk suntik variabel `$learner` ke semua view `layouts.learner`.
 
+### 4.14 Tindak lanjut catatan keamanan & kualitas dari bagian 4.13
+Tiga catatan yang diangkat di dokumentasi (bagian 6) sudah ditindaklanjuti:
+
+1. **PIN murid di-hash** — `LearnerController::store()`/`update()` sekarang menyimpan PIN dengan `Hash::make()` (bcrypt), dan `LearnerLoginController::login()` mencocokkan pakai `Hash::check()`, bukan perbandingan plaintext. Migration baru `hash_plaintext_pins_on_learners_table` meng-hash ulang PIN lama yang masih plaintext di database produksi (deteksi otomatis: string < 60 karakter dianggap plaintext, aman dijalankan berulang).
+2. **Rate-limiting login PIN** — ditambahkan `RateLimiter` per kombinasi (murid + IP): maksimal 5 percobaan gagal per menit sebelum diblokir sementara, plus `throttle:20,1` di level route sebagai lapisan tambahan. Mencegah brute-force PIN 4 digit.
+3. **Opsi role "Murid" dihapus dari form Register User** — karena murid sekarang dibuat & login lewat mekanisme PIN terpisah (halaman Murid), bukan lagi lewat form ini. Validasi role di `RegisterController` disesuaikan jadi `admin,guru` saja.
+4. **Duplikasi logika rapor dirapikan** — method `hitungRataRataPersen()` dan `hitungPredikat()` yang sebelumnya diduplikasi di 3 controller (`Admin\RaportController`, `Learner\AssignmentController`, `LearnerController`) sekarang jadi satu trait `App\Support\CalculatesRaport`, dipakai bersama oleh ketiganya.
+
+Catatan: route publik self-register (`/register`, `RegisterController::register()`) yang otomatis assign role `learner` ke `User` **tidak diubah** karena sudah tidak ditautkan di UI manapun (link-nya sudah di-comment di `welcome.blade.php` sejak awal) — dibiarkan idle, bukan prioritas untuk dibersihkan sekarang.
+
 ---
 
 ## 5. Cara Deploy Perubahan ke Server (Hostinger via SSH)
@@ -238,6 +248,7 @@ php artisan optimize:clear         # wajib, agar cache/OPcache tidak pakai kode 
 - **`UserController::sendMail()`** (fitur "Kirim Email ke Terpilih" di halaman Pengguna Terdaftar, mengirim ulang welcome email) **tetap ada** — ini berbeda dari fitur "Email Kustom" (`customEmailForm()`/`sendCustomEmail()`) yang sudah dihapus total di bagian 4.11.
 - **`WelcomeMail`** dan **`EmailLog`** juga terpisah dari fitur-fitur yang sudah dihapus (Announcement, Email Kustom, Log Audit Email) — dipakai khusus saat registrasi user baru & fitur kirim ulang welcome email, tidak ikut terhapus.
 - **Locale aplikasi** (`config/app.php` → `APP_LOCALE`) masih default `en`. Terjemahan UI ke Bahasa Indonesia (bagian 4.10) dilakukan dengan mengganti teks langsung di setiap file Blade/controller, **bukan** lewat sistem i18n Laravel (`resources/lang`) — jadi kalau ke depan butuh multi-bahasa yang proper, perlu direfaktor ke sistem lang file.
-- **PIN login Murid disimpan plaintext, tanpa rate-limiting** (lihat 4.13b) — ini catatan keamanan yang perlu ditindaklanjuti kalau data murid/PIN dianggap sensitif, mengingat PIN cuma 4 digit (rentan brute-force tanpa lockout).
-- **`admin.register.form` (Register User)** masih menyediakan pilihan role "learner"/Murid, padahal Murid sekarang login pakai PIN (bukan email/password) lewat mekanisme terpisah — perlu dicek apakah opsi Murid di form ini masih relevan atau berpotensi membingungkan admin.
-- Duplikasi logika hitung rapor (rata-rata persen & predikat) di dua controller berbeda — lihat catatan di 4.13d.
+- ~~PIN login Murid disimpan plaintext, tanpa rate-limiting~~ — **sudah diperbaiki**, lihat 4.14 (PIN di-hash bcrypt + rate-limiting).
+- ~~Opsi role "Murid" di form Register User~~ — **sudah dihapus**, lihat 4.14.
+- ~~Duplikasi logika hitung rapor~~ — **sudah dirapikan** jadi trait `App\Support\CalculatesRaport`, lihat 4.14.
+- Route publik self-register (`/register`) yang assign role `learner` ke `User` masih ada tapi **tidak ditautkan di UI manapun** (dead code, aman dibiarkan idle) — lihat catatan di 4.14.
