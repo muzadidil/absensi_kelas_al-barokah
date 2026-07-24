@@ -1,58 +1,114 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dasbor Murid | Sistem Absensi Kelas Al-Barokah</title>
+@extends('layouts.learner')
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">👋 Selamat Datang, {{ $learner->nama_lengkap }}</h2>
-            <p class="text-muted">Ini adalah Dasbor Murid Anda. Akses fitur dan info terbaru di bawah ini.</p>
+@section('title', 'Dasbor Siswa')
 
-            <form method="POST" action="{{ route('learner.logout') }}" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-outline-danger btn-sm">
-                    <i class="bi bi-box-arrow-right me-1"></i> Keluar
-                </button>
-            </form>
+@section('content')
+
+    @push('styles')
+        <style>
+            .stat-card {
+                border: none;
+                border-radius: 1rem;
+                box-shadow: var(--lems-shadow-sm);
+                transition: transform 0.18s ease, box-shadow 0.18s ease;
+            }
+            .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: var(--lems-shadow-md);
+            }
+            .stat-card .card-body {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 1rem;
+                padding: 1.25rem 1.4rem;
+            }
+            .stat-label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--lems-ink-muted);
+            }
+            .stat-value {
+                font-size: 1.85rem;
+                font-weight: 700;
+                color: var(--lems-ink);
+            }
+            .stat-icon {
+                flex-shrink: 0;
+                width: 48px;
+                height: 48px;
+                border-radius: 0.85rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.3rem;
+            }
+            .stat-icon-belum { color: #fd7e14; background: rgba(253, 126, 20, 0.12); }
+            .stat-icon-selesai { color: #198754; background: rgba(25, 135, 84, 0.12); }
+            .stat-icon-rata { color: #4f6bed; background: rgba(79, 107, 237, 0.12); }
+        </style>
+    @endpush
+
+    <div class="mb-3">
+        <h4 class="fw-bold mb-1">👋 Selamat Datang, {{ $learner->nama_lengkap }}</h4>
+        <p class="text-muted mb-0">Ini adalah dasbor kamu. Pantau tugas dan nilai di sini.</p>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div>
+                        <p class="stat-label mb-2">Belum Dikerjakan</p>
+                        <p class="stat-value mb-0">{{ $belumCount }}</p>
+                    </div>
+                    <div class="stat-icon stat-icon-belum">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        @php
-            $tugasBelumCount = $learner->assignmentLearners()->where('status', 'belum')->count();
-        @endphp
-
-        <div class="row g-4 justify-content-center">
-            <!-- Tugas Saya -->
-            <div class="col-md-6">
-                <div class="card border-0 shadow h-100">
-                    <div class="card-body text-center position-relative">
-                        @if($tugasBelumCount > 0)
-                            <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger">
-                                {{ $tugasBelumCount }}
-                            </span>
-                        @endif
-                        <i class="bi bi-journal-text fs-1 text-primary mb-3"></i>
-                        <h5 class="card-title">Tugas Saya</h5>
-                        <p class="card-text">
-                            @if($tugasBelumCount > 0)
-                                Ada {{ $tugasBelumCount }} tugas yang belum dikerjakan.
-                            @else
-                                Tidak ada tugas yang menunggu dikerjakan.
-                            @endif
-                        </p>
-                        <a href="{{ route('learner.assignments.index') }}" class="btn btn-primary w-100">Buka</a>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div>
+                        <p class="stat-label mb-2">Tugas Selesai</p>
+                        <p class="stat-value mb-0">{{ $selesaiCount }}</p>
+                    </div>
+                    <div class="stat-icon stat-icon-selesai">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div>
+                        <p class="stat-label mb-2">Rata-rata Nilai</p>
+                        <p class="stat-value mb-0">{{ $rataRata }}%</p>
+                    </div>
+                    <div class="stat-icon stat-icon-rata">
+                        <i class="bi bi-graph-up"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <div class="row g-3 mt-1">
+        <div class="col-12">
+            <div class="card stat-card">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1"><i class="bi bi-journal-text me-1"></i> Tugas Saya</h5>
+                        <p class="text-muted mb-0">Lihat dan kerjakan tugas yang ditugaskan untukmu.</p>
+                    </div>
+                    <a href="{{ route('learner.assignments.index') }}" class="btn btn-primary">Buka Tugas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

@@ -163,6 +163,9 @@ Route::middleware('auth.learner')->group(function () {
     Route::get('/learner/tugas', [LearnerAssignmentController::class, 'index'])->name('learner.assignments.index');
     Route::get('/learner/tugas/{assignment}', [LearnerAssignmentController::class, 'show'])->name('learner.assignments.show');
     Route::post('/learner/tugas/{assignment}/submit', [LearnerAssignmentController::class, 'submit'])->name('learner.assignments.submit');
+
+    // Raport (read-only)
+    Route::get('/learner/raport', [LearnerAssignmentController::class, 'raport'])->name('learner.raport');
 });
 
 

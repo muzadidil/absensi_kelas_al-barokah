@@ -41,7 +41,32 @@ class LearnerController extends Controller
     {
         $learner = Learner::find(session('learner_id'));
 
-        return view('learner.dashboard', compact('learner'));
+        $assignmentLearners = $learner->assignmentLearners()->with('assignment.questions')->get();
+        $belumCount = $assignmentLearners->where('status', 'belum')->count();
+        $selesai = $assignmentLearners->where('status', 'selesai');
+        $selesaiCount = $selesai->count();
+        $rataRata = $this->hitungRataRataPersen($selesai);
+
+        return view('learner.dashboard', compact('learner', 'belumCount', 'selesaiCount', 'rataRata'));
+    }
+
+    /**
+     * Rata-rata nilai dalam bentuk persentase (score/max tiap tugas selesai,
+     * dirata-rata) — dipakai juga oleh raport supaya angkanya konsisten.
+     */
+    private function hitungRataRataPersen($assignmentLearnersSelesai): float
+    {
+        if ($assignmentLearnersSelesai->isEmpty()) {
+            return 0;
+        }
+
+        $persentasePerTugas = $assignmentLearnersSelesai->map(function ($al) {
+            $maxScore = $al->assignment->questions->sum('points');
+
+            return $maxScore > 0 ? ($al->total_score / $maxScore) * 100 : 0;
+        });
+
+        return round($persentasePerTugas->avg(), 1);
     }
 
     public function store(Request $request)

@@ -131,4 +131,54 @@ class AssignmentController extends Controller
         return redirect()->route('learner.assignments.index')
             ->with('success', 'Jawaban berhasil dikirim!');
     }
+
+    /**
+     * Raport murid yang sedang login — rekap semua tugas yang pernah
+     * ditugaskan beserta nilai dan predikat keseluruhan.
+     */
+    public function raport()
+    {
+        $learner = Learner::find(session('learner_id'));
+
+        $assignmentLearners = $learner->assignmentLearners()
+            ->with('assignment.questions')
+            ->get()
+            ->sortByDesc(fn ($al) => $al->assignment->created_at)
+            ->values();
+
+        $selesai = $assignmentLearners->where('status', 'selesai');
+        $totalTugas = $assignmentLearners->count();
+        $totalSelesai = $selesai->count();
+        $rataRata = $this->hitungRataRataPersen($selesai);
+        $predikat = $this->hitungPredikat($rataRata);
+
+        return view('learner.raport', compact(
+            'learner', 'assignmentLearners', 'totalTugas', 'totalSelesai', 'rataRata', 'predikat'
+        ));
+    }
+
+    private function hitungRataRataPersen($assignmentLearnersSelesai): float
+    {
+        if ($assignmentLearnersSelesai->isEmpty()) {
+            return 0;
+        }
+
+        $persentasePerTugas = $assignmentLearnersSelesai->map(function ($al) {
+            $maxScore = $al->assignment->questions->sum('points');
+
+            return $maxScore > 0 ? ($al->total_score / $maxScore) * 100 : 0;
+        });
+
+        return round($persentasePerTugas->avg(), 1);
+    }
+
+    private function hitungPredikat(float $rataRata): string
+    {
+        return match (true) {
+            $rataRata >= 90 => 'Sangat Baik',
+            $rataRata >= 75 => 'Baik',
+            $rataRata >= 60 => 'Cukup',
+            default => 'Perlu Perbaikan',
+        };
+    }
 }
