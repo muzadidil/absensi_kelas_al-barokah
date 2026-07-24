@@ -53,7 +53,7 @@
             <thead class="table-light">
                 <tr>
                     <th style="width: 1%;">No.</th>
-                    <th class="px-3 py-2 text-left">Nama</th>
+                    <th class="px-3 py-2 text-left">Nama Lengkap</th>
                     <th class="px-3 py-2 text-left">Email</th>
                     <th class="px-3 py-2 text-left">PIN</th>
                     <th class="px-3 py-2 text-left">Tingkat Kelas</th>
@@ -65,7 +65,7 @@
                 @foreach($learners as $learner)
                     <tr class="hover:bg-gray-50">
                         <td class="px-3 py-1">{{ $loop->iteration }}</td>
-                        <td class="px-3 py-1">{{ $learner->fname }} {{ $learner->mname }} {{ $learner->lname }}</td>
+                        <td class="px-3 py-1">{{ $learner->nama_lengkap }}</td>
                         <td class="px-3 py-1">{{ $learner->email ?: '-' }}</td>
                         <td class="px-3 py-1">{{ $learner->pin ?: '-' }}</td>
                         <td class="px-3 py-1">{{ $learner->grade_level }}</td>
@@ -108,17 +108,9 @@
                               <div class="modal-body pt-1">
                               <div class="container-fluid">
                                   <div class="row g-3 mb-3">
-                                  <div class="col-md-4">
-                                      <label class="form-label">Nama Depan</label>
-                                      <input type="text" name="fname" class="form-control" value="{{ $learner->fname }}" required>
-                                  </div>
-                                  <div class="col-md-4">
-                                      <label class="form-label">Nama Tengah</label>
-                                      <input type="text" name="mname" class="form-control" value="{{ $learner->mname }}">
-                                  </div>
-                                  <div class="col-md-4">
-                                      <label class="form-label">Nama Belakang</label>
-                                      <input type="text" name="lname" class="form-control" value="{{ $learner->lname }}" required>
+                                  <div class="col-md-12">
+                                      <label class="form-label">Nama Lengkap</label>
+                                      <input type="text" name="nama_lengkap" class="form-control" value="{{ $learner->nama_lengkap }}" required>
                                   </div>
                                   </div>
 
@@ -191,21 +183,11 @@
         <div class="modal-body pt-0">
           <div class="container-fluid">
 
-            <!-- First Row: Names -->
+            <!-- First Row: Name -->
             <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label for="fname" class="form-label">Nama Depan</label>
-                <input type="text" name="fname" class="form-control rounded-3" placeholder="Nama Depan" required>
-              </div>
-
-              <div class="col-md-4">
-                <label for="mname" class="form-label">Nama Tengah</label>
-                <input type="text" name="mname" class="form-control rounded-3" placeholder="Nama Tengah">
-              </div>
-
-              <div class="col-md-4">
-                <label for="lname" class="form-label">Nama Belakang</label>
-                <input type="text" name="lname" class="form-control rounded-3" placeholder="Nama Belakang" required>
+              <div class="col-md-12">
+                <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                <input type="text" name="nama_lengkap" class="form-control rounded-3" placeholder="Nama Lengkap" required>
               </div>
             </div>
             <div class="row g-3 mb-3">

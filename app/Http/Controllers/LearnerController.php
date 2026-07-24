@@ -19,7 +19,7 @@ class LearnerController extends Controller
 
     // For admin viewing learner records
         // $learners = Learner::all();
-         $learners = Learner::orderByRaw("CONCAT(lname, fname, mname) ASC")->get();
+         $learners = Learner::orderBy('nama_lengkap')->get();
          $gradeLevels = GradeLevel::orderBy('name')->get();
          $sections = Section::orderBy('name')->get();
         return view('admin.learners.index', compact('learners', 'gradeLevels', 'sections'));
@@ -39,16 +39,13 @@ class LearnerController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'fname' => 'required',
-            'mname' => 'nullable|string',
-            'lname' => 'required',
+            'nama_lengkap' => 'required|string|max:255',
             'email' => 'nullable|email|unique:learners,email',
             'pin' => 'nullable|numeric|digits:4',
             'grade_level' => 'required|exists:grade_levels,name',
             'section' => 'required|exists:sections,name',
         ]);
 
-        $data['mname'] = $data['mname'] ?? '';
         $data['email'] = $data['email'] ?: null;
 
         Learner::create($data);
@@ -59,16 +56,13 @@ class LearnerController extends Controller
     public function update(Request $request, Learner $learner)
     {
         $data = $request->validate([
-            'fname' => 'required',
-            'mname' => 'nullable|string',
-            'lname' => 'required',
+            'nama_lengkap' => 'required|string|max:255',
             'email' => 'nullable|email|unique:learners,email,' . $learner->id,
             'pin' => 'nullable|numeric|digits:4',
             'grade_level' => 'required|exists:grade_levels,name',
             'section' => 'required|exists:sections,name',
         ]);
 
-        $data['mname'] = $data['mname'] ?? '';
         $data['email'] = $data['email'] ?: null;
 
         // PIN opsional saat edit: kosongkan input berarti PIN lama tidak diubah

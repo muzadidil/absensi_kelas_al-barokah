@@ -10,9 +10,7 @@ class Learner extends Model
      use HasFactory;
 
     protected $fillable = [
-        'fname',
-        'mname',
-        'lname',
+        'nama_lengkap',
         'email',
         'pin',
         'grade_level',

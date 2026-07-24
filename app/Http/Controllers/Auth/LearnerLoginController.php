@@ -17,13 +17,11 @@ class LearnerLoginController extends Controller
     public function getByGrade(string $gradeLevel): JsonResponse
     {
         $learners = Learner::where('grade_level', $gradeLevel)
-            ->orderBy('fname')
+            ->orderBy('nama_lengkap')
             ->get()
             ->map(fn (Learner $learner) => [
                 'id' => $learner->id,
-                'name' => collect([$learner->fname, $learner->mname, $learner->lname])
-                    ->filter()
-                    ->implode(' '),
+                'name' => $learner->nama_lengkap,
             ]);
 
         return response()->json($learners);

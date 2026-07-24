@@ -61,7 +61,7 @@
                     <select name="learner_id" id="learner_id" class="form-select" required>
                         <option value="" disabled selected>-- Pilih murid --</option>
                         @foreach ($learners as $learner)
-                            <option value="{{ $learner->id }}">{{ $learner->lname }}, {{ $learner->fname }}</option>
+                            <option value="{{ $learner->id }}">{{ $learner->nama_lengkap }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -101,7 +101,7 @@
                         @forelse($attendances as $index => $attendance)
                             <tr>
                                 <td class="text-center">{{ ($attendances->currentPage() - 1) * $attendances->perPage() + $loop->iteration }}</td>
-                                <td>{{ $attendance->learner->lname }}, {{ $attendance->learner->fname }}</td>
+                                <td>{{ $attendance->learner->nama_lengkap }}</td>
                                 <td>{{ $attendance->am_in ? \Carbon\Carbon::parse($attendance->am_in)->format('H:i') : '-' }}</td>
                                 <td>{{ $attendance->am_out ? \Carbon\Carbon::parse($attendance->am_out)->format('H:i') : '-' }}</td>
                                 <td>{{ $attendance->pm_in ? \Carbon\Carbon::parse($attendance->pm_in)->format('H:i') : '-' }}</td>

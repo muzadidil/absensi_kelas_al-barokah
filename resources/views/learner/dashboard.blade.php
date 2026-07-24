@@ -12,7 +12,7 @@
 <body class="bg-light">
     <div class="container py-4">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">👋 Selamat Datang, {{ collect([$learner->fname, $learner->mname, $learner->lname])->filter()->implode(' ') }}</h2>
+            <h2 class="fw-bold">👋 Selamat Datang, {{ $learner->nama_lengkap }}</h2>
             <p class="text-muted">Ini adalah Dasbor Murid Anda. Akses fitur dan info terbaru di bawah ini.</p>
 
             <form method="POST" action="{{ route('learner.logout') }}" class="d-inline">
