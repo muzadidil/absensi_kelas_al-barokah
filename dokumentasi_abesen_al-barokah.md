@@ -7,7 +7,13 @@ Aplikasi berbasis Laravel untuk mengelola absensi dan data pengguna di lingkunga
 - Absensi harian siswa (AM IN / AM OUT / PM IN / PM OUT) via tombol biasa
 - Manajemen pengguna dengan 3 role: **Admin**, **Guru**, **Learner** (siswa)
 - Registrasi user baru oleh admin, lengkap dengan email selamat datang
+- Kelola Tingkat Kelas & Tahun Ajaran (CRUD, tidak lagi hardcode)
+- **Sistem Tugas/Assignment**: admin buat tugas (pilgan + essay), assign ke kelas/individu, murid kerjakan, admin nilai essay
+- **Rapor murid**: rekap nilai tugas per murid (rata-rata persen & predikat)
+- **Login Murid via PIN** (terpisah dari login Admin/Guru yang pakai email+password)
 - Dashboard ringkasan data (jumlah user, siswa, guru, log absensi, log email)
+
+> ⚠️ Bagian fitur Tugas/Rapor/Login PIN (poin 3 dan seterusnya di atas) dikembangkan **di luar sesi pendampingan ini** (kemungkinan oleh developer/sesi lain langsung ke GitHub) dan baru diketahui saat `git pull`. Detailnya didokumentasikan di bagian 4.12 berdasarkan hasil penelusuran kode, bukan dari keputusan yang dibahas bersama.
 
 Live di: `https://al-barokah.zasha.online` (hosting: Hostinger, akses server via SSH, deploy via `git pull`).
 
@@ -24,14 +30,28 @@ app/
 │   ├── RegisterController.php           # Registrasi user oleh admin
 │   ├── UserController.php               # Manajemen "Pengguna Terdaftar" & kirim welcome email
 │   ├── Admin/
-│   │   └── LearnerAttendanceController.php  # Logika absensi (index + store)
+│   │   ├── LearnerAttendanceController.php  # Logika absensi (index + store)
+│   │   ├── ClassSettingController.php       # CRUD Tingkat Kelas & Tahun Ajaran
+│   │   ├── AssignmentController.php         # (baru) Admin kelola tugas + assign ke murid
+│   │   ├── AssignmentQuestionController.php # (baru) Admin kelola soal per tugas
+│   │   └── RaportController.php             # (baru) Rapor semua murid (admin)
+│   ├── Learner/
+│   │   └── AssignmentController.php     # (baru) Murid lihat/kerjakan tugas + lihat rapor sendiri
 │   └── Auth/
-│       └── AuthenticatedSessionController.php # Redirect login sesuai role
+│       ├── AuthenticatedSessionController.php # Redirect login sesuai role (Admin/Guru)
+│       └── LearnerLoginController.php   # (baru) Login Murid pakai PIN (terpisah dari Breeze)
 ├── Models/
 │   ├── User.php
-│   ├── Learner.php                      # Data siswa
+│   ├── Learner.php                      # Data siswa (nama_lengkap, email nullable, pin, grade_level, section)
 │   ├── LearnerAttendance.php            # Data absensi harian (am_in, am_out, pm_in, pm_out)
+│   ├── GradeLevel.php / Section.php     # Master data Tingkat Kelas & Tahun Ajaran
+│   ├── Assignment.php                   # (baru) Data tugas
+│   ├── AssignmentQuestion.php           # (baru) Soal per tugas (pilgan/essay)
+│   ├── AssignmentLearner.php            # (baru) Pivot: tugas ditugaskan ke murid mana, status & skor
+│   ├── LearnerAnswer.php                # (baru) Jawaban murid per soal
 │   └── EmailLog.php
+├── Http/Middleware/
+│   └── LearnerAuth.php                  # (baru) Middleware alias `auth.learner`, cek session('learner_id')
 └── Mail/
     └── WelcomeMail.php                  # Email selamat datang saat user baru dibuat
 
@@ -41,41 +61,63 @@ resources/views/
 │   ├── register-user.blade.php          # Form tambah user baru
 │   ├── guru/index.blade.php             # Daftar guru (admin) — lihat & hapus akun guru
 │   ├── learners/index.blade.php         # Daftar murid (admin) — tambah/edit/hapus
+│   ├── class-settings/index.blade.php   # Kelola Tingkat Kelas & Tahun Ajaran
+│   ├── assignments/*.blade.php          # (baru) Kelola tugas, soal, lihat & nilai jawaban murid
+│   ├── raport/*.blade.php               # (baru) Rapor semua murid & detail per murid
 │   ├── reports/index.blade.php          # Placeholder "Laporan" (Coming Soon)
 │   └── attendance/index.blade.php       # Halaman absensi (dropdown + tombol), pakai layouts.admin
 ├── guru/dashboard.blade.php             # Dashboard guru (pakai layouts.app, TANPA sidebar admin)
-├── learner/dashboard.blade.php          # Dashboard siswa (pakai layouts.app, TANPA sidebar admin)
+├── learner/
+│   ├── dashboard.blade.php              # Dashboard murid (didesain ulang, pakai layouts.learner)
+│   ├── assignments/*.blade.php          # (baru) Daftar & kerjakan tugas
+│   └── raport.blade.php                 # (baru) Rapor murid sendiri
 ├── layouts/
 │   ├── admin.blade.php                  # Layout sidebar admin (dipakai Admin saja)
-│   ├── app.blade.php / guest.blade.php  # Layout sederhana (dipakai Guru & Murid, tanpa sidebar)
+│   ├── learner.blade.php                # (baru) Layout khusus Murid (topbar/sidebar sendiri, beda dari admin)
+│   ├── app.blade.php / guest.blade.php  # Layout sederhana (dipakai Guru, tanpa sidebar)
 └── emails/welcome.blade.php             # Template email selamat datang
 
 routes/web.php                           # Semua route utama aplikasi
 database/
-├── migrations/                          # Struktur tabel (learners, learner_attendance, dll.)
-└── seeders/RoleSeeder.php               # Seeder role (admin, guru, learner) + akun admin awal
+├── migrations/                          # Struktur tabel (learners, learner_attendance, assignments, dll.)
+└── seeders/
+    ├── RoleSeeder.php                   # Seeder role (admin, guru, learner) + akun admin awal
+    └── GradeLevelSectionSeeder.php       # Seed data awal Tingkat Kelas & Tahun Ajaran
 ```
 
 ---
 
 ## 3. Role & Alur Login
 
-**Login memakai satu halaman yang sama untuk semua role** (`/login`) — tidak ada form login terpisah per role. Setelah login berhasil, sistem mengecek role akun dan otomatis redirect:
+> ⚠️ **Update penting**: sejak fitur baru ditambahkan (lihat bagian 4.12), alur login **Murid sudah berbeda total** dari Admin/Guru — bukan lagi satu halaman login yang sama untuk semua role. Bagian di bawah ini sudah disesuaikan dengan kondisi terbaru.
+
+### Login Admin & Guru (tetap seperti semula)
+Admin dan Guru login lewat tab "Admin/Guru" di halaman `/login`, pakai **email + password** (Laravel Breeze, guard `web` standar via `Auth::user()`). Setelah login, sistem mengecek role dan redirect:
 
 | Role     | Redirect setelah login | Layout & Tampilan Dashboard |
 |----------|-------------------------|-------------------------------------|
-| admin    | `/admin/dashboard`      | Layout `layouts.admin` (ada sidebar lengkap: Dasbor, Murid, Guru, Absensi, Pengguna Terdaftar, Laporan) + statistik & grafik |
+| admin    | `/admin/dashboard`      | Layout `layouts.admin` (sidebar lengkap: Dasbor, Murid, Kelas & Tahun Ajaran, Guru, Absensi, Pengguna Terdaftar, Laporan) + statistik & grafik |
 | guru     | `/guru/dashboard`       | Layout `layouts.app` (**tanpa sidebar**) — cuma 2 kartu: Log Absensi & Profil Saya |
-| learner  | `/learner/dashboard`    | Layout `layouts.app` (**tanpa sidebar**) — cuma 2 kartu: Absensi & Profil Saya |
 
-Jadi dashboard Admin **jauh lebih lengkap** (sidebar + kelola semua data) dibanding dashboard Guru/Murid yang sengaja dibuat sangat sederhana (hanya akses ke absensi & profil sendiri).
+### Login Murid (BARU: pakai PIN, bukan email/password)
+Murid login lewat tab **"Siswa"** di halaman `/login` yang sama secara visual, tapi mekanismenya beda total:
+1. Pilih **Tingkat Kelas** → dropdown nama murid terisi otomatis via AJAX (`GET /api/learners-by-grade/{gradeLevel}`, publik tanpa auth).
+2. Pilih **nama murid** dari dropdown, lalu masukkan **PIN 4 digit**.
+3. Submit ke `POST /learner-login` (`LearnerLoginController@login`) — PIN dicocokkan langsung (`$learner->pin === $request->pin`, **plaintext, tidak di-hash**).
+4. Kalau cocok: disimpan di **session key `learner_id`** (bukan `Auth::login()` Laravel biasa, tidak pakai guard apapun) → redirect ke `/learner/dashboard`.
+
+Akses halaman Murid (`/learner/dashboard`, `/learner/tugas/*`, `/learner/raport`) dijaga middleware baru **`auth.learner`** (`LearnerAuth`), yang cuma mengecek `session('learner_id')` valid — **bukan** middleware `auth` Laravel bawaan. Logout murid: `POST /learner-logout` (hapus session `learner_id`).
+
+Murid sekarang pakai layout baru **`layouts.learner`** (bukan `layouts.app` lagi), dengan tampilan topbar/sidebar sendiri. Variabel `$learner` disuntik otomatis ke semua view yang extend layout ini lewat View Composer di `AppServiceProvider`.
+
+⚠️ **Catatan keamanan** (belum diperbaiki, sekadar dicatat): PIN disimpan & dicocokkan sebagai plaintext (tidak di-hash), dan tidak ada rate-limiting/lockout untuk percobaan PIN salah berulang — berpotensi rawan brute-force kalau PIN cuma 4 digit. Perlu jadi perhatian ke depan.
 
 **Cara membuat akun berbeda per role:**
-- **Murid**: bisa daftar akun **sendiri** lewat halaman publik `/register` — otomatis dapat role `learner`, tidak bisa pilih role lain dari sana.
-- **Guru & Admin**: **tidak bisa** membuat akun sendiri. Akunnya hanya bisa dibuat oleh Admin lewat menu "Daftarkan Pengguna" (`/register-user`), yang punya pilihan role Admin/Guru/Murid.
-- Begitu akun dibuat (baik oleh admin atau daftar sendiri), pemiliknya bisa login sendiri kapan saja tanpa perlu bantuan admin lagi.
+- **Murid**: **tidak bisa** self-register lagi via `/register` (karena sekarang butuh PIN, bukan email/password) — akun murid dibuat oleh Admin lewat halaman **Murid** (`admin.learners.index`), diisi `nama_lengkap`, `grade_level`, `section`, dan `pin` (email sekarang opsional).
+- **Guru & Admin**: **tidak bisa** membuat akun sendiri. Akunnya hanya bisa dibuat oleh Admin lewat menu "Daftarkan Pengguna" (`/register-user`), yang punya pilihan role Admin/Guru/Murid (role Murid dari form ini kemungkinan sudah tidak relevan lagi karena murid tidak login pakai email/password — perlu dicek ulang apakah form ini masih dipakai untuk Murid).
+- Begitu akun Admin/Guru dibuat, pemiliknya bisa login sendiri kapan saja tanpa perlu bantuan admin lagi. Murid butuh **PIN yang di-set oleh Admin** untuk bisa login sendiri.
 
-Role disimpan menggunakan package **Spatie Laravel Permission**. Role awal dibuat lewat `RoleSeeder`, yang **aman dijalankan berulang** (idempotent) — dan sejak revisi terbaru juga otomatis mengganti nama role lama `employee` menjadi `guru` jika masih ada di database produksi:
+Role (Admin/Guru/Learner) disimpan menggunakan package **Spatie Laravel Permission** — ini tetap dipakai untuk User model (Admin/Guru), sedangkan Murid **tidak** pakai sistem role ini sama sekali (murid bukan `User`, melainkan model `Learner` terpisah dengan sistem auth sendiri). Role awal dibuat lewat `RoleSeeder`, yang **aman dijalankan berulang** (idempotent):
 
 ```bash
 php artisan db:seed --class=RoleSeeder --force
@@ -140,6 +182,38 @@ Catatan: model `EmailLog` dan tabel `email_logs` **tetap dipertahankan** karena 
 
 Sidebar admin sekarang tersisa: **Dasbor, Murid, Guru, Absensi, Pengguna Terdaftar, Laporan**.
 
+### 4.12 Kelola Tingkat Kelas & Tahun Ajaran (CRUD, ganti dari hardcode)
+- Pilihan "Tingkat Kelas" (1st Year, dst) dan "Kelompok/Tahun Ajaran" (A/B/C/D) di form Murid sebelumnya di-hardcode di kode, tidak sesuai kondisi kelas Al-Barokah sebenarnya.
+- Dibuat tabel baru `grade_levels` dan `sections` + model `GradeLevel`/`Section`, halaman admin baru **"Kelas & Tahun Ajaran"** (`ClassSettingController`, route `admin.class-settings.*`, `admin.grade-levels.*`, `admin.sections.*`) untuk tambah/edit/hapus pilihan sendiri.
+- Form Tambah/Edit Murid sekarang menarik pilihan dropdown secara dinamis dari kedua tabel ini (validasi `exists:grade_levels,name` / `exists:sections,name`).
+- `GradeLevelSectionSeeder` mengisi data default (nilai lama) supaya form tidak kosong sebelum admin menyesuaikan.
+- Label "Kelompok" kemudian diganti jadi **"Tahun Ajaran"** di seluruh tampilan (hanya rename label, struktur tabel `sections`/kolom `section` tidak berubah).
+
+### 4.13 (Di luar sesi ini) Fitur Tugas/Assignment, Rapor, dan Login Murid via PIN
+Ditemukan lewat `git pull` — perubahan besar berikut **dikembangkan di luar sesi pendampingan ini**, sudah live di server produksi:
+
+**a) Perubahan struktur tabel `learners`** (3 migration berurutan, 24 Juli 2026):
+- `email` diubah jadi **nullable** (sebelumnya wajib).
+- Kolom baru `pin` (string, nullable) ditambahkan untuk login murid.
+- Kolom `fname`, `mname`, `lname` **digabung jadi satu kolom `nama_lengkap`** (data lama otomatis digabung lewat migration, spasi ganda dirapikan). Rollback (`down()`) tidak bisa mengembalikan pemisahan nama karena datanya sudah digabung.
+- `$fillable` di `Learner.php` sekarang: `['nama_lengkap', 'email', 'pin', 'grade_level', 'section']`.
+
+**b) Login Murid via PIN** — lihat detail lengkap di bagian 3 di atas. Ringkas: terpisah total dari `Auth::user()` Laravel, pakai session key `learner_id` manual + middleware `auth.learner`.
+
+**c) Sistem Tugas/Assignment**:
+- Admin buat tugas (`Assignment`: judul, deskripsi, deadline, target `kelas` atau `individu`) lewat halaman `admin/assignments` (`AssignmentController`, resource route `admin.assignments.*`).
+- Admin tambah soal per tugas (`AssignmentQuestion`: tipe `pilgan`/`essay`, opsi JSON, kunci jawaban, poin) via `AssignmentQuestionController`.
+- Admin assign tugas ke murid (satu kelas sekaligus, atau pilih individu) → tercatat di tabel pivot `assignment_learners` (status `belum`/`selesai`, waktu submit, total skor).
+- Murid buka tugas yang ditugaskan ke dirinya (`/learner/tugas`), kerjakan, submit. Soal **pilgan otomatis dikoreksi** saat submit; soal **essay dinilai manual oleh admin** lewat halaman "Lihat Jawaban Murid" (`admin.assignments.learner-answers` + `.grade`).
+- Murid tidak bisa mengerjakan tugas yang tidak ditugaskan ke dirinya, submit dua kali, atau submit setelah lewat deadline (dicegah di controller).
+
+**d) Rapor Murid**:
+- Dihitung murni dari **rata-rata persentase skor tugas yang sudah selesai** (bukan dari data kehadiran). Predikat: ≥90 "Sangat Baik", ≥75 "Baik", ≥60 "Cukup", di bawahnya "Perlu Perbaikan".
+- Admin bisa lihat rapor semua murid (`admin/raport`) atau detail satu murid (`admin/raport/{learner}`). Murid bisa lihat rapor miliknya sendiri (`/learner/raport`).
+- ⚠️ Logika hitung rata-rata & predikat **terduplikasi** di `Admin\RaportController` dan `Learner\AssignmentController` (method private yang sama persis di dua tempat) — kandidat refactor ke trait/service kalau ingin dirapikan, tapi bukan bug fungsional.
+
+**e) Perubahan pendukung lain**: middleware baru `auth.learner` didaftarkan di `bootstrap/app.php`; View Composer baru di `AppServiceProvider` untuk suntik variabel `$learner` ke semua view `layouts.learner`.
+
 ---
 
 ## 5. Cara Deploy Perubahan ke Server (Hostinger via SSH)
@@ -164,3 +238,6 @@ php artisan optimize:clear         # wajib, agar cache/OPcache tidak pakai kode 
 - **`UserController::sendMail()`** (fitur "Kirim Email ke Terpilih" di halaman Pengguna Terdaftar, mengirim ulang welcome email) **tetap ada** — ini berbeda dari fitur "Email Kustom" (`customEmailForm()`/`sendCustomEmail()`) yang sudah dihapus total di bagian 4.11.
 - **`WelcomeMail`** dan **`EmailLog`** juga terpisah dari fitur-fitur yang sudah dihapus (Announcement, Email Kustom, Log Audit Email) — dipakai khusus saat registrasi user baru & fitur kirim ulang welcome email, tidak ikut terhapus.
 - **Locale aplikasi** (`config/app.php` → `APP_LOCALE`) masih default `en`. Terjemahan UI ke Bahasa Indonesia (bagian 4.10) dilakukan dengan mengganti teks langsung di setiap file Blade/controller, **bukan** lewat sistem i18n Laravel (`resources/lang`) — jadi kalau ke depan butuh multi-bahasa yang proper, perlu direfaktor ke sistem lang file.
+- **PIN login Murid disimpan plaintext, tanpa rate-limiting** (lihat 4.13b) — ini catatan keamanan yang perlu ditindaklanjuti kalau data murid/PIN dianggap sensitif, mengingat PIN cuma 4 digit (rentan brute-force tanpa lockout).
+- **`admin.register.form` (Register User)** masih menyediakan pilihan role "learner"/Murid, padahal Murid sekarang login pakai PIN (bukan email/password) lewat mekanisme terpisah — perlu dicek apakah opsi Murid di form ini masih relevan atau berpotensi membingungkan admin.
+- Duplikasi logika hitung rapor (rata-rata persen & predikat) di dua controller berbeda — lihat catatan di 4.13d.
