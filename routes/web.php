@@ -47,30 +47,10 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 // Route::middleware(['auth'])->group(function () {
 
-    // Show registration form
-    Route::get('/register-user', [RegisterController::class, 'showAdminRegisterForm'])->name('admin.register.form');
-
-    // Handle registration
-    Route::post('/register-user', [RegisterController::class, 'registerByAdmin'])->name('admin.register.user');
-
-    // Admin
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     // Guru
     Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
-    Route::get('/admin/guru', [GuruController::class, 'manage'])->name('admin.guru.index');
-    Route::delete('/admin/guru/{user}', [GuruController::class, 'destroy'])->name('admin.guru.destroy');
     // Learner
     Route::get('/learner/dashboard', [LearnerController::class, 'index'])->name('learner.dashboard');
-
-    // Reports
-    Route::view('/admin/reports', 'admin.reports.index')->name('admin.reports');
-
-    // User Management
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/sendmail', [UserController::class, 'sendMail'])->name('users.sendmail');
-    Route::get('/users/sendmail', fn() => redirect()->route('users.index'));
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -96,33 +76,51 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('auth')
         ->name('admin.profile.destroy');
 
-    Route::get('attendance', [LearnerAttendanceController::class, 'index'])->name('admin.attendance.index');
-    Route::post('attendance/store', [LearnerAttendanceController::class, 'store'])->name('admin.attendance.store');
+    // ------------------------------------------------------------------
+    // Admin-only routes (require the 'admin' role, not just being logged in)
+    // ------------------------------------------------------------------
+    Route::middleware('role:admin')->group(function () {
 
-    // Class Settings (Tingkat Kelas & Kelompok)
-    Route::get('/admin/class-settings', [ClassSettingController::class, 'index'])->name('admin.class-settings.index');
-    Route::post('/admin/grade-levels', [ClassSettingController::class, 'storeGradeLevel'])->name('admin.grade-levels.store');
-    Route::put('/admin/grade-levels/{gradeLevel}', [ClassSettingController::class, 'updateGradeLevel'])->name('admin.grade-levels.update');
-    Route::delete('/admin/grade-levels/{gradeLevel}', [ClassSettingController::class, 'destroyGradeLevel'])->name('admin.grade-levels.destroy');
-    Route::post('/admin/sections', [ClassSettingController::class, 'storeSection'])->name('admin.sections.store');
-    Route::put('/admin/sections/{section}', [ClassSettingController::class, 'updateSection'])->name('admin.sections.update');
-    Route::delete('/admin/sections/{section}', [ClassSettingController::class, 'destroySection'])->name('admin.sections.destroy');
+        // Show registration form
+        Route::get('/register-user', [RegisterController::class, 'showAdminRegisterForm'])->name('admin.register.form');
+
+        // Handle registration
+        Route::post('/register-user', [RegisterController::class, 'registerByAdmin'])->name('admin.register.user');
+
+        // Admin
+        Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+        // Guru management
+        Route::get('/admin/guru', [GuruController::class, 'manage'])->name('admin.guru.index');
+        Route::delete('/admin/guru/{user}', [GuruController::class, 'destroy'])->name('admin.guru.destroy');
+
+        // Reports
+        Route::view('/admin/reports', 'admin.reports.index')->name('admin.reports');
+
+        // User Management
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/sendmail', [UserController::class, 'sendMail'])->name('users.sendmail');
+        Route::get('/users/sendmail', fn() => redirect()->route('users.index'));
+
+        // Attendance
+        Route::get('attendance', [LearnerAttendanceController::class, 'index'])->name('admin.attendance.index');
+        Route::post('attendance/store', [LearnerAttendanceController::class, 'store'])->name('admin.attendance.store');
+
+        // Class Settings (Tingkat Kelas & Kelompok)
+        Route::get('/admin/class-settings', [ClassSettingController::class, 'index'])->name('admin.class-settings.index');
+        Route::post('/admin/grade-levels', [ClassSettingController::class, 'storeGradeLevel'])->name('admin.grade-levels.store');
+        Route::put('/admin/grade-levels/{gradeLevel}', [ClassSettingController::class, 'updateGradeLevel'])->name('admin.grade-levels.update');
+        Route::delete('/admin/grade-levels/{gradeLevel}', [ClassSettingController::class, 'destroyGradeLevel'])->name('admin.grade-levels.destroy');
+        Route::post('/admin/sections', [ClassSettingController::class, 'storeSection'])->name('admin.sections.store');
+        Route::put('/admin/sections/{section}', [ClassSettingController::class, 'updateSection'])->name('admin.sections.update');
+        Route::delete('/admin/sections/{section}', [ClassSettingController::class, 'destroySection'])->name('admin.sections.destroy');
+
+        // Learners (data murid) — was public with no auth at all, now admin-only
+        Route::resource('learners', LearnerController::class)->names('admin.learners');
+    });
 });
-
-
-// Temporarily allow public access for testing purposes~
-Route::resource('learners', LearnerController::class)->names('admin.learners');
-    // Route::resource('attendance', AttendanceController::class);
-Route::delete('/learners/{id}', [LearnerController::class, 'destroy'])->name('learners.destroy');
-
-
-
-
-// // Admin-only routes for managing records
-// Route::middleware(['auth', 'role:admin'])->group(function () {
-//     Route::resource('learners', LearnerController::class)->names('admin.learners');
-//     // Add more admin-only routes here later
-// });
 
 
 /*
