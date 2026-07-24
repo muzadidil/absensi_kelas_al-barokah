@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ClassSettingController;
 use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\RaportController;
 use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Guru\AssignmentController as GuruAssignmentController;
 use App\Http\Controllers\Guru\AssignmentQuestionController as GuruAssignmentQuestionController;
@@ -178,6 +179,10 @@ Route::middleware(['auth'])->group(function () {
         // Raport Siswa
         Route::get('admin/raport', [RaportController::class, 'index'])->name('admin.raport.index');
         Route::get('admin/raport/{learner}', [RaportController::class, 'show'])->name('admin.raport.show');
+
+        // Pengaturan Situs (branding: favicon, logo login, alamat)
+        Route::get('admin/settings', [SettingController::class, 'index'])->name('admin.settings.index');
+        Route::post('admin/settings', [SettingController::class, 'update'])->name('admin.settings.update');
     });
 });
 

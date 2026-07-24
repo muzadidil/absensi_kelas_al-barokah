@@ -50,6 +50,7 @@ class TypingLevelController extends Controller
             ],
             'name' => 'required|string|max:255',
             'allowed_keys' => 'required|string|max:100',
+            'word_bank' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
     }

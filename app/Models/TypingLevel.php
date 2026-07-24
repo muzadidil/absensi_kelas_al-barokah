@@ -10,6 +10,7 @@ class TypingLevel extends Model
         'level_number',
         'name',
         'allowed_keys',
+        'word_bank',
         'description',
     ];
 

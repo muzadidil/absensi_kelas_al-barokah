@@ -56,6 +56,14 @@
                         <span class="text-muted small d-block mb-1">Tombol yang dilatih:</span>
                         <code class="fs-6">{{ strtoupper($level->allowed_keys) }}</code>
                     </div>
+                    <div class="mb-2">
+                        @php $wordCount = $level->word_bank ? count(array_filter(preg_split('/[\s,]+/u', trim($level->word_bank)))) : 0; @endphp
+                        @if($wordCount > 0)
+                            <span class="badge bg-success-subtle text-success-emphasis">{{ $wordCount }} kata di bank</span>
+                        @else
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis">Belum ada bank kata (teks acak)</span>
+                        @endif
+                    </div>
                     <div class="text-muted small">
                         <i class="bi bi-clipboard-data me-1"></i> {{ $level->attempts_count }} kali percobaan oleh murid
                     </div>
@@ -86,6 +94,10 @@
                             <div class="mb-3">
                                 <label class="form-label">Tombol yang Dilatih <span class="text-muted small">(ketik huruf/simbol tanpa spasi, mis. asdfghjkl;)</span></label>
                                 <input type="text" name="allowed_keys" class="form-control" value="{{ $level->allowed_keys }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Bank Kata <span class="text-muted small">(opsional — kata sungguhan untuk dilatih, pisahkan dengan koma/spasi/baris baru. Kalau kosong, teks latihan dibuat acak dari tombol di atas)</span></label>
+                                <textarea name="word_bank" class="form-control" rows="6" placeholder="contoh: ada, akad, akal, gagah, salah, ...">{{ $level->word_bank }}</textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Deskripsi <span class="text-muted small">(opsional)</span></label>
@@ -132,6 +144,10 @@
                     <div class="mb-3">
                         <label class="form-label">Tombol yang Dilatih <span class="text-muted small">(ketik huruf/simbol tanpa spasi, mis. asdfghjkl;)</span></label>
                         <input type="text" name="allowed_keys" class="form-control" placeholder="asdfghjkl;" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bank Kata <span class="text-muted small">(opsional — kata sungguhan untuk dilatih, pisahkan dengan koma/spasi/baris baru. Kalau kosong, teks latihan dibuat acak dari tombol di atas)</span></label>
+                        <textarea name="word_bank" class="form-control" rows="6" placeholder="contoh: ada, akad, akal, gagah, salah, ..."></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Deskripsi <span class="text-muted small">(opsional)</span></label>

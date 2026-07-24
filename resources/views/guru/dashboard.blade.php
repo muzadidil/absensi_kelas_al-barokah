@@ -6,8 +6,8 @@
 <style>
     .stat-card { position: relative; overflow: hidden; }
     .stat-card .card-body { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-    .stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fp-ink-muted); margin-bottom: 0.4rem; }
-    .stat-value { font-size: 1.9rem; font-weight: 700; color: var(--fp-ink); line-height: 1; }
+    .stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--lems-ink-muted); margin-bottom: 0.4rem; }
+    .stat-value { font-size: 1.9rem; font-weight: 700; color: var(--lems-ink); line-height: 1; }
     .stat-icon { width: 46px; height: 46px; border-radius: 0.8rem; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
     .icon-indigo { background: rgba(79,70,229,.1); color: #4f46e5; }
     .icon-green { background: rgba(25,135,84,.12); color: #157347; }
@@ -15,9 +15,9 @@
 
     .schedule-row { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1rem; border-radius: 0.75rem; }
     .schedule-row:hover { background: #f8f9fc; }
-    .schedule-time { min-width: 88px; font-weight: 700; font-size: 0.85rem; color: var(--fp-primary); }
-    .schedule-info .subject { font-weight: 600; font-size: 0.92rem; color: var(--fp-ink); }
-    .schedule-info .meta { font-size: 0.78rem; color: var(--fp-ink-muted); }
+    .schedule-time { min-width: 88px; font-weight: 700; font-size: 0.85rem; color: var(--lems-accent); }
+    .schedule-info .subject { font-weight: 600; font-size: 0.92rem; color: var(--lems-ink); }
+    .schedule-info .meta { font-size: 0.78rem; color: var(--lems-ink-muted); }
 </style>
 @endpush
 

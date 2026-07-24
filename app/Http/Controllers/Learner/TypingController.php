@@ -30,13 +30,13 @@ class TypingController extends Controller
     }
 
     /**
-     * Halaman latihan: tampilkan teks acak dari tombol yang diizinkan tahap ini.
+     * Halaman latihan: tampilkan teks latihan untuk tahap ini.
      */
     public function show(TypingLevel $typingLevel)
     {
         $learner = Learner::find(session('learner_id'));
 
-        $practiceText = $this->generatePracticeText($typingLevel->allowed_keys);
+        $practiceText = $this->generatePracticeText($typingLevel);
 
         return view('learner.typing.practice', compact('learner', 'typingLevel', 'practiceText'));
     }
@@ -67,10 +67,46 @@ class TypingController extends Controller
     }
 
     /**
-     * Bikin teks latihan acak: kelompok 3-5 huruf dari tombol yang diizinkan,
-     * dipisah spasi seperti "kata", supaya terasa seperti mengetik kalimat.
+     * Bikin teks latihan: kalau tahap punya word bank (kata sungguhan yang
+     * diisi Guru), acak beberapa kata dari situ. Kalau kosong, fallback ke
+     * kelompok huruf acak dari tombol yang diizinkan seperti sebelumnya.
      */
-    private function generatePracticeText(string $allowedKeys, int $totalChars = 120): string
+    private function generatePracticeText(TypingLevel $typingLevel, int $targetWordCount = 40): string
+    {
+        $words = $this->wordsFromBank($typingLevel->word_bank);
+
+        if (empty($words)) {
+            return $this->generateRandomLetterText($typingLevel->allowed_keys);
+        }
+
+        $picked = [];
+        for ($i = 0; $i < $targetWordCount; $i++) {
+            $picked[] = $words[array_rand($words)];
+        }
+
+        return implode(' ', $picked);
+    }
+
+    /**
+     * Pecah isi word bank (dipisah koma, spasi, dan/atau baris baru) jadi
+     * array kata bersih huruf kecil. Huruf kecil dipakai karena tahap latihan
+     * hanya melatih tombol huruf tanpa Shift.
+     */
+    private function wordsFromBank(?string $wordBank): array
+    {
+        if (! $wordBank) {
+            return [];
+        }
+
+        $words = preg_split('/[\s,]+/u', trim($wordBank));
+
+        return array_values(array_filter(array_map(
+            fn ($word) => mb_strtolower(trim($word)),
+            $words
+        )));
+    }
+
+    private function generateRandomLetterText(string $allowedKeys, int $totalChars = 120): string
     {
         $keys = str_split($allowedKeys);
         $words = [];

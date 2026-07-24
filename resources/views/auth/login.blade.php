@@ -3,17 +3,23 @@
 @endphp
 
 <x-guest-layout>
+    <!-- Heading -->
+    <div class="mb-5">
+        <h2 class="text-2xl font-semibold text-white mb-1">Masuk ke Akun</h2>
+        <p class="text-sm text-gray-300">Pilih peran Anda, lalu masukkan kredensial.</p>
+    </div>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <!-- Tabs -->
-    <div class="flex mb-6 rounded-full bg-white/10 p-1">
+    <div class="flex mb-6 rounded-full bg-white/10 p-1 border border-white/10">
         <button type="button" id="tab-btn-staff" onclick="switchLoginTab('staff')"
-            class="flex-1 py-2 text-sm font-semibold text-center rounded-full transition">
+            class="flex-1 py-2.5 text-sm font-semibold text-center rounded-full transition">
             Guru
         </button>
         <button type="button" id="tab-btn-siswa" onclick="switchLoginTab('siswa')"
-            class="flex-1 py-2 text-sm font-semibold text-center rounded-full transition">
+            class="flex-1 py-2.5 text-sm font-semibold text-center rounded-full transition">
             Siswa
         </button>
     </div>
@@ -21,33 +27,25 @@
     <!-- ================= TAB: ADMIN / GURU (tidak diubah) ================= -->
     <div id="tab-panel-staff">
         <div class="relative">
-            <!-- X button to go back (top-right of screen) -->
-            <!-- <a href="{{ url('/') }}"
-            class="absolute top-0 right-0 text-gray-400 hover:text-gray-600 text-2xl font-bold z-50"
-            aria-label="Close"
-            title="Back to Home">
-            &times;
-            </a> -->
-
-            <form method="POST" action="{{ route('login') }}" class="mt-5">
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
 
                 <!-- Email Address -->
-                <div class="mt-8">
+                <div>
                     <x-input-label for="email" :value="__('Email')" />
-                    <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="Enter your email address"/>
+                    <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="Masukkan alamat email"/>
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
                 <!-- Password -->
                 <div class="mt-4">
                     <x-input-label for="password" :value="__('Password')" />
-                    <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password"/>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500" />
+                    <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" placeholder="Masukkan kata sandi"/>
+                    <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-400" />
                 </div>
 
                <!-- Remember Me and Forgot Password -->
-                <div class="flex items-center justify-between mt-4 p-2">
+                <div class="flex items-center justify-between mt-4">
                     <label for="remember_me" class="inline-flex items-center">
                         <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
                         <span class="ms-2 text-sm text-gray-300">{{ __('Remember me') }}</span>
@@ -60,17 +58,17 @@
                     @endif
                 </div>
 
-                <!-- Actions: Back and Login Buttons -->
-                <div class="flex justify-between items-center mt-4 mb-4">
-                    <!-- Back Button -->
-                    <a href="{{ url('/') }}" class="text-sm text-white hover:underline">
-                        Back to Home
-                    </a>
-
-                    <!-- Login Button -->
-                    <x-primary-button style="background-color: #2563eb; color: white;" class="px-5 py-2 rounded-full font-medium transition-all duration-200">
+                <!-- Actions -->
+                <div class="mt-6">
+                    <x-primary-button style="background-color: #2563eb; color: white; width: 100%; justify-content: center;" class="py-2.5 rounded-full font-medium transition-all duration-200 hover:brightness-110">
                         {{ __('Log in') }}
                     </x-primary-button>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a href="{{ url('/') }}" class="text-sm text-gray-300 hover:text-white">
+                        &larr; Kembali ke Beranda
+                    </a>
                 </div>
             </form>
         </div>
@@ -78,11 +76,11 @@
 
     <!-- ================= TAB: SISWA (baru) ================= -->
     <div id="tab-panel-siswa">
-        <form method="POST" action="{{ route('learner.login') }}" class="mt-5">
+        <form method="POST" action="{{ route('learner.login') }}">
             @csrf
 
             <!-- Pilih Kelas -->
-            <div class="mt-4">
+            <div>
                 <x-input-label for="grade_level_select" value="Pilih Kelas" />
                 <select id="grade_level_select" onchange="loadLearnersByGrade(this.value)"
                     class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
@@ -112,14 +110,16 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex justify-between items-center mt-4 mb-4">
-                <a href="{{ url('/') }}" class="text-sm text-white hover:underline">
-                    Kembali ke Beranda
-                </a>
-
-                <x-primary-button style="background-color: #2563eb; color: white;" class="px-5 py-2 rounded-full font-medium transition-all duration-200">
+            <div class="mt-6">
+                <x-primary-button style="background-color: #2563eb; color: white; width: 100%; justify-content: center;" class="py-2.5 rounded-full font-medium transition-all duration-200 hover:brightness-110">
                     Masuk
                 </x-primary-button>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="{{ url('/') }}" class="text-sm text-gray-300 hover:text-white">
+                    &larr; Kembali ke Beranda
+                </a>
             </div>
         </form>
     </div>

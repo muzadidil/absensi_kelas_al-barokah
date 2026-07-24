@@ -3,11 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sistem Absensi Kelas Al-Barokah</title>
+    <title>{{ \App\Models\Setting::siteName() }}</title>
 
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" href="{{ \App\Models\Setting::faviconUrl() }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -42,11 +40,10 @@
 <body class="min-h-screen flex items-center justify-center text-white antialiased">
     <div class="max-w-2xl text-center px-6 py-12 glass rounded-3xl shadow-lg">
         <div class="flex justify-center mb-6">
-            <img src="{{ asset('images/developer.png') }}" alt="Logo" class="h-20 w-20 logo-animation">
-            <!-- <img src="https://laravel.com/img/logomark.min.svg" alt="Laravel Logo" class="h-20 w-20 logo-animation"> -->
+            <img src="{{ \App\Models\Setting::loginLogoUrl() }}" alt="Logo" class="h-20 w-20 logo-animation">
         </div>
         <h1 class="text-3xl font-semibold mb-2">Selamat Datang</h1>
-        <p class="text-lg mb-6">Sistem Absensi Kelas Al-Barokah</p>
+        <p class="text-lg mb-6">{{ \App\Models\Setting::siteName() }}</p>
 
         <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
             <a href="{{ route('login') }}" style="background-color: #2563eb; color: white;" class="px-5 py-2 rounded-full font-medium transition-all duration-200">Login</a>

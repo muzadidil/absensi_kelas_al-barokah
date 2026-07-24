@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Sistem Absensi Kelas Al-Barokah') | Dashboard</title>
 
+    <link rel="icon" href="{{ \App\Models\Setting::faviconUrl() }}">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -375,6 +377,13 @@
             class="menu-item nav-link {{ request()->routeIs('admin.raport.*') ? 'active' : '' }}"
             data-tooltip="Raport Siswa">
               <i class="bi bi-file-earmark-bar-graph me-2"></i><span> Raport</span>
+          </a>
+      </li>
+      <li class="nav-item mb-1">
+          <a href="{{ route('admin.settings.index') }}"
+            class="menu-item nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
+            data-tooltip="Pengaturan Situs (logo, favicon, alamat)">
+              <i class="bi bi-gear-fill me-2"></i><span> Pengaturan Situs</span>
           </a>
       </li>
       <!-- <li class="nav-item">

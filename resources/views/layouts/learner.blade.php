@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Sistem Absensi Kelas Al-Barokah') | Siswa</title>
 
+    <link rel="icon" href="{{ \App\Models\Setting::faviconUrl() }}">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -221,22 +223,33 @@
           vertical-align: middle;
       }
 
+      dialog, .modal-backdrop {
+        display: none !important;
+      }
+
+      #notificationDrawer {
+          box-shadow: -8px 0 24px rgba(16, 24, 40, 0.16);
+          border-left: 1px solid rgba(79, 107, 237, 0.35) !important;
+          border-radius: 1rem 0 0 1rem;
+      }
+
       footer.bg-light {
         background: #ffffff !important;
         border-top: 1px solid rgba(16, 24, 40, 0.06);
       }
 
-      /* Tombol Keluar di bawah sidebar */
-      .sidebar-logout-btn {
-        background: rgba(220, 53, 69, 0.15);
-        color: #ff8f9c;
+      .topbar .dropdown-menu {
         border: none;
-        width: 100%;
-        text-align: left;
+        border-radius: 0.75rem;
+        box-shadow: var(--lems-shadow-md);
+        padding: 0.5rem;
       }
-      .sidebar-logout-btn:hover {
-        background: rgba(220, 53, 69, 0.28);
-        color: #fff;
+      .topbar .dropdown-item {
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+      }
+      .topbar .dropdown-item-text {
+        padding: 0.25rem 0.75rem;
       }
     </style>
 
@@ -289,15 +302,40 @@
         </a>
       </li>
     </ul>
-
-    <!-- Tombol Keluar -->
-    <form method="POST" action="{{ route('learner.logout') }}">
-      @csrf
-      <button type="submit" class="menu-item sidebar-logout-btn" data-tooltip="Keluar">
-        <i class="bi bi-box-arrow-right me-2"></i><span> Keluar</span>
-      </button>
-    </form>
   </nav>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border border-1 border-primary rounded-4 shadow">
+
+      <div class="modal-header py-2 px-3">
+        <h5 class="modal-title" id="logoutModalLabel">Konfirmasi Logout</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        Apakah Anda yakin ingin keluar?
+      </div>
+
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-sm border border-primary text-primary bg-white"
+                data-bs-dismiss="modal">
+          Batal
+        </button>
+
+        <form method="POST" action="{{ route('learner.logout') }}">
+          @csrf
+          <button type="submit" class="btn btn-primary btn-sm">
+            Keluar
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
 
    <!-- Content + Topbar Wrapper -->
   <div class="content-wrapper">
@@ -315,15 +353,46 @@
         @yield('title', 'Dasbor Siswa')
       </h3>
 
-      <!-- Right-side: Nama Siswa -->
+      <!-- Right-side controls -->
       <div class="ms-auto d-flex align-items-center gap-2">
-          <i class="bi bi-person-circle fs-5 text-muted"></i>
-          <div class="text-end">
-              <div class="fw-semibold" style="font-size: 0.9rem; line-height: 1.1;">{{ $learner->nama_lengkap ?? '' }}</div>
-              <div class="text-muted" style="font-size: 0.75rem; line-height: 1.1;">Kelas {{ $learner->grade_level ?? '' }}</div>
+          <!-- Notification Bell -->
+          <button class="btn position-relative" onclick="toggleNotifications()">
+              <i class="bi bi-bell"></i>
+          </button>
+
+          <!-- User Dropdown -->
+          <div class="dropdown">
+              <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-circle fs-5"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                  <li class="dropdown-item-text fw-semibold">
+                      {{ $learner->nama_lengkap ?? '' }}
+                      <br>
+                      <small class="text-muted">Kelas {{ $learner->grade_level ?? '' }}</small>
+                      <small class="text-primary text-uppercase">Murid</small>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                      <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                          <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                      </a>
+                  </li>
+              </ul>
           </div>
       </div>
     </nav>
+
+    <!-- Notification Drawer -->
+    <div id="notificationDrawer" class="position-fixed top-0 end-0 bg-white border-start shadow h-100 p-3" style="width: 300px; z-index: 1050; transform: translateX(100%); transition: transform 0.3s;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Notifikasi</h5>
+            <button class="btn-close" onclick="toggleNotifications()"></button>
+        </div>
+        <div>
+            <p class="small text-danger">Tidak ada notifikasi baru.</p>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <div class="content py-0">
@@ -341,6 +410,11 @@
   <script>
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    function toggleNotifications() {
+        const drawer = document.getElementById('notificationDrawer');
+        drawer.style.transform = drawer.style.transform === 'translateX(0%)' ? 'translateX(100%)' : 'translateX(0%)';
     }
   </script>
 
