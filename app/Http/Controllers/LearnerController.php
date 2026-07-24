@@ -25,6 +25,17 @@ class LearnerController extends Controller
         return view('admin.learners.index', compact('learners', 'gradeLevels', 'sections'));
     }
 
+    /**
+     * Dasbor murid — diakses lewat sesi learner_id (login via PIN),
+     * bukan lewat Auth::user() seperti admin/guru.
+     */
+    public function learnerDashboard()
+    {
+        $learner = Learner::find(session('learner_id'));
+
+        return view('learner.dashboard', compact('learner'));
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([

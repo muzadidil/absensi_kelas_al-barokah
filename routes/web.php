@@ -9,6 +9,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\LearnerAttendanceController;
 use App\Http\Controllers\Admin\ClassSettingController;
+use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,10 @@ use App\Http\Controllers\Admin\ClassSettingController;
 Route::get('/', function () {
     return view('welcome');
 })->middleware('guest');
+
+// Murid login lewat Kelas + Nama + PIN (bukan email/password, terpisah dari Auth::user())
+Route::get('/api/learners-by-grade/{gradeLevel}', [LearnerLoginController::class, 'getByGrade']);
+Route::post('/learner-login', [LearnerLoginController::class, 'login'])->name('learner.login');
 
 
 /*
@@ -49,8 +54,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Guru
     Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
-    // Learner
-    Route::get('/learner/dashboard', [LearnerController::class, 'index'])->name('learner.dashboard');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -120,6 +123,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Learners (data murid) — was public with no auth at all, now admin-only
         Route::resource('learners', LearnerController::class)->names('admin.learners');
     });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Learner (Murid) Routes — sesi terpisah, bukan Auth::user()
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth.learner')->group(function () {
+    Route::get('/learner/dashboard', [LearnerController::class, 'learnerDashboard'])->name('learner.dashboard');
+    Route::post('/learner-logout', [LearnerLoginController::class, 'logout'])->name('learner.logout');
 });
 
 
