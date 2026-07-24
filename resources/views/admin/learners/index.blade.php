@@ -55,6 +55,7 @@
                     <th style="width: 1%;">No.</th>
                     <th class="px-3 py-2 text-left">Nama</th>
                     <th class="px-3 py-2 text-left">Email</th>
+                    <th class="px-3 py-2 text-left">PIN</th>
                     <th class="px-3 py-2 text-left">Tingkat Kelas</th>
                     <th class="px-3 py-2 text-left">Tahun Ajaran</th>
                     <th class="px-3 py-2 text-center">Aksi</th>
@@ -66,6 +67,7 @@
                         <td class="px-3 py-1">{{ $loop->iteration }}</td>
                         <td class="px-3 py-1">{{ $learner->fname }} {{ $learner->mname }} {{ $learner->lname }}</td>
                         <td class="px-3 py-1">{{ $learner->email ?: '-' }}</td>
+                        <td class="px-3 py-1">{{ $learner->pin ?: '-' }}</td>
                         <td class="px-3 py-1">{{ $learner->grade_level }}</td>
                         <td class="px-3 py-1">{{ $learner->section }}</td>
                         <td class="px-3 py-1 text-center">
@@ -125,6 +127,13 @@
                                         <label class="form-label">Email <span class="text-muted small">(opsional)</span></label>
                                         <input type="email" name="email" class="form-control" value="{{ $learner->email }}">
                                     </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">PIN <span class="text-muted small">(kosongkan kalau tidak mau ganti)</span></label>
+                                        <input type="number" name="pin" class="form-control" value="{{ $learner->pin }}" maxlength="4" placeholder="Contoh: 1234">
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-3 mb-3">
                                     <div class="col-md-4">
                                         <label class="form-label">Tingkat Kelas</label>
                                         <select name="grade_level" class="form-select" required>
@@ -204,6 +213,13 @@
                 <label for="email" class="form-label">Email <span class="text-muted small">(opsional)</span></label>
                 <input type="email" name="email" class="form-control rounded-3" placeholder="Email">
               </div>
+              <div class="col-md-4">
+                <label for="pin" class="form-label">PIN <span class="text-muted small">(opsional)</span></label>
+                <input type="number" name="pin" class="form-control rounded-3" maxlength="4" placeholder="Contoh: 1234">
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
               <div class="col-md-4">
                 <label for="grade_level" class="form-label">Tingkat Kelas</label>
                 <select name="grade_level" class="form-select rounded-3" required>

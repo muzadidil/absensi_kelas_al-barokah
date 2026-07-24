@@ -32,6 +32,7 @@ class LearnerController extends Controller
             'mname' => 'nullable|string',
             'lname' => 'required',
             'email' => 'nullable|email|unique:learners,email',
+            'pin' => 'nullable|numeric|digits:4',
             'grade_level' => 'required|exists:grade_levels,name',
             'section' => 'required|exists:sections,name',
         ]);
@@ -51,12 +52,18 @@ class LearnerController extends Controller
             'mname' => 'nullable|string',
             'lname' => 'required',
             'email' => 'nullable|email|unique:learners,email,' . $learner->id,
+            'pin' => 'nullable|numeric|digits:4',
             'grade_level' => 'required|exists:grade_levels,name',
             'section' => 'required|exists:sections,name',
         ]);
 
         $data['mname'] = $data['mname'] ?? '';
         $data['email'] = $data['email'] ?: null;
+
+        // PIN opsional saat edit: kosongkan input berarti PIN lama tidak diubah
+        if (empty($data['pin'])) {
+            unset($data['pin']);
+        }
 
         $learner->update($data);
 

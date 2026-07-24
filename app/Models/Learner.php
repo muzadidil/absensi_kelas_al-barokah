@@ -14,6 +14,7 @@ class Learner extends Model
         'mname',
         'lname',
         'email',
+        'pin',
         'grade_level',
         'section',
     ];
