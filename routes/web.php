@@ -47,8 +47,7 @@ Route::get('/dashboard', function () {
         $user->hasRole('learner') => redirect('/learner/dashboard'),
         default => abort(403),
     };
-// })->middleware(['auth'])->name('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 
 /*
@@ -56,8 +55,7 @@ Route::get('/dashboard', function () {
 | Authenticated User Routes (All Roles)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])->group(function () {
-// Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     // Guru
     Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
