@@ -107,26 +107,15 @@
 
                               <div class="modal-body pt-1">
                               <div class="container-fluid">
-                                  <div class="row g-3 mb-3">
+                                  <div class="row g-3 mb-3 align-items-start">
                                   <div class="col-md-12">
                                       <label class="form-label">Nama Lengkap</label>
                                       <input type="text" name="nama_lengkap" class="form-control" value="{{ $learner->nama_lengkap }}" required>
                                   </div>
                                   </div>
 
-                                  <div class="row g-3 mb-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">Email <span class="text-muted small">(opsional)</span></label>
-                                        <input type="email" name="email" class="form-control" value="{{ $learner->email }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">PIN <span class="text-muted small">(kosongkan kalau tidak mau ganti)</span></label>
-                                        <input type="number" name="pin" class="form-control" value="{{ $learner->pin }}" maxlength="4" placeholder="Contoh: 1234">
-                                    </div>
-                                  </div>
-
-                                  <div class="row g-3 mb-3">
-                                    <div class="col-md-4">
+                                  <div class="row g-3 mb-3 align-items-start">
+                                    <div class="col-md-6">
                                         <label class="form-label">Tingkat Kelas</label>
                                         <select name="grade_level" class="form-select" required>
                                         <option disabled>Pilih Tingkat</option>
@@ -135,7 +124,7 @@
                                         @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label class="form-label">Tahun Ajaran</label>
                                         <select name="section" class="form-select" required>
                                         <option disabled>Pilih Tahun Ajaran</option>
@@ -143,6 +132,17 @@
                                             <option value="{{ $section->name }}" @selected($learner->section === $section->name)>{{ $section->name }}</option>
                                         @endforeach
                                         </select>
+                                    </div>
+                                  </div>
+
+                                  <div class="row g-3 mb-3 align-items-start">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Email <span class="text-muted small">(opsional)</span></label>
+                                        <input type="email" name="email" class="form-control" value="{{ $learner->email }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">PIN</label>
+                                        <input type="number" name="pin" class="form-control" value="{{ $learner->pin }}" maxlength="4" placeholder="Kosongkan kalau tidak mau ganti">
                                     </div>
                                   </div>
                               </div>
@@ -184,25 +184,15 @@
           <div class="container-fluid">
 
             <!-- First Row: Name -->
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-3 align-items-start">
               <div class="col-md-12">
                 <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
                 <input type="text" name="nama_lengkap" class="form-control rounded-3" placeholder="Nama Lengkap" required>
               </div>
             </div>
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label for="email" class="form-label">Email <span class="text-muted small">(opsional)</span></label>
-                <input type="email" name="email" class="form-control rounded-3" placeholder="Email">
-              </div>
-              <div class="col-md-4">
-                <label for="pin" class="form-label">PIN <span class="text-muted small">(opsional)</span></label>
-                <input type="number" name="pin" class="form-control rounded-3" maxlength="4" placeholder="Contoh: 1234">
-              </div>
-            </div>
 
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
+            <div class="row g-3 mb-3 align-items-start">
+              <div class="col-md-6">
                 <label for="grade_level" class="form-label">Tingkat Kelas</label>
                 <select name="grade_level" class="form-select rounded-3" required>
                   <option value="" selected disabled>Pilih Tingkat</option>
@@ -212,7 +202,7 @@
                 </select>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <label for="section" class="form-label">Tahun Ajaran</label>
                 <select name="section" class="form-select rounded-3" required>
                   <option value="" selected disabled>Pilih Tahun Ajaran</option>
@@ -220,6 +210,17 @@
                       <option value="{{ $section->name }}">{{ $section->name }}</option>
                   @endforeach
                 </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3 align-items-start">
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email <span class="text-muted small">(opsional)</span></label>
+                <input type="email" name="email" class="form-control rounded-3" placeholder="Email">
+              </div>
+              <div class="col-md-6">
+                <label for="pin" class="form-label">PIN <span class="text-muted small">(opsional)</span></label>
+                <input type="number" name="pin" class="form-control rounded-3" maxlength="4" placeholder="Contoh: 1234">
               </div>
             </div>
 
