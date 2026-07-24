@@ -21,4 +21,14 @@ class Learner extends Model
     {
         return $this->hasMany(LearnerAttendance::class);
     }
+
+    public function assignmentLearners()
+    {
+        return $this->hasMany(AssignmentLearner::class);
+    }
+
+    public function learnerAnswers()
+    {
+        return $this->hasMany(LearnerAnswer::class);
+    }
 }
