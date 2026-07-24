@@ -27,15 +27,35 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h5 class="mb-0">Daftar Murid</h5>
 
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 align-items-center">
                 <a href="{{ route('admin.class-settings.index') }}" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-gear-fill me-1"></i> Kelola Tingkat Kelas & Tahun Ajaran
                 </a>
+
+                <!-- Filter Kelas -->
+                <select id="filterKelas" class="form-select form-select-sm" style="width: auto;"
+                    onchange="window.location.href = this.value ? '{{ route('admin.learners.index') }}?kelas=' + encodeURIComponent(this.value) : '{{ route('admin.learners.index') }}'">
+                    <option value="" {{ (!$kelas || $kelas === 'semua') ? 'selected' : '' }}>Semua Kelas</option>
+                    @foreach($gradeLevels as $gradeLevel)
+                        <option value="{{ $gradeLevel->name }}" {{ $kelas === $gradeLevel->name ? 'selected' : '' }}>{{ $gradeLevel->name }}</option>
+                    @endforeach
+                </select>
+
                 <!-- Add Learner Button -->
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addLearnerModal">
                     <i class="bi bi-person-plus-fill me-1"></i> Tambah Murid
                 </button>
             </div>
+        </div>
+
+        <div class="mt-2">
+            <small class="text-muted">
+                @if($kelas && $kelas !== 'semua')
+                    Menampilkan {{ $learners->count() }} murid dari kelas {{ $kelas }}
+                @else
+                    Menampilkan {{ $learners->count() }} murid
+                @endif
+            </small>
         </div>
     </div>
 

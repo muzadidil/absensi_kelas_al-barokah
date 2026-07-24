@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class LearnerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
          if (auth()->user()->hasRole('learner')) {
         return view('learner.dashboard');
@@ -19,10 +19,18 @@ class LearnerController extends Controller
 
     // For admin viewing learner records
         // $learners = Learner::all();
-         $learners = Learner::orderBy('nama_lengkap')->get();
+        $kelas = $request->query('kelas');
+
+        $learnersQuery = Learner::orderBy('nama_lengkap');
+
+        if ($kelas && $kelas !== 'semua') {
+            $learnersQuery->where('grade_level', $kelas);
+        }
+
+         $learners = $learnersQuery->get();
          $gradeLevels = GradeLevel::orderBy('name')->get();
          $sections = Section::orderBy('name')->get();
-        return view('admin.learners.index', compact('learners', 'gradeLevels', 'sections'));
+        return view('admin.learners.index', compact('learners', 'gradeLevels', 'sections', 'kelas'));
     }
 
     /**
