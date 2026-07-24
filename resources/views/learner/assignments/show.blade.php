@@ -105,8 +105,8 @@
             <div class="card border-0 shadow-sm mb-3 bg-primary bg-opacity-10">
                 <div class="card-body text-center">
                     <h5 class="mb-0">Total Nilai: {{ $assignmentLearner->total_score ?? 0 }} poin</h5>
-                    @if($assignment->questions->contains('type', 'essay'))
-                        <small class="text-muted">Nilai soal essay akan ditambahkan setelah dinilai admin.</small>
+                    @if($assignment->questions->whereIn('type', ['essay', 'praktek'])->isNotEmpty())
+                        <small class="text-muted">Nilai soal essay/praktek akan ditambahkan setelah dinilai admin.</small>
                     @endif
                 </div>
             </div>

@@ -41,9 +41,9 @@ class AssignmentController extends Controller
             'assignmentLearners.learner',
         ]);
 
-        // Tandai murid mana yang masih punya soal essay yang belum dinilai,
-        // supaya tabel "Murid yang Ditugaskan" bisa kasih peringatan.
-        $essayQuestionIds = $assignment->questions->where('type', 'essay')->pluck('id');
+        // Tandai murid mana yang masih punya soal essay/praktek yang belum
+        // dinilai, supaya tabel "Murid yang Ditugaskan" bisa kasih peringatan.
+        $essayQuestionIds = $assignment->questions->whereIn('type', ['essay', 'praktek'])->pluck('id');
         $ungradedByLearner = [];
         if ($essayQuestionIds->isNotEmpty()) {
             $ungradedByLearner = LearnerAnswer::whereIn('assignment_question_id', $essayQuestionIds)
@@ -90,7 +90,7 @@ class AssignmentController extends Controller
             ->firstOrFail();
 
         $assignment->load('questions');
-        $essayQuestions = $assignment->questions->where('type', 'essay');
+        $essayQuestions = $assignment->questions->whereIn('type', ['essay', 'praktek']);
 
         $rules = [];
         foreach ($essayQuestions as $question) {

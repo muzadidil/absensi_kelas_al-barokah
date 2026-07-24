@@ -19,7 +19,7 @@ class AssignmentQuestionController extends Controller
             'question_text' => $data['question_text'],
             'options' => $data['type'] === 'pilgan' ? array_values($data['options']) : null,
             'correct_answer' => $data['type'] === 'pilgan' ? $data['correct_answer'] : null,
-            'answer_key' => $data['type'] === 'essay' ? ($data['answer_key'] ?? null) : null,
+            'answer_key' => in_array($data['type'], ['essay', 'praktek']) ? ($data['answer_key'] ?? null) : null,
             'points' => $data['points'],
             'sort_order' => $assignment->questions()->count() + 1,
         ]);
@@ -37,7 +37,7 @@ class AssignmentQuestionController extends Controller
             'question_text' => $data['question_text'],
             'options' => $data['type'] === 'pilgan' ? array_values($data['options']) : null,
             'correct_answer' => $data['type'] === 'pilgan' ? $data['correct_answer'] : null,
-            'answer_key' => $data['type'] === 'essay' ? ($data['answer_key'] ?? null) : null,
+            'answer_key' => in_array($data['type'], ['essay', 'praktek']) ? ($data['answer_key'] ?? null) : null,
             'points' => $data['points'],
         ]);
 
@@ -56,7 +56,7 @@ class AssignmentQuestionController extends Controller
     private function validateQuestion(Request $request): array
     {
         return $request->validate([
-            'type' => 'required|in:pilgan,essay',
+            'type' => 'required|in:pilgan,essay,praktek',
             'question_text' => 'required|string',
             'options' => 'required_if:type,pilgan|array|min:2|max:5',
             'options.*' => 'string',

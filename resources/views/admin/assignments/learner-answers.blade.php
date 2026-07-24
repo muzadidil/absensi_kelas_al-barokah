@@ -44,8 +44,8 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h6 class="fw-bold mb-0">Soal {{ $loop->iteration }}</h6>
                         <div class="d-flex gap-2">
-                            <span class="badge {{ $question->type === 'pilgan' ? 'bg-primary' : 'bg-warning text-dark' }}">
-                                {{ $question->type === 'pilgan' ? 'Pilgan' : 'Essay' }}
+                            <span class="badge {{ match($question->type) { 'pilgan' => 'bg-primary', 'essay' => 'bg-warning text-dark', 'praktek' => 'bg-info text-dark' } }}">
+                                {{ match($question->type) { 'pilgan' => 'Pilgan', 'essay' => 'Essay', 'praktek' => 'Praktek' } }}
                             </span>
                             <span class="badge bg-light text-dark border">{{ $question->points }} poin</span>
                         </div>
@@ -77,7 +77,7 @@
                     @else
                         @if($question->answer_key)
                             <div class="mb-3">
-                                <span class="text-muted small d-block mb-1">Kunci Jawaban Acuan:</span>
+                                <span class="text-muted small d-block mb-1">{{ $question->type === 'praktek' ? 'Kriteria Penilaian:' : 'Kunci Jawaban Acuan:' }}</span>
                                 <div class="border rounded-3 p-2 bg-light-subtle border-primary-subtle">{{ $question->answer_key }}</div>
                             </div>
                         @endif

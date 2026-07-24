@@ -56,8 +56,8 @@
                 <div class="border rounded-3 p-3 mb-2">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <span class="fw-bold">Soal {{ $loop->iteration }}</span>
-                        <span class="badge {{ $question->type === 'pilgan' ? 'bg-primary' : 'bg-warning text-dark' }}">
-                            {{ $question->type === 'pilgan' ? 'Pilgan' : 'Essay' }}
+                        <span class="badge {{ match($question->type) { 'pilgan' => 'bg-primary', 'essay' => 'bg-warning text-dark', 'praktek' => 'bg-info text-dark' } }}">
+                            {{ match($question->type) { 'pilgan' => 'Pilgan', 'essay' => 'Essay', 'praktek' => 'Praktek' } }}
                         </span>
                         <span class="badge bg-light text-dark border">{{ $question->points }} poin</span>
                     </div>
@@ -72,9 +72,9 @@
                                 </li>
                             @endforeach
                         </ul>
-                    @elseif($question->type === 'essay' && $question->answer_key)
+                    @elseif(in_array($question->type, ['essay', 'praktek']) && $question->answer_key)
                         <div class="small text-muted">
-                            <span class="fw-semibold">Kunci jawaban acuan:</span> {{ $question->answer_key }}
+                            <span class="fw-semibold">{{ $question->type === 'praktek' ? 'Kriteria penilaian:' : 'Kunci jawaban acuan:' }}</span> {{ $question->answer_key }}
                         </div>
                     @endif
                 </div>

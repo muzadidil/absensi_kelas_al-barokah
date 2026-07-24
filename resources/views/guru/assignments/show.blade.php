@@ -137,8 +137,8 @@
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <span class="fw-bold">Soal {{ $loop->iteration }}</span>
-                                <span class="badge {{ $question->type === 'pilgan' ? 'bg-primary' : 'bg-warning text-dark' }}">
-                                    {{ $question->type === 'pilgan' ? 'Pilgan' : 'Essay' }}
+                                <span class="badge {{ match($question->type) { 'pilgan' => 'bg-primary', 'essay' => 'bg-warning text-dark', 'praktek' => 'bg-info text-dark' } }}">
+                                    {{ match($question->type) { 'pilgan' => 'Pilgan', 'essay' => 'Essay', 'praktek' => 'Praktek' } }}
                                 </span>
                                 <span class="badge bg-light text-dark border">{{ $question->points }} poin</span>
                             </div>
@@ -153,9 +153,9 @@
                                         </li>
                                     @endforeach
                                 </ul>
-                            @elseif($question->type === 'essay' && $question->answer_key)
+                            @elseif(in_array($question->type, ['essay', 'praktek']) && $question->answer_key)
                                 <div class="small text-muted">
-                                    <span class="fw-semibold">Kunci jawaban acuan:</span> {{ $question->answer_key }}
+                                    <span class="fw-semibold">{{ $question->type === 'praktek' ? 'Kriteria penilaian:' : 'Kunci jawaban acuan:' }}</span> {{ $question->answer_key }}
                                 </div>
                             @endif
                         </div>
@@ -198,6 +198,10 @@
                                       <input class="form-check-input" type="radio" name="type" value="essay" onchange="toggleQuestionType(this.form)" {{ $question->type === 'essay' ? 'checked' : '' }}>
                                       <label class="form-check-label">Essay</label>
                                   </div>
+                                  <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="radio" name="type" value="praktek" onchange="toggleQuestionType(this.form)" {{ $question->type === 'praktek' ? 'checked' : '' }}>
+                                      <label class="form-check-label">Praktek</label>
+                                  </div>
                               </div>
 
                               <div class="mb-3">
@@ -225,8 +229,8 @@
                                   <input type="hidden" name="correct_answer" value="{{ $question->correct_answer }}">
                               </div>
 
-                              <div class="essay-section {{ $question->type === 'essay' ? '' : 'd-none' }}">
-                                  <label class="form-label">Kunci Jawaban Acuan <span class="text-muted small">(opsional, panduan untuk guru saat menilai)</span></label>
+                              <div class="essay-section {{ in_array($question->type, ['essay', 'praktek']) ? '' : 'd-none' }}">
+                                  <label class="form-label">Kunci Jawaban / Kriteria Penilaian <span class="text-muted small">(opsional, panduan untuk guru saat menilai)</span></label>
                                   <textarea name="answer_key" class="form-control" rows="2">{{ $question->answer_key }}</textarea>
                               </div>
 
@@ -272,6 +276,10 @@
                           <input class="form-check-input" type="radio" name="type" value="essay" onchange="toggleQuestionType(this.form)">
                           <label class="form-check-label">Essay</label>
                       </div>
+                      <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="type" value="praktek" onchange="toggleQuestionType(this.form)">
+                          <label class="form-check-label">Praktek</label>
+                      </div>
                   </div>
 
                   <div class="mb-3">
@@ -304,7 +312,7 @@
                   </div>
 
                   <div class="essay-section d-none">
-                      <label class="form-label">Kunci Jawaban Acuan <span class="text-muted small">(opsional, panduan untuk guru saat menilai)</span></label>
+                      <label class="form-label">Kunci Jawaban / Kriteria Penilaian <span class="text-muted small">(opsional, panduan untuk guru saat menilai)</span></label>
                       <textarea name="answer_key" class="form-control" rows="2"></textarea>
                   </div>
 
