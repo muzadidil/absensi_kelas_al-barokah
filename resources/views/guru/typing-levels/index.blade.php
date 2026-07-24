@@ -13,6 +13,14 @@
     .rule-off { background: rgba(220,53,69,.12); color: #b02a37; }
     .rule-info{ background: rgba(79,70,229,.10); color: #4f46e5; }
     .criteria-box { background: #f8f9fc; border: 1px solid var(--lems-border, #e7e8ee); border-radius: 0.6rem; padding: 0.85rem; }
+
+    /* Pastikan isi modal tahap bisa di-scroll di layar pendek — body dibatasi
+       tingginya lalu overflow, sehingga footer (Simpan/Batal) selalu terlihat. */
+    #addLevelModal .modal-body,
+    [id^="editLevelModal"] .modal-body {
+        max-height: calc(100vh - 190px);
+        overflow-y: auto;
+    }
 </style>
 @endpush
 
