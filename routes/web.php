@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\LearnerAttendanceController;
 use App\Http\Controllers\Admin\ClassSettingController;
 use App\Http\Controllers\Admin\AssignmentController;
+use App\Http\Controllers\Admin\AssignmentQuestionController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
@@ -126,6 +127,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Assignments (Tugas)
         Route::resource('admin/assignments', AssignmentController::class)->names('admin.assignments');
+
+        // Assignment Questions (Soal)
+        Route::post('admin/assignments/{assignment}/questions', [AssignmentQuestionController::class, 'store'])->name('admin.assignments.questions.store');
+        Route::put('admin/assignments/{assignment}/questions/{question}', [AssignmentQuestionController::class, 'update'])->name('admin.assignments.questions.update');
+        Route::delete('admin/assignments/{assignment}/questions/{question}', [AssignmentQuestionController::class, 'destroy'])->name('admin.assignments.questions.destroy');
+
+        // Assign / Unassign Murid ke Tugas
+        Route::post('admin/assignments/{assignment}/assign', [AssignmentController::class, 'assignLearners'])->name('admin.assignments.assign');
+        Route::delete('admin/assignments/{assignment}/unassign/{learner}', [AssignmentController::class, 'unassignLearner'])->name('admin.assignments.unassign');
     });
 });
 
