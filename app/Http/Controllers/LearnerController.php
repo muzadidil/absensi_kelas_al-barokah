@@ -27,30 +27,38 @@ class LearnerController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'fname' => 'required',
+            'mname' => 'nullable|string',
             'lname' => 'required',
-            'email' => 'required|email|unique:learners,email',
+            'email' => 'nullable|email|unique:learners,email',
             'grade_level' => 'required|exists:grade_levels,name',
             'section' => 'required|exists:sections,name',
         ]);
 
-        Learner::create($request->all());
+        $data['mname'] = $data['mname'] ?? '';
+        $data['email'] = $data['email'] ?: null;
+
+        Learner::create($data);
 
         return redirect()->back()->with('success', 'Murid berhasil ditambahkan!');
     }
 
     public function update(Request $request, Learner $learner)
     {
-        $request->validate([
+        $data = $request->validate([
             'fname' => 'required',
+            'mname' => 'nullable|string',
             'lname' => 'required',
-            'email' => 'required|email|unique:learners,email,' . $learner->id,
+            'email' => 'nullable|email|unique:learners,email,' . $learner->id,
             'grade_level' => 'required|exists:grade_levels,name',
             'section' => 'required|exists:sections,name',
         ]);
 
-        $learner->update($request->all());
+        $data['mname'] = $data['mname'] ?? '';
+        $data['email'] = $data['email'] ?: null;
+
+        $learner->update($data);
 
         return redirect()->back()->with('success', 'Data murid berhasil diperbarui!');
     }

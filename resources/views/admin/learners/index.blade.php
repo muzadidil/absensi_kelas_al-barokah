@@ -65,7 +65,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-3 py-1">{{ $loop->iteration }}</td>
                         <td class="px-3 py-1">{{ $learner->fname }} {{ $learner->mname }} {{ $learner->lname }}</td>
-                        <td class="px-3 py-1">{{ $learner->email }}</td>
+                        <td class="px-3 py-1">{{ $learner->email ?: '-' }}</td>
                         <td class="px-3 py-1">{{ $learner->grade_level }}</td>
                         <td class="px-3 py-1">{{ $learner->section }}</td>
                         <td class="px-3 py-1 text-center">
@@ -122,8 +122,8 @@
 
                                   <div class="row g-3 mb-3">
                                     <div class="col-md-4">
-                                        <label class="form-label">Email</label>
-                                        <input type="email" name="email" class="form-control" value="{{ $learner->email }}" required>
+                                        <label class="form-label">Email <span class="text-muted small">(opsional)</span></label>
+                                        <input type="email" name="email" class="form-control" value="{{ $learner->email }}">
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">Tingkat Kelas</label>
@@ -201,8 +201,8 @@
             </div>
             <div class="row g-3 mb-3">
               <div class="col-md-4">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" name="email" class="form-control rounded-3" placeholder="Email" required>
+                <label for="email" class="form-label">Email <span class="text-muted small">(opsional)</span></label>
+                <input type="email" name="email" class="form-control rounded-3" placeholder="Email">
               </div>
               <div class="col-md-4">
                 <label for="grade_level" class="form-label">Tingkat Kelas</label>
