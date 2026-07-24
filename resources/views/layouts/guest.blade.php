@@ -38,6 +38,15 @@
         border-color: rgba(255, 255, 255, 0.3) !important;
     }
 
+    select {
+        color-scheme: dark;
+    }
+
+    select option {
+        background-color: #1f2937 !important;
+        color: white !important;
+    }
+
     input::placeholder {
         color: rgba(255, 255, 255, 0.6);
     }

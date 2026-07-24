@@ -10,7 +10,7 @@
     <div class="flex mb-6 rounded-full bg-white/10 p-1">
         <button type="button" id="tab-btn-staff" onclick="switchLoginTab('staff')"
             class="flex-1 py-2 text-sm font-semibold text-center rounded-full transition">
-            Admin / Guru
+            Guru
         </button>
         <button type="button" id="tab-btn-siswa" onclick="switchLoginTab('siswa')"
             class="flex-1 py-2 text-sm font-semibold text-center rounded-full transition">
