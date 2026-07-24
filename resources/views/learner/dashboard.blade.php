@@ -23,27 +23,30 @@
             </form>
         </div>
 
-        <div class="row g-4">
-            <!-- Attendance -->
-            <div class="col-md-6">
-                <div class="card border-0 shadow h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-clipboard2-check fs-1 text-primary mb-3"></i>
-                        <h5 class="card-title">Absensi</h5>
-                        <p class="card-text">Catat absensi harian Anda.</p>
-                        <a href="{{ route('admin.attendance.index') }}" class="btn btn-primary w-100">Buka</a>
-                    </div>
-                </div>
-            </div>
+        @php
+            $tugasBelumCount = $learner->assignmentLearners()->where('status', 'belum')->count();
+        @endphp
 
-            <!-- Profile -->
+        <div class="row g-4 justify-content-center">
+            <!-- Tugas Saya -->
             <div class="col-md-6">
                 <div class="card border-0 shadow h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-person-circle fs-1 text-success mb-3"></i>
-                        <h5 class="card-title">Profil Saya</h5>
-                        <p class="card-text">Lihat atau perbarui data <br>murid Anda.</p>
-                        <a href="{{ route('profile.edit') }}" class="btn btn-success w-100">Ke Profil</a>
+                    <div class="card-body text-center position-relative">
+                        @if($tugasBelumCount > 0)
+                            <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger">
+                                {{ $tugasBelumCount }}
+                            </span>
+                        @endif
+                        <i class="bi bi-journal-text fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Tugas Saya</h5>
+                        <p class="card-text">
+                            @if($tugasBelumCount > 0)
+                                Ada {{ $tugasBelumCount }} tugas yang belum dikerjakan.
+                            @else
+                                Tidak ada tugas yang menunggu dikerjakan.
+                            @endif
+                        </p>
+                        <a href="{{ route('learner.assignments.index') }}" class="btn btn-primary w-100">Buka</a>
                     </div>
                 </div>
             </div>

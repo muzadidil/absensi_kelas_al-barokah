@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LearnerAttendanceController;
 use App\Http\Controllers\Admin\ClassSettingController;
 use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\AssignmentQuestionController;
+use App\Http\Controllers\Learner\AssignmentController as LearnerAssignmentController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
@@ -148,6 +149,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware('auth.learner')->group(function () {
     Route::get('/learner/dashboard', [LearnerController::class, 'learnerDashboard'])->name('learner.dashboard');
     Route::post('/learner-logout', [LearnerLoginController::class, 'logout'])->name('learner.logout');
+
+    // Tugas (dikerjakan oleh murid)
+    Route::get('/learner/tugas', [LearnerAssignmentController::class, 'index'])->name('learner.assignments.index');
+    Route::get('/learner/tugas/{assignment}', [LearnerAssignmentController::class, 'show'])->name('learner.assignments.show');
+    Route::post('/learner/tugas/{assignment}/submit', [LearnerAssignmentController::class, 'submit'])->name('learner.assignments.submit');
 });
 
 
