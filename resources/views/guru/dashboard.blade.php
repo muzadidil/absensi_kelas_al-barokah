@@ -111,9 +111,11 @@
                 <a href="{{ route('guru.quiz-levels.index') }}" class="btn btn-outline-primary mb-2 text-start">
                     <i class="bi bi-ui-checks me-2"></i> Master Kuis Pilihan Ganda
                 </a>
+                @if(auth()->user()->teachesSubjectNamed('TIK'))
                 <a href="{{ route('guru.typing-levels.index') }}" class="btn btn-outline-primary mb-2 text-start">
                     <i class="bi bi-keyboard me-2"></i> Master Latihan Mengetik
                 </a>
+                @endif
                 <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary text-start">
                     <i class="bi bi-person-gear me-2"></i> Edit Profil Saya
                 </a>
