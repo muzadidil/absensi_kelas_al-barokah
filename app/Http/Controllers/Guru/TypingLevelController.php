@@ -13,17 +13,10 @@ use Illuminate\Validation\Rule;
  */
 class TypingLevelController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            abort_unless($request->user()->teachesSubjectNamed('TIK'), 403, 'Fitur ini khusus untuk Guru TIK.');
-
-            return $next($request);
-        });
-    }
-
     public function index(Request $request)
     {
+        $this->authorizeTik($request);
+
         $levels = TypingLevel::where('guru_id', $request->user()->id)
             ->withCount('attempts')
             ->orderBy('level_number')
@@ -34,6 +27,8 @@ class TypingLevelController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorizeTik($request);
+
         $subject = $this->tikSubject();
 
         $data = $this->validateLevel($request);
@@ -84,7 +79,14 @@ class TypingLevelController extends Controller
 
     private function authorizeOwner(Request $request, TypingLevel $typingLevel): void
     {
+        $this->authorizeTik($request);
+
         abort_unless($typingLevel->guru_id === $request->user()->id, 403);
+    }
+
+    private function authorizeTik(Request $request): void
+    {
+        abort_unless($request->user()->teachesSubjectNamed('TIK'), 403, 'Fitur ini khusus untuk Guru TIK.');
     }
 
     private function tikSubject(): Subject
