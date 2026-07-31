@@ -323,6 +323,7 @@
               <i class="bi bi-ui-checks me-2"></i><span> Kuis Pilihan Ganda</span>
           </a>
       </li>
+      @if(auth()->user()->teachesSubjectNamed('TIK'))
       <li class="nav-item mb-1">
           <a href="{{ route('guru.typing-levels.index') }}"
               class="menu-item nav-link {{ request()->routeIs('guru.typing-levels.*') ? 'active' : '' }}"
@@ -330,6 +331,7 @@
               <i class="bi bi-keyboard-fill me-2"></i><span> Latihan Mengetik</span>
           </a>
       </li>
+      @endif
     </ul>
   </nav>
 

@@ -21,6 +21,7 @@ use App\Mail\WelcomeMail;
 // the email content, subject, and view template for welcome messages.
 
 use App\Models\EmailLog;
+use App\Models\Subject;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -30,7 +31,8 @@ class UserController extends Controller
         // $users = User::all(); // get all users
         // $users = User::orderBy('name', 'asc')->get(); // alphabetical order
         $users = User::orderBy('created_at', 'desc')->paginate(10); // created_date order descending
-        return view('users.index', compact('users'));
+        $subjects = Subject::orderBy('name')->get();
+        return view('users.index', compact('users', 'subjects'));
     }
 
     public function update(Request $request, User $user)
@@ -39,6 +41,8 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|exists:roles,name',
+            'subjects' => 'array',
+            'subjects.*' => 'integer|exists:subjects,id',
         ]);
 
         DB::transaction(function () use ($request, $user) {
@@ -49,6 +53,9 @@ class UserController extends Controller
 
             // Sync role using Spatie
             $user->syncRoles([$request->role]);
+
+            // Mapel yang diampu — hanya relevan untuk role guru.
+            $user->subjects()->sync($request->role === 'guru' ? $request->input('subjects', []) : []);
         });
 
         return redirect()

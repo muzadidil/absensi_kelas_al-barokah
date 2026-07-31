@@ -6,25 +6,42 @@ use App\Http\Controllers\Controller;
 use App\Models\QuizLevel;
 use App\Models\QuizOption;
 use App\Models\QuizQuestion;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class QuizLevelController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $levels = QuizLevel::withCount(['questions', 'attempts'])
+        $subjects = $request->user()->subjects()->orderBy('name')->get();
+
+        if ($subjects->isEmpty()) {
+            return view('guru.quiz-levels.index', [
+                'subjects' => $subjects,
+                'activeSubject' => null,
+                'levels' => collect(),
+            ]);
+        }
+
+        $activeSubject = $subjects->firstWhere('id', (int) $request->query('subject')) ?? $subjects->first();
+
+        $levels = QuizLevel::where('guru_id', $request->user()->id)
+            ->where('subject_id', $activeSubject->id)
+            ->withCount(['questions', 'attempts'])
             ->orderBy('level_number')
             ->get();
 
-        return view('guru.quiz-levels.index', compact('levels'));
+        return view('guru.quiz-levels.index', compact('subjects', 'activeSubject', 'levels'));
     }
 
     /**
      * Kelola soal satu tahap.
      */
-    public function show(QuizLevel $quizLevel)
+    public function show(Request $request, QuizLevel $quizLevel)
     {
+        $this->authorizeOwner($request, $quizLevel);
+
         $quizLevel->load(['questions.options']);
 
         return view('guru.quiz-levels.show', compact('quizLevel'));
@@ -32,7 +49,11 @@ class QuizLevelController extends Controller
 
     public function store(Request $request)
     {
-        $data = $this->validateLevel($request);
+        $subject = $this->resolveOwnedSubject($request);
+
+        $data = $this->validateLevel($request, $subject->id);
+        $data['guru_id'] = $request->user()->id;
+        $data['subject_id'] = $subject->id;
 
         QuizLevel::create($data);
 
@@ -41,15 +62,19 @@ class QuizLevelController extends Controller
 
     public function update(Request $request, QuizLevel $quizLevel)
     {
-        $data = $this->validateLevel($request, $quizLevel->id);
+        $this->authorizeOwner($request, $quizLevel);
+
+        $data = $this->validateLevel($request, $quizLevel->subject_id, $quizLevel->id);
 
         $quizLevel->update($data);
 
         return redirect()->back()->with('success', 'Tahap kuis berhasil diperbarui!');
     }
 
-    public function destroy(QuizLevel $quizLevel)
+    public function destroy(Request $request, QuizLevel $quizLevel)
     {
+        $this->authorizeOwner($request, $quizLevel);
+
         $quizLevel->delete();
 
         return redirect()->back()->with('success', 'Tahap kuis berhasil dihapus!');
@@ -59,10 +84,12 @@ class QuizLevelController extends Controller
      * Salin sebuah tahap beserta seluruh soal & opsinya sebagai tahap baru di
      * urutan akhir. Nomor otomatis unik dan nama diberi penanda "(salinan)".
      */
-    public function duplicate(QuizLevel $quizLevel)
+    public function duplicate(Request $request, QuizLevel $quizLevel)
     {
+        $this->authorizeOwner($request, $quizLevel);
+
         $copy = $quizLevel->replicate();
-        $copy->level_number = (int) QuizLevel::max('level_number') + 1;
+        $copy->level_number = (int) QuizLevel::where('guru_id', $quizLevel->guru_id)->max('level_number') + 1;
         $copy->name = mb_substr($quizLevel->name . ' (salinan)', 0, 255);
         $copy->save();
 
@@ -87,12 +114,34 @@ class QuizLevelController extends Controller
         return redirect()->back()->with('success', 'Tahap berhasil disalin beserta semua soalnya! Silakan ubah nomor & nama tahap salinan.');
     }
 
-    private function validateLevel(Request $request, ?int $ignoreId = null): array
+    private function authorizeOwner(Request $request, QuizLevel $quizLevel): void
+    {
+        abort_unless($quizLevel->guru_id === $request->user()->id, 403);
+    }
+
+    /**
+     * Mapel yang dipilih Guru saat menambah tahap — harus salah satu mapel
+     * yang memang diampunya.
+     */
+    private function resolveOwnedSubject(Request $request): Subject
+    {
+        $subjectId = (int) $request->input('subject_id');
+
+        $subject = $request->user()->subjects()->find($subjectId);
+
+        abort_unless($subject, 403, 'Anda belum ditugaskan mengampu mapel ini.');
+
+        return $subject;
+    }
+
+    private function validateLevel(Request $request, int $subjectId, ?int $ignoreId = null): array
     {
         $data = $request->validate([
             'level_number' => [
                 'required', 'integer', 'min:1', 'max:999',
-                Rule::unique('quiz_levels', 'level_number')->ignore($ignoreId),
+                Rule::unique('quiz_levels', 'level_number')
+                    ->where('guru_id', $request->user()->id)
+                    ->ignore($ignoreId),
             ],
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',

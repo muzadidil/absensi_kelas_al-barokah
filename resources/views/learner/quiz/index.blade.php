@@ -18,7 +18,10 @@
 @endif
 
 <div class="mb-4">
-    <h4 class="fw-bold mb-1"><i class="bi bi-ui-checks me-1"></i> Kuis Pilihan Ganda</h4>
+    <a href="{{ route('learner.quiz.index') }}" class="btn btn-sm btn-outline-secondary mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Semua Mapel
+    </a>
+    <h4 class="fw-bold mb-1"><i class="bi bi-ui-checks me-1"></i> Kuis {{ $subject->name }}</h4>
     <p class="text-muted mb-0">Jawab benar untuk lanjut, salah = ulang dari awal tahap. Lulus satu tahap membuka tahap berikutnya. Semangat, makin sering coba makin jago! 💪</p>
 </div>
 

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class QuizLevel extends Model
 {
     protected $fillable = [
+        'guru_id',
+        'subject_id',
         'level_number',
         'name',
         'description',
@@ -16,6 +18,16 @@ class QuizLevel extends Model
     protected $casts = [
         'reset_to_first_on_fail' => 'boolean',
     ];
+
+    public function guru()
+    {
+        return $this->belongsTo(User::class, 'guru_id');
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
 
     public function questions()
     {

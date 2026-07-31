@@ -2,13 +2,22 @@
 
 namespace Database\Seeders;
 
+use App\Models\Subject;
 use App\Models\TypingLevel;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class TypingLevelSeeder extends Seeder
 {
     public function run(): void
     {
+        $guru = User::where('email', 'muzadidilfuad@gmail.com')->first();
+        $subject = $guru ? Subject::firstOrCreate(['name' => 'TIK']) : null;
+
+        if ($guru && $subject) {
+            $subject->teachers()->syncWithoutDetaching([$guru->id]);
+        }
+
         $levels = [
             [
                 'level_number' => 1,
@@ -44,7 +53,15 @@ class TypingLevelSeeder extends Seeder
         ];
 
         foreach ($levels as $level) {
-            TypingLevel::updateOrCreate(['level_number' => $level['level_number']], $level);
+            if ($guru && $subject) {
+                $level['guru_id'] = $guru->id;
+                $level['subject_id'] = $subject->id;
+            }
+
+            TypingLevel::updateOrCreate(
+                ['guru_id' => $guru?->id, 'level_number' => $level['level_number']],
+                $level
+            );
         }
     }
 }

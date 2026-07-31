@@ -33,7 +33,7 @@
         <span class="badge bg-primary mb-1">Tahap {{ $quizLevel->level_number }}</span>
         <h5 class="fw-bold mb-0">{{ $quizLevel->name }}</h5>
     </div>
-    <a href="{{ route('learner.quiz.index') }}" class="btn btn-outline-secondary btn-sm flex-shrink-0">
+    <a href="{{ route('learner.quiz.subject', $quizLevel->subject_id) }}" class="btn btn-outline-secondary btn-sm flex-shrink-0">
         <i class="bi bi-arrow-left me-1"></i> Keluar
     </a>
 </div>
@@ -84,7 +84,7 @@
                     <i class="bi bi-arrow-right-circle me-1"></i> Tahap Berikutnya
                 </a>
             @endif
-            <a href="{{ route('learner.quiz.index') }}" class="btn btn-outline-primary">Kembali ke Daftar</a>
+            <a href="{{ route('learner.quiz.subject', $quizLevel->subject_id) }}" class="btn btn-outline-primary">Kembali ke Daftar</a>
         </div>
     </div>
 </div>
@@ -94,8 +94,8 @@
     const LEVEL = { resetToFirst: @json((bool) $quizLevel->reset_to_first_on_fail) };
     const ROUTES = {
         attempt: @json(route('learner.quiz.attempt', $quizLevel->id)),
-        index: @json(route('learner.quiz.index')),
-        playFirst: @json($firstLevel ? route('learner.quiz.play', $firstLevel->id) : route('learner.quiz.index')),
+        index: @json(route('learner.quiz.subject', $quizLevel->subject_id)),
+        playFirst: @json($firstLevel ? route('learner.quiz.play', $firstLevel->id) : route('learner.quiz.subject', $quizLevel->subject_id)),
     };
     const CSRF = @json(csrf_token());
 

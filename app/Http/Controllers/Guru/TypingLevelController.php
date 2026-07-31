@@ -3,22 +3,42 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Models\Subject;
 use App\Models\TypingLevel;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
+/**
+ * Latihan Mengetik 10 Jari — khusus Guru yang mengampu mapel TIK.
+ */
 class TypingLevelController extends Controller
 {
-    public function index()
+    public function __construct()
     {
-        $levels = TypingLevel::withCount('attempts')->orderBy('level_number')->get();
+        $this->middleware(function ($request, $next) {
+            abort_unless($request->user()->teachesSubjectNamed('TIK'), 403, 'Fitur ini khusus untuk Guru TIK.');
+
+            return $next($request);
+        });
+    }
+
+    public function index(Request $request)
+    {
+        $levels = TypingLevel::where('guru_id', $request->user()->id)
+            ->withCount('attempts')
+            ->orderBy('level_number')
+            ->get();
 
         return view('guru.typing-levels.index', compact('levels'));
     }
 
     public function store(Request $request)
     {
+        $subject = $this->tikSubject();
+
         $data = $this->validateLevel($request);
+        $data['guru_id'] = $request->user()->id;
+        $data['subject_id'] = $subject->id;
 
         TypingLevel::create($data);
 
@@ -27,6 +47,8 @@ class TypingLevelController extends Controller
 
     public function update(Request $request, TypingLevel $typingLevel)
     {
+        $this->authorizeOwner($request, $typingLevel);
+
         $data = $this->validateLevel($request, $typingLevel->id);
 
         $typingLevel->update($data);
@@ -34,8 +56,10 @@ class TypingLevelController extends Controller
         return redirect()->back()->with('success', 'Tahap latihan berhasil diperbarui!');
     }
 
-    public function destroy(TypingLevel $typingLevel)
+    public function destroy(Request $request, TypingLevel $typingLevel)
     {
+        $this->authorizeOwner($request, $typingLevel);
+
         $typingLevel->delete();
 
         return redirect()->back()->with('success', 'Tahap latihan berhasil dihapus!');
@@ -46,14 +70,26 @@ class TypingLevelController extends Controller
      * baru di urutan paling akhir. Nomor tahap otomatis (unik) dan nama diberi
      * penanda "(salinan)" agar Guru tinggal mengubah nomor & namanya.
      */
-    public function duplicate(TypingLevel $typingLevel)
+    public function duplicate(Request $request, TypingLevel $typingLevel)
     {
+        $this->authorizeOwner($request, $typingLevel);
+
         $copy = $typingLevel->replicate();
-        $copy->level_number = (int) TypingLevel::max('level_number') + 1;
+        $copy->level_number = (int) TypingLevel::where('guru_id', $typingLevel->guru_id)->max('level_number') + 1;
         $copy->name = mb_substr($typingLevel->name . ' (salinan)', 0, 255);
         $copy->save();
 
         return redirect()->back()->with('success', 'Tahap berhasil disalin! Silakan ubah nomor & nama tahap salinan sesuai kebutuhan.');
+    }
+
+    private function authorizeOwner(Request $request, TypingLevel $typingLevel): void
+    {
+        abort_unless($typingLevel->guru_id === $request->user()->id, 403);
+    }
+
+    private function tikSubject(): Subject
+    {
+        return Subject::firstOrCreate(['name' => 'TIK']);
     }
 
     private function validateLevel(Request $request, ?int $ignoreId = null): array
@@ -61,7 +97,9 @@ class TypingLevelController extends Controller
         $data = $request->validate([
             'level_number' => [
                 'required', 'integer', 'min:1', 'max:255',
-                Rule::unique('typing_levels', 'level_number')->ignore($ignoreId),
+                Rule::unique('typing_levels', 'level_number')
+                    ->where('guru_id', $request->user()->id)
+                    ->ignore($ignoreId),
             ],
             'name' => 'required|string|max:255',
             'allowed_keys' => 'required|string|max:100',

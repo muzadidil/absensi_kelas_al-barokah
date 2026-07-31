@@ -44,10 +44,31 @@
         <h5 class="fw-bold mb-1">Master Kuis Pilihan Ganda</h5>
         <p class="text-muted mb-0 small">Kuis berjenjang ala game — soal satu per satu, salah sedikit ulang dari awal tahap. Murid harus lulus satu tahap untuk membuka tahap berikutnya.</p>
     </div>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLevelModal">
-        <i class="bi bi-plus-lg me-1"></i> Tambah Tahap
-    </button>
+    @if($activeSubject)
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLevelModal">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Tahap
+        </button>
+    @endif
 </div>
+
+@if($subjects->isEmpty())
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-exclamation-circle display-4 d-block mb-2 opacity-50"></i>
+        Anda belum ditugaskan mengampu mapel apa pun. Hubungi Admin untuk diberi mapel dulu.
+    </div>
+@else
+    @if($subjects->count() > 1)
+        <ul class="nav nav-pills mb-3">
+            @foreach($subjects as $subject)
+                <li class="nav-item">
+                    <a class="nav-link {{ $subject->id === $activeSubject->id ? 'active' : '' }}"
+                       href="{{ route('guru.quiz-levels.index', ['subject' => $subject->id]) }}">
+                        {{ $subject->name }}
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    @endif
 
 <div class="row g-3">
     @forelse($levels as $level)
@@ -133,8 +154,9 @@
         <div class="modal-content">
             <form action="{{ route('guru.quiz-levels.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="subject_id" value="{{ $activeSubject->id }}">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah Tahap Kuis</h5>
+                    <h5 class="modal-title">Tambah Tahap Kuis — {{ $activeSubject->name }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -148,5 +170,6 @@
         </div>
     </div>
 </div>
+@endif
 
 @endsection

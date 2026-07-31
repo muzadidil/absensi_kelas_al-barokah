@@ -119,6 +119,22 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @if($user->hasRole('guru'))
+                                <div class="mb-3">
+                                    <label class="d-block">Mapel yang Diampu</label>
+                                    <div class="small text-muted mb-1">Menentukan Kuis siapa yang bisa dikelola guru ini. Mapel bernama "TIK" juga membuka akses Latihan Mengetik.</div>
+                                    @php $taughtIds = $user->subjects->pluck('id'); @endphp
+                                    @forelse($subjects as $subject)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="subjects[]" value="{{ $subject->id }}"
+                                                id="subject_{{ $user->id }}_{{ $subject->id }}" {{ $taughtIds->contains($subject->id) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="subject_{{ $user->id }}_{{ $subject->id }}">{{ $subject->name }}</label>
+                                        </div>
+                                    @empty
+                                        <div class="small text-muted">Belum ada mapel. Tambahkan dulu di halaman Jadwal Pelajaran.</div>
+                                    @endforelse
+                                </div>
+                            @endif
                         </div>
                         <!-- Modal Footer Buttons -->
                         <div class="modal-footer border-top-0 d-flex justify-content-end">

@@ -46,4 +46,18 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Mapel yang diampu Guru ini (diatur Admin) — dasar kepemilikan
+     * Kuis & Latihan Mengetik.
+     */
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'subject_teacher', 'guru_id', 'subject_id');
+    }
+
+    public function teachesSubjectNamed(string $name): bool
+    {
+        return $this->subjects()->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->exists();
+    }
 }

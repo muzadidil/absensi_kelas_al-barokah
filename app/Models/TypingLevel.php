@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class TypingLevel extends Model
 {
     protected $fillable = [
+        'guru_id',
+        'subject_id',
         'level_number',
         'name',
         'allowed_keys',
@@ -28,6 +30,16 @@ class TypingLevel extends Model
         'max_error_percent' => 'integer',
         'time_limit_seconds' => 'integer',
     ];
+
+    public function guru()
+    {
+        return $this->belongsTo(User::class, 'guru_id');
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
 
     public function attempts()
     {

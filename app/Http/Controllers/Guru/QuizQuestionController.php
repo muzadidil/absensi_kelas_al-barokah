@@ -13,6 +13,8 @@ class QuizQuestionController extends Controller
 {
     public function store(Request $request, QuizLevel $quizLevel)
     {
+        $this->authorizeOwner($request, $quizLevel);
+
         $data = $this->validateQuestion($request);
 
         $question = QuizQuestion::create([
@@ -30,6 +32,8 @@ class QuizQuestionController extends Controller
 
     public function update(Request $request, QuizLevel $quizLevel, QuizQuestion $question)
     {
+        $this->authorizeOwner($request, $quizLevel);
+
         $data = $this->validateQuestion($request);
 
         $question->update([
@@ -43,12 +47,19 @@ class QuizQuestionController extends Controller
             ->with('success', 'Soal berhasil diperbarui!');
     }
 
-    public function destroy(QuizLevel $quizLevel, QuizQuestion $question)
+    public function destroy(Request $request, QuizLevel $quizLevel, QuizQuestion $question)
     {
+        $this->authorizeOwner($request, $quizLevel);
+
         $question->delete();
 
         return redirect()->route('guru.quiz-levels.show', $quizLevel->id)
             ->with('success', 'Soal berhasil dihapus!');
+    }
+
+    private function authorizeOwner(Request $request, QuizLevel $quizLevel): void
+    {
+        abort_unless($quizLevel->guru_id === $request->user()->id, 403);
     }
 
     /**

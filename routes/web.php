@@ -198,8 +198,9 @@ Route::middleware('auth.learner')->group(function () {
     Route::get('/learner/mengetik/{typingLevel}', [LearnerTypingController::class, 'show'])->name('learner.typing.show');
     Route::post('/learner/mengetik/{typingLevel}/submit', [LearnerTypingController::class, 'submit'])->name('learner.typing.submit');
 
-    // Kuis Pilihan Ganda berjenjang (gauntlet)
+    // Kuis Pilihan Ganda berjenjang (gauntlet), per mata pelajaran
     Route::get('/learner/kuis', [LearnerQuizController::class, 'index'])->name('learner.quiz.index');
+    Route::get('/learner/kuis/mapel/{subject}', [LearnerQuizController::class, 'bySubject'])->name('learner.quiz.subject');
     Route::get('/learner/kuis/{quizLevel}', [LearnerQuizController::class, 'play'])->name('learner.quiz.play');
     Route::post('/learner/kuis/{quizLevel}/attempt', [LearnerQuizController::class, 'attempt'])->name('learner.quiz.attempt');
 });
