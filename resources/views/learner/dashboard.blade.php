@@ -121,5 +121,16 @@
                 </div>
             </div>
         </div>
+        <div class="col-12">
+            <div class="card stat-card">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1"><i class="bi bi-rocket-takeoff me-1"></i> Game 10 Jari</h5>
+                        <p class="text-muted mb-0">Selamatkan Al-Barokah dari serangan meteor! <span class="badge bg-secondary">Pratinjau</span></p>
+                    </div>
+                    <a href="{{ route('learner.meteor.index') }}" class="btn btn-primary">Main Sekarang</a>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection

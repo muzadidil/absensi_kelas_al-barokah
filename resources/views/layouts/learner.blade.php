@@ -70,6 +70,13 @@
           <i class="bi bi-keyboard me-2"></i><span> Latihan Mengetik</span>
         </a>
       </li>
+      <li class="nav-item mb-1">
+        <a href="{{ route('learner.meteor.index') }}"
+          class="menu-item nav-link {{ request()->routeIs('learner.meteor.*') ? 'active' : '' }}"
+          data-tooltip="Game 10 Jari">
+          <i class="bi bi-rocket-takeoff me-2"></i><span> Game 10 Jari</span>
+        </a>
+      </li>
     </ul>
   </nav>
 

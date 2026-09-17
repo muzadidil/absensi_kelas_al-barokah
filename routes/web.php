@@ -18,6 +18,7 @@ use App\Http\Controllers\Guru\QuizQuestionController;
 use App\Http\Controllers\Learner\TypingController as LearnerTypingController;
 use App\Http\Controllers\Learner\QuizController as LearnerQuizController;
 use App\Http\Controllers\Learner\RaportController as LearnerRaportController;
+use App\Http\Controllers\Learner\MeteorGameController as LearnerMeteorGameController;
 use App\Http\Controllers\Auth\LearnerLoginController;
 
 /*
@@ -197,6 +198,9 @@ Route::middleware('auth.learner')->group(function () {
     Route::get('/learner/mengetik', [LearnerTypingController::class, 'index'])->name('learner.typing.index');
     Route::get('/learner/mengetik/{typingLevel}', [LearnerTypingController::class, 'show'])->name('learner.typing.show');
     Route::post('/learner/mengetik/{typingLevel}/submit', [LearnerTypingController::class, 'submit'])->name('learner.typing.submit');
+
+    // Game 10 Jari (JILID — pratinjau Fase 1: belum ada boss/checkpoint/rekor)
+    Route::get('/learner/game-jari', [LearnerMeteorGameController::class, 'index'])->name('learner.meteor.index');
 
     // Kuis Pilihan Ganda berjenjang (gauntlet), per mata pelajaran
     Route::get('/learner/kuis', [LearnerQuizController::class, 'index'])->name('learner.quiz.index');
