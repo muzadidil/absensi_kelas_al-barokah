@@ -5,6 +5,103 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 18 September 2026 — Game 10 Jari: JILID 1–5 + lawan boss
+
+**Masalah yang diperbaiki**
+
+Game 10 Jari cuma punya satu arena tanpa ujung — main sampai nyawa habis, selesai, tidak
+ada yang tersimpan. Padahal rencana yang sudah disepakati (`RENCANA_GAME_10_JARI.md`)
+menyebut permainan bertingkat JILID 1–5 dan tiap JILID ditutup **lawan boss**. Bagian
+itu belum pernah dibuat.
+
+**Yang dikerjakan**
+
+Sekarang alurnya berjenjang seperti menu Kuis dan Latihan Mengetik:
+
+- Menu **Game 10 Jari** tidak langsung main, tapi menampilkan **daftar JILID** dengan
+  status Terbuka / Terkunci / Tembus, sama seperti daftar tahap di Kuis.
+- Satu JILID terdiri dari dua babak: **gelombang meteor** dulu (hancurkan sejumlah meteor),
+  lalu **boss muncul** dengan palang darah di atas layar.
+- Boss menyerang dengan memuntahkan beberapa huruf sekaligus. Tiap huruf yang berhasil
+  diketik **mengurangi darah boss**; huruf yang lolos sampai bawah **mengurangi nyawa**.
+- **Lulus satu JILID = boss kalah sebelum nyawa habis.** Lulus membuka JILID berikutnya.
+- Nyawa (5) dipakai untuk satu rangkaian penuh: gelombang meteor + lawan boss.
+
+Lima boss sesuai kesepakatan:
+
+| JILID | Boss | Senjata | Huruf per serangan | Checkpoint |
+|---|---|---|---|---|
+| 1 | Pocong | Bola Api | 1 | — |
+| 2 | Wewe Gombel | Bola Es Salju | 2 | — |
+| 3 | Genderuwo | Rumput Bulat | 3 | — |
+| 4 | Kelelawar | Anak Kelelawar | 4 | — |
+| 5 | Orang naik UFO | Tembakan UFO | 4 | **Ya** |
+
+Kelima boss digambar langsung di layar (tidak pakai berkas gambar), masing-masing dengan
+warna peluru sendiri: api oranye, es biru, rumput hijau, kelelawar ungu, UFO hijau-toska.
+
+**Checkpoint (JILID 5)**
+
+- Gagal di JILID 1–4 → progres hangus, ulang dari **JILID 1**.
+- Begitu boss JILID 5 kalah, **checkpoint tersimpan permanen**. Gagal setelah itu tidak
+  melempar balik ke JILID 1 lagi, cukup ke checkpoint terakhir.
+
+**Rekor tersimpan**
+
+Tiap percobaan dicatat: lulus/tidak, sempat ketemu boss atau belum, jumlah yang
+dihancurkan, WPM, dan akurasi. Di daftar JILID ditampilkan berapa kali tiap JILID sudah
+dicoba dan WPM terbaik. WPM tetap **hanya tolok ukur**, bukan syarat lulus — targetnya
+sekitar 25.
+
+**Berkas yang disentuh**
+
+- 3 migrasi baru: `meteor_game_levels`, `meteor_game_attempts`, dan 2 kolom progres di
+  tabel `learners`
+- Model baru `MeteorGameLevel`, `MeteorGameAttempt`; `Learner` ditambah kolom progres
+- `MeteorGameLevelSeeder` (isi JILID 1–5)
+- `MeteorGameController` (daftar JILID, halaman main, pencatatan hasil)
+- View baru `learner/meteor/index.blade.php`; `learner/meteor/play.blade.php` ditambah babak boss
+- `routes/web.php`, `learner/dashboard.blade.php`
+
+**Perintah yang perlu dijalankan setelah menarik perubahan ini**
+
+```
+php artisan migrate --force
+php artisan db:seed --class=MeteorGameLevelSeeder --force
+php artisan optimize:clear
+```
+
+Seeder-nya aman dijalankan berulang. **Tanpa seeder, daftar JILID akan kosong.**
+
+**Yang perlu dicoba**
+
+- Buka **Game 10 Jari** → harus muncul 5 kartu JILID; hanya JILID 1 terbuka, sisanya terkunci.
+- Main JILID 1 → hancurkan meteor sampai target → boss **Pocong** muncul dengan palang darah.
+- Ketik huruf pada bola api → darah Pocong berkurang. Biarkan satu lolos → nyawa berkurang.
+- Kalahkan Pocong → muncul layar menang + tombol **Lanjut JILID 2**, dan JILID 2 terbuka
+  di daftar.
+- Sengaja kalah → muncul catatan bahwa progres diulang dari JILID 1.
+- Coba buka URL JILID yang masih terkunci langsung lewat alamat → harus ditolak dan
+  dikembalikan ke daftar.
+
+**Catatan pengujian**
+
+Diuji otomatis di Chrome tanpa jendela dengan halaman permainan diekstrak jadi berkas
+mandiri: **25 dari 25 pemeriksaan lolos** — termasuk pergantian gelombang→boss, darah boss
+berkurang saat peluru dihancurkan, jalur menang, jalur kalah, dan data hasil yang dikirim
+ke server. Kelima boss juga sudah dipotret dan tampil benar.
+
+Seperti sebelumnya: **sisi PHP/Laravel-nya belum dijalankan** di komputer pengerjaan karena
+PHP tidak terpasang di sana. Migrasi, seeder, controller, dan route baru **perlu dicoba
+sekali di server** setelah deploy.
+
+**Belum dikerjakan**
+
+- JILID 6 ke atas (di JILID atas kecepatan mulai dinaikkan dan target WPM naik dari 25).
+- Progres game ini belum tampil di Raport; baru terlihat di daftar JILID.
+
+---
+
 ## 18 September 2026 — Game 10 Jari ditulis ulang (banyak bug + tampilan dirombak)
 
 **Masalah yang diperbaiki**

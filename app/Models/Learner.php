@@ -16,10 +16,13 @@ class Learner extends Model
         'grade_level',
         'section',
         'quiz_reset_at',
+        'meteor_reset_at',
+        'meteor_checkpoint_level',
     ];
 
     protected $casts = [
         'quiz_reset_at' => 'datetime',
+        'meteor_reset_at' => 'datetime',
     ];
 
     public function attendances()
@@ -30,5 +33,10 @@ class Learner extends Model
     public function quizAttempts()
     {
         return $this->hasMany(QuizAttempt::class);
+    }
+
+    public function meteorGameAttempts()
+    {
+        return $this->hasMany(MeteorGameAttempt::class);
     }
 }

@@ -126,7 +126,7 @@
                 <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
                     <div>
                         <h5 class="mb-1"><i class="bi bi-rocket-takeoff me-1"></i> Game 10 Jari</h5>
-                        <p class="text-muted mb-0">Selamatkan Al-Barokah dari serangan meteor — latih jari di home row. <span class="badge bg-secondary">Mode Bebas</span></p>
+                        <p class="text-muted mb-0">Selamatkan Al-Barokah dari meteor. Tiap JILID ditutup lawan boss. <span class="badge bg-secondary">JILID 1–5</span></p>
                     </div>
                     <a href="{{ route('learner.meteor.index') }}" class="btn btn-primary">Main Sekarang</a>
                 </div>
