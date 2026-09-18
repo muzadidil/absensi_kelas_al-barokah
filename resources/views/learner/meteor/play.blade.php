@@ -107,7 +107,14 @@
             <p class="text-muted small mb-0">
                 Hancurkan {{ $meteorGameLevel->wave_target }} meteor, lalu lawan
                 {{ $meteorGameLevel->boss_name }} dan senjata {{ $meteorGameLevel->boss_weapon_name }}-nya.
+                Huruf: <code>{{ strtoupper(implode(' ', str_split($meteorGameLevel->allowed_keys))) }}</code>
             </p>
+            @if($meteorGameLevel->bullet_returns)
+                <p class="small text-primary mb-0 mt-1">
+                    <i class="bi bi-arrow-repeat me-1"></i>
+                    Peluru yang kamu ketik <strong>memantul balik</strong> dan meledak di tubuh bossnya.
+                </p>
+            @endif
         </div>
         <a href="{{ route('learner.meteor.index') }}" class="btn btn-outline-secondary btn-sm flex-shrink-0">
             <i class="bi bi-arrow-left me-1"></i> Daftar JILID
@@ -213,6 +220,8 @@
     var LEVEL = {
         number:      {{ $meteorGameLevel->level_number }},
         label:       @json($meteorGameLevel->display_label),
+        theme:       @json($meteorGameLevel->theme),
+        returns:     {{ $meteorGameLevel->bullet_returns ? 'true' : 'false' }},
         keys:        @json(str_split($meteorGameLevel->allowed_keys)),
         lives:       {{ $meteorGameLevel->lives }},
         waveTarget:  {{ $meteorGameLevel->wave_target }},
@@ -228,6 +237,7 @@
     var FALL_SECONDS = 7.0;      // konstan di semua JILID & semua ukuran layar
     var BULLET_SECONDS = 5.2;    // peluru boss sedikit lebih cepat dari meteor biasa
     var BOSS_SHOT_GAP = 2.7;
+    var RETURN_SPEED = 820;      // laju peluru yang memantul balik ke boss
     var BOSS_INTRO = 2.2;
     var GROUND_H = 56;
     var TAU = Math.PI * 2;
@@ -258,14 +268,15 @@
     var phase = 'wave';    // wave | bossIntro | boss
     var lives, combo, bestCombo, destroyed, waveCleared, wrongKeys, missed;
     var elapsed, clock, spawnAcc, phaseTimer;
-    var falling, particles, beams, stars;
+    var falling, particles, beams, stars, clouds;
+    var isPagi = LEVEL.theme === 'pagi';
     var boss, bossHp, bossTimer, bossCharge;
     var shake, hurt, wrongFlash, comboPop;
     var lastFrame = 0, hudTimer = 0, submitted = false;
 
     // ---------- ukuran & bintang ----------
 
-    function buildStars() {
+    function buildSky() {
         stars = [];
         for (var i = 0; i < 110; i++) {
             stars.push({
@@ -274,6 +285,16 @@
                 r: Math.random() < 0.82 ? 0.7 + Math.random() * 0.7 : 1.4 + Math.random() * 0.9,
                 drift: 0.004 + Math.random() * 0.012,
                 phase: Math.random() * TAU
+            });
+        }
+        clouds = [];
+        for (var c = 0; c < 7; c++) {
+            clouds.push({
+                x: Math.random(),
+                y: 0.06 + Math.random() * 0.46,
+                s: 0.55 + Math.random() * 0.95,
+                drift: 0.006 + Math.random() * 0.014,
+                a: 0.45 + Math.random() * 0.4
             });
         }
     }
@@ -439,7 +460,8 @@
     // ---------- objek jatuh ----------
 
     function pickChar() {
-        var onScreen = falling.map(function (f) { return f.char; });
+        var onScreen = falling.filter(function (f) { return !f.returning; })
+                              .map(function (f) { return f.char; });
         var pool = LEVEL.keys.filter(function (c) { return onScreen.indexOf(c) === -1; });
         if (pool.length === 0) pool = LEVEL.keys;
         return pool[(Math.random() * pool.length) | 0];
@@ -514,19 +536,28 @@
     }
 
     function hitFalling(f) {
-        falling.splice(falling.indexOf(f), 1);
         destroyed++;
         combo++;
         if (combo > bestCombo) bestCombo = combo;
         if (combo >= 2) comboPop = 1;
         beams.push({ x: f.x, y: f.y, age: 0, life: 0.15 });
-        burst(f.x, f.y, 20, 150, false, f.kind === 'bullet' ? bossHue() : 18);
         shake = Math.max(shake, 3);
 
+        // JILID ber-bullet_returns: peluru tidak hancur di tempat, tapi memantul
+        // balik ke bossnya dan baru meledak di sana.
+        if (f.kind === 'bullet' && LEVEL.returns && boss) {
+            f.returning = true;
+            f.trail.length = 0;
+            burst(f.x, f.y, 10, 90, false, bossHue());
+            syncHud();
+            return;
+        }
+
+        falling.splice(falling.indexOf(f), 1);
+        burst(f.x, f.y, 20, 150, false, f.kind === 'bullet' ? bossHue() : 18);
+
         if (f.kind === 'bullet') {
-            bossHp = Math.max(0, bossHp - 1);
-            boss.flash = 1;
-            if (bossHp <= 0) { finish(true); return; }
+            damageBoss(f.x, f.y);
         } else if (phase === 'wave') {
             waveCleared++;
             if (waveCleared >= LEVEL.waveTarget) {
@@ -535,7 +566,16 @@
                 falling.length = 0;
             }
         }
+        if (state === 'playing') syncHud();
+    }
+
+    function damageBoss(x, y) {
+        bossHp = Math.max(0, bossHp - 1);
+        boss.flash = 1;
+        shake = Math.max(shake, 6);
+        burst(x, y, 22, 170, false, bossHue());
         syncHud();
+        if (bossHp <= 0) finish(true);
     }
 
     function landed(f) {
@@ -586,6 +626,24 @@
 
         for (var i = falling.length - 1; i >= 0; i--) {
             var f = falling[i];
+
+            if (f.returning) {
+                if (!boss) { falling.splice(i, 1); continue; }
+                var dx = boss.x - f.x, dy = boss.y - f.y;
+                var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                f.x += (dx / dist) * RETURN_SPEED * dt;
+                f.y += (dy / dist) * RETURN_SPEED * dt;
+                f.angle += 9 * dt;
+                f.trail.unshift({ x: f.x, y: f.y });
+                if (f.trail.length > 12) f.trail.pop();
+                if (dist < 46) {
+                    falling.splice(i, 1);
+                    damageBoss(f.x, f.y);
+                    if (state !== 'playing') return;
+                }
+                continue;
+            }
+
             f.y += f.speed * dt;
             f.x += f.vx * dt;
             f.angle += f.spin * dt;
@@ -618,9 +676,16 @@
             if (beams[b].age >= beams[b].life) beams.splice(b, 1);
         }
 
-        for (var s = 0; s < stars.length; s++) {
-            stars[s].y += stars[s].drift * dt;
-            if (stars[s].y > 1) { stars[s].y -= 1; stars[s].x = Math.random(); }
+        if (isPagi) {
+            for (var c = 0; c < clouds.length; c++) {
+                clouds[c].x += clouds[c].drift * dt;
+                if (clouds[c].x > 1.2) { clouds[c].x = -0.2; clouds[c].y = 0.06 + Math.random() * 0.46; }
+            }
+        } else {
+            for (var s = 0; s < stars.length; s++) {
+                stars[s].y += stars[s].drift * dt;
+                if (stars[s].y > 1) { stars[s].y -= 1; stars[s].x = Math.random(); }
+            }
         }
 
         shake      = Math.max(0, shake - dt * 42);
@@ -633,26 +698,59 @@
 
     function drawSky() {
         var g = ctx.createLinearGradient(0, 0, 0, H);
-        g.addColorStop(0, '#04061a');
-        g.addColorStop(0.55, '#101a45');
-        g.addColorStop(1, '#1d2764');
+        if (isPagi) {
+            g.addColorStop(0, '#2f6fb5');
+            g.addColorStop(0.42, '#7dbbe9');
+            g.addColorStop(0.78, '#cbe6f7');
+            g.addColorStop(1, '#ffe6c2');
+        } else {
+            g.addColorStop(0, '#04061a');
+            g.addColorStop(0.55, '#101a45');
+            g.addColorStop(1, '#1d2764');
+        }
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
 
-        var neb = ctx.createRadialGradient(W * 0.22, H * 0.28, 0, W * 0.22, H * 0.28, W * 0.42);
-        neb.addColorStop(0, 'rgba(96, 84, 200, .22)');
-        neb.addColorStop(1, 'rgba(96, 84, 200, 0)');
-        ctx.fillStyle = neb;
-        ctx.fillRect(0, 0, W, H);
+        if (isPagi) {
+            var sx = W * 0.78, sy = groundY - 76;
+            var sun = ctx.createRadialGradient(sx, sy, 0, sx, sy, 175);
+            sun.addColorStop(0, 'rgba(255, 240, 185, .8)');
+            sun.addColorStop(0.32, 'rgba(255, 208, 125, .32)');
+            sun.addColorStop(1, 'rgba(255, 195, 115, 0)');
+            ctx.fillStyle = sun;
+            ctx.beginPath(); ctx.arc(sx, sy, 175, 0, TAU); ctx.fill();
+            ctx.fillStyle = '#fff6d2';
+            ctx.beginPath(); ctx.arc(sx, sy, 30, 0, TAU); ctx.fill();
+        } else {
+            var neb = ctx.createRadialGradient(W * 0.22, H * 0.28, 0, W * 0.22, H * 0.28, W * 0.42);
+            neb.addColorStop(0, 'rgba(96, 84, 200, .22)');
+            neb.addColorStop(1, 'rgba(96, 84, 200, 0)');
+            ctx.fillStyle = neb;
+            ctx.fillRect(0, 0, W, H);
+        }
     }
 
-    function drawStars() {
+    function puff(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+
+    function drawSkyDetail() {
+        if (isPagi) {
+            for (var c = 0; c < clouds.length; c++) {
+                var k = clouds[c];
+                var x = k.x * W, y = k.y * groundY, s = k.s;
+                ctx.fillStyle = 'rgba(255, 255, 255, ' + k.a.toFixed(2) + ')';
+                puff(x, y, 32 * s);
+                puff(x + 30 * s, y + 7 * s, 25 * s);
+                puff(x - 31 * s, y + 9 * s, 21 * s);
+                puff(x + 7 * s, y - 15 * s, 23 * s);
+            }
+            return;
+        }
         for (var i = 0; i < stars.length; i++) {
-            var s = stars[i];
-            ctx.globalAlpha = 0.35 + 0.45 * (0.5 + 0.5 * Math.sin(clock * 1.6 + s.phase));
+            var st = stars[i];
+            ctx.globalAlpha = 0.35 + 0.45 * (0.5 + 0.5 * Math.sin(clock * 1.6 + st.phase));
             ctx.fillStyle = '#dfe6ff';
             ctx.beginPath();
-            ctx.arc(s.x * W, s.y * groundY, s.r, 0, TAU);
+            ctx.arc(st.x * W, st.y * groundY, st.r, 0, TAU);
             ctx.fill();
         }
         ctx.globalAlpha = 1;
@@ -664,36 +762,44 @@
         var s  = Math.max(0.8, Math.min(1.7, W / 640));
         var ratio = lives / LEVEL.lives;
 
+        var shieldRgb = isPagi ? '255, 214, 130' : '110, 200, 255';
         var glow = ctx.createLinearGradient(0, y - 90 * s, 0, y);
-        glow.addColorStop(0, 'rgba(90, 170, 255, 0)');
-        glow.addColorStop(1, 'rgba(110, 200, 255, ' + (0.08 + 0.18 * ratio).toFixed(3) + ')');
+        glow.addColorStop(0, 'rgba(' + shieldRgb + ', 0)');
+        glow.addColorStop(1, 'rgba(' + shieldRgb + ', ' + (0.09 + 0.19 * ratio).toFixed(3) + ')');
         ctx.fillStyle = glow;
         ctx.fillRect(0, y - 90 * s, W, 90 * s);
 
         var ground = ctx.createLinearGradient(0, y, 0, H);
-        ground.addColorStop(0, '#16371f');
-        ground.addColorStop(1, '#040c07');
+        if (isPagi) { ground.addColorStop(0, '#5aa84a'); ground.addColorStop(1, '#27622a'); }
+        else        { ground.addColorStop(0, '#16371f'); ground.addColorStop(1, '#040c07'); }
         ctx.fillStyle = ground;
         ctx.fillRect(0, y, W, H - y);
 
         var domeR = 32 * s, hallW = 68 * s, hallH = 26 * s, towerX = 96 * s, towerH = 52 * s;
 
-        ctx.fillStyle = '#04150c';
+        ctx.fillStyle = isPagi ? '#f2e7d0' : '#04150c';
         ctx.beginPath(); ctx.rect(cx - hallW, y - hallH, hallW * 2, hallH); ctx.fill();
+        ctx.fillStyle = isPagi ? '#2f8f6a' : '#04150c';
         ctx.beginPath(); ctx.arc(cx, y - hallH, domeR, Math.PI, TAU); ctx.fill();
         ctx.beginPath(); ctx.rect(cx - 1.5 * s, y - hallH - domeR - 12 * s, 3 * s, 12 * s); ctx.fill();
 
+        ctx.fillStyle = isPagi ? '#f2e7d0' : '#04150c';
         [-towerX, towerX].forEach(function (dx) {
             ctx.beginPath(); ctx.rect(cx + dx - 7 * s, y - towerH, 14 * s, towerH); ctx.fill();
+        });
+        ctx.fillStyle = isPagi ? '#2f8f6a' : '#04150c';
+        [-towerX, towerX].forEach(function (dx) {
             ctx.beginPath(); ctx.arc(cx + dx, y - towerH, 8 * s, Math.PI, TAU); ctx.fill();
         });
 
-        ctx.fillStyle = 'rgba(255, 198, 106, ' + (0.25 + 0.45 * ratio).toFixed(3) + ')';
+        ctx.fillStyle = isPagi
+            ? 'rgba(84, 56, 30, ' + (0.35 + 0.35 * ratio).toFixed(3) + ')'
+            : 'rgba(255, 198, 106, ' + (0.25 + 0.45 * ratio).toFixed(3) + ')';
         for (var i = -2; i <= 2; i++) {
             ctx.fillRect(cx + i * 24 * s - 3 * s, y - hallH * 0.68, 6 * s, 9 * s);
         }
 
-        ctx.strokeStyle = 'rgba(150, 220, 255, ' + (0.22 + 0.5 * ratio).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(' + shieldRgb + ', ' + (0.22 + 0.5 * ratio).toFixed(3) + ')';
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
@@ -701,7 +807,7 @@
     // ---------- gambar: boss ----------
 
     function bossHue() {
-        return [18, 190, 100, 280, 160][LEVEL.number - 1] || 18;
+        return [18, 190, 100, 280, 160, 12, 195, 130, 265, 310][LEVEL.number - 1] || 18;
     }
 
     function bossBulletColors() {
@@ -710,6 +816,11 @@
             case 3:  return ['#e6ffd9', '#8fd45a', '#2f6b1c'];   // rumput bulat
             case 4:  return ['#e8dcff', '#9b7bd4', '#3d2470'];   // anak kelelawar
             case 5:  return ['#dcfff4', '#5fe6c0', '#136b52'];   // tembakan UFO
+            case 6:  return ['#ffe0d0', '#ff6a3d', '#8f2408'];   // roket kembar
+            case 7:  return ['#d9f5ff', '#3fc2ff', '#0a4f7a'];   // meriam plasma
+            case 8:  return ['#d8ffe6', '#39e07f', '#0d5c30'];   // paket data
+            case 9:  return ['#ded6ff', '#7a5cf0', '#281c5c'];   // rudal bayangan
+            case 10: return ['#ffd9f4', '#ff4fc4', '#7a0d58'];   // virus inti
             default: return ['#ffdca6', '#ff8b3d', '#8b2b07'];   // bola api
         }
     }
@@ -731,11 +842,9 @@
             ctx.beginPath(); ctx.arc(0, 0, 90, 0, TAU); ctx.fill();
         }
 
-        if (LEVEL.number === 1)      drawPocong();
-        else if (LEVEL.number === 2) drawWewe();
-        else if (LEVEL.number === 3) drawGenderuwo();
-        else if (LEVEL.number === 4) drawKelelawar();
-        else                         drawUfo();
+        var painters = [drawPocong, drawWewe, drawGenderuwo, drawKelelawar, drawUfo,
+                        drawDrone, drawMecha, drawSatelit, drawKapal, drawIntiAi];
+        (painters[LEVEL.number - 1] || drawPocong)();
 
         if (boss.flash > 0) {
             ctx.globalCompositeOperation = 'lighter';
@@ -869,6 +978,164 @@
         }
     }
 
+    function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    var ROTORS = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+
+    function drawDrone() {
+        var spin = clock * 22;
+
+        ctx.strokeStyle = '#39404f';
+        ctx.lineWidth = 7;
+        ROTORS.forEach(function (d) {
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(d[0] * 48, d[1] * 30); ctx.stroke();
+        });
+
+        ROTORS.forEach(function (d, i) {
+            var rx = d[0] * 48, ry = d[1] * 30;
+            ctx.fillStyle = '#20252f';
+            ctx.beginPath(); ctx.arc(rx, ry, 7, 0, TAU); ctx.fill();
+            ctx.strokeStyle = 'rgba(190, 228, 255, .45)';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(rx, ry, 22, spin + i, spin + i + 4.4); ctx.stroke();
+            ctx.beginPath(); ctx.arc(rx, ry, 16, -spin - i, -spin - i + 3.4); ctx.stroke();
+        });
+
+        ctx.fillStyle = '#2b3240'; roundRect(-30, -20, 60, 40, 12); ctx.fill();
+        ctx.fillStyle = '#3c4658'; roundRect(-22, -14, 44, 18, 8); ctx.fill();
+        ctx.fillStyle = 'rgba(255, 90, 90, .3)';
+        ctx.beginPath(); ctx.ellipse(0, 9, 25, 12, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#ff3b3b';
+        ctx.beginPath(); ctx.ellipse(0, 9, 14, 6, 0, 0, TAU); ctx.fill();
+    }
+
+    function drawMecha() {
+        ctx.fillStyle = '#4a5666';
+        roundRect(-62, -18, 34, 30, 8); ctx.fill();
+        roundRect(28, -18, 34, 30, 8); ctx.fill();
+
+        ctx.fillStyle = '#39434f';
+        roundRect(-58, 10, 16, 34, 5); ctx.fill();
+        roundRect(42, 10, 16, 34, 5); ctx.fill();
+        ctx.fillStyle = '#ff9a3c';
+        ctx.beginPath(); ctx.arc(-50, 44, 6, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(50, 44, 6, 0, TAU); ctx.fill();
+
+        ctx.fillStyle = '#5b6a7d'; roundRect(-30, -22, 60, 56, 10); ctx.fill();
+        ctx.fillStyle = '#3d4756'; roundRect(-22, 6, 44, 22, 6); ctx.fill();
+
+        var pulse = 0.65 + 0.35 * Math.sin(clock * 5);
+        ctx.fillStyle = 'rgba(255, 150, 50, ' + pulse.toFixed(2) + ')';
+        ctx.beginPath(); ctx.arc(0, -4, 11, 0, TAU); ctx.fill();
+
+        ctx.fillStyle = '#6b7b90'; roundRect(-16, -48, 32, 26, 7); ctx.fill();
+        ctx.fillStyle = '#31e0ff'; roundRect(-11, -40, 22, 7, 3); ctx.fill();
+    }
+
+    function drawSatelit() {
+        ctx.fillStyle = '#1b3a6b';
+        roundRect(-96, -22, 56, 44, 3); ctx.fill();
+        roundRect(40, -22, 56, 44, 3); ctx.fill();
+        ctx.strokeStyle = 'rgba(130, 205, 255, .5)';
+        ctx.lineWidth = 1.5;
+        for (var i = 1; i < 4; i++) {
+            ctx.beginPath(); ctx.moveTo(-96 + i * 14, -22); ctx.lineTo(-96 + i * 14, 22); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(40 + i * 14, -22); ctx.lineTo(40 + i * 14, 22); ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#8894a8'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(-40, 0); ctx.lineTo(-24, 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(24, 0); ctx.lineTo(40, 0); ctx.stroke();
+
+        ctx.fillStyle = '#d9dee8'; roundRect(-24, -26, 48, 52, 8); ctx.fill();
+        ctx.fillStyle = '#aab3c2'; roundRect(-24, -6, 48, 12, 3); ctx.fill();
+
+        ctx.strokeStyle = '#8894a8'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 22); ctx.lineTo(0, 34); ctx.stroke();
+        ctx.fillStyle = '#eef2f8';
+        ctx.beginPath(); ctx.ellipse(0, 34, 22, 12, 0, 0, Math.PI); ctx.fill();
+
+        ctx.fillStyle = Math.floor(clock * 6) % 2 === 0 ? '#39e07f' : '#166b3c';
+        ctx.beginPath(); ctx.arc(0, -16, 6, 0, TAU); ctx.fill();
+    }
+
+    function drawKapal() {
+        ctx.fillStyle = '#1d2233';
+        ctx.beginPath();
+        ctx.moveTo(0, 46);
+        ctx.lineTo(-86, 4);
+        ctx.lineTo(-40, -8);
+        ctx.lineTo(-16, -34);
+        ctx.lineTo(16, -34);
+        ctx.lineTo(40, -8);
+        ctx.lineTo(86, 4);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#2c3350';
+        ctx.beginPath();
+        ctx.moveTo(0, 26); ctx.lineTo(-30, 2); ctx.lineTo(0, -24); ctx.lineTo(30, 2);
+        ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = '#7a5cf0';
+        ctx.beginPath(); ctx.ellipse(0, -4, 9, 14, 0, 0, TAU); ctx.fill();
+
+        var glow = 0.55 + 0.45 * Math.sin(clock * 7);
+        ctx.fillStyle = 'rgba(122, 92, 240, ' + glow.toFixed(2) + ')';
+        [-52, -30, 30, 52].forEach(function (x) {
+            ctx.beginPath(); ctx.ellipse(x, -12, 7, 4, 0, 0, TAU); ctx.fill();
+        });
+    }
+
+    function drawIntiAi() {
+        var rings = [[58, clock * 1.3, '255, 79, 196'],
+                     [46, -clock * 0.9, '120, 220, 255'],
+                     [74, clock * 2.1, '180, 120, 255']];
+        rings.forEach(function (ring) {
+            ctx.save();
+            ctx.rotate(ring[1]);
+            ctx.strokeStyle = 'rgba(' + ring[2] + ', .8)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, ring[0], ring[0] * 0.34, 0, 0, TAU);
+            ctx.stroke();
+            ctx.restore();
+        });
+
+        ctx.fillStyle = 'rgba(255, 120, 220, .55)';
+        for (var i = 0; i < 6; i++) {
+            var a = clock * 2.1 + i * TAU / 6;
+            ctx.save();
+            ctx.translate(Math.cos(a) * 64, Math.sin(a) * 26);
+            ctx.rotate(a);
+            ctx.fillRect(-5, -5, 10, 10);
+            ctx.restore();
+        }
+
+        var pulse = 0.7 + 0.3 * Math.sin(clock * 6);
+        var core = ctx.createRadialGradient(0, 0, 3, 0, 0, 36);
+        core.addColorStop(0, '#ffffff');
+        core.addColorStop(0.4, 'rgba(255, 79, 196, ' + pulse.toFixed(2) + ')');
+        core.addColorStop(1, 'rgba(120, 40, 160, 0)');
+        ctx.fillStyle = core;
+        ctx.beginPath(); ctx.arc(0, 0, 36, 0, TAU); ctx.fill();
+
+        ctx.fillStyle = '#2a0b22';
+        ctx.beginPath(); ctx.ellipse(0, 0, 7, 15, 0, 0, TAU); ctx.fill();
+    }
+
     function drawBossHp() {
         var w = Math.min(320, W * 0.6), x = (W - w) / 2, y = 16;
         var pct = bossHp / LEVEL.bossHp;
@@ -883,7 +1150,7 @@
         ctx.font = '700 11px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillStyle = '#dbe3ff';
+        ctx.fillStyle = isPagi ? '#16233f' : '#dbe3ff';
         ctx.fillText(LEVEL.bossName.toUpperCase(), W / 2, y + 15);
     }
 
@@ -896,13 +1163,13 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '800 15px system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(255, 120, 120, .9)';
+        ctx.fillStyle = isPagi ? 'rgba(190, 30, 40, .95)' : 'rgba(255, 120, 120, .9)';
         ctx.fillText('BOSS ' + LEVEL.label, 0, -34);
         ctx.font = '800 40px system-ui, sans-serif';
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = isPagi ? '#10192e' : '#fff';
         ctx.fillText(LEVEL.bossName, 0, 0);
         ctx.font = '600 13px system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(210, 220, 255, .85)';
+        ctx.fillStyle = isPagi ? 'rgba(26, 40, 70, .9)' : 'rgba(210, 220, 255, .85)';
         ctx.fillText('Senjata: ' + LEVEL.bossWeapon, 0, 30);
         ctx.restore();
     }
@@ -911,12 +1178,14 @@
 
     function drawBeams() {
         var ox = W / 2, oy = groundY - 14;
+        // di langit pagi sinar biru muda nyaris tak terlihat, jadi dibuat jingga
+        var rgb = isPagi ? '255, 130, 50' : '140, 230, 255';
         for (var i = 0; i < beams.length; i++) {
             var b = beams[i];
             var a = 1 - b.age / b.life;
-            ctx.strokeStyle = 'rgba(140, 230, 255, ' + (a * 0.85).toFixed(3) + ')';
+            ctx.strokeStyle = 'rgba(' + rgb + ', ' + (a * 0.85).toFixed(3) + ')';
             ctx.lineWidth = 2 + a * 3;
-            ctx.shadowColor = 'rgba(120, 220, 255, .9)';
+            ctx.shadowColor = 'rgba(' + rgb + ', .9)';
             ctx.shadowBlur = 12;
             ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(b.x, b.y); ctx.stroke();
             ctx.shadowBlur = 0;
@@ -925,12 +1194,13 @@
 
     function drawFalling(f) {
         var colors = f.kind === 'bullet' ? bossBulletColors() : ['#ffdca6', '#ff8b3d', '#8b2b07'];
+        if (f.returning) colors = ['#ffffff', colors[0], colors[1]];   // memantul = menyala terang
         var i, p, k;
 
         for (i = f.trail.length - 1; i >= 1; i--) {
             p = f.trail[i];
             k = 1 - i / f.trail.length;
-            ctx.fillStyle = hexToRgba(colors[1], k * 0.4);
+            ctx.fillStyle = hexToRgba(colors[1], k * (f.returning ? 0.65 : 0.4));
             ctx.beginPath(); ctx.arc(p.x, p.y, f.r * k * 0.82, 0, TAU); ctx.fill();
         }
 
@@ -993,11 +1263,12 @@
         ctx.scale(pop, pop);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        var rgb = isPagi ? '150, 80, 0' : '255, 224, 130';
         ctx.font = '800 34px ui-monospace, Consolas, monospace';
-        ctx.fillStyle = 'rgba(255, 224, 130, ' + (0.26 + comboPop * 0.45).toFixed(3) + ')';
+        ctx.fillStyle = 'rgba(' + rgb + ', ' + (0.26 + comboPop * 0.45).toFixed(3) + ')';
         ctx.fillText(combo + '×', 0, 0);
         ctx.font = '700 11px system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(255, 224, 130, ' + (0.18 + comboPop * 0.3).toFixed(3) + ')';
+        ctx.fillStyle = 'rgba(' + rgb + ', ' + (0.18 + comboPop * 0.3).toFixed(3) + ')';
         ctx.fillText('KOMBO', 0, 24);
         ctx.restore();
     }
@@ -1011,7 +1282,10 @@
             ctx.fillRect(0, 0, W, H);
         }
         if (wrongFlash > 0) {
-            ctx.fillStyle = 'rgba(255, 255, 255, ' + (wrongFlash * 0.09).toFixed(3) + ')';
+            // kilatan putih tak terlihat di langit pagi, jadi dibalik jadi gelap
+            ctx.fillStyle = isPagi
+                ? 'rgba(20, 30, 60, ' + (wrongFlash * 0.12).toFixed(3) + ')'
+                : 'rgba(255, 255, 255, ' + (wrongFlash * 0.09).toFixed(3) + ')';
             ctx.fillRect(0, 0, W, H);
         }
     }
@@ -1022,7 +1296,7 @@
             ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
         }
         drawSky();
-        drawStars();
+        drawSkyDetail();
         drawBeams();
         drawBase();
         drawCombo();                 // di bawah objek jatuh supaya tidak menutupi huruf
@@ -1079,7 +1353,8 @@
 
         var target = null;
         for (var i = 0; i < falling.length; i++) {
-            if (falling[i].char === key && (target === null || falling[i].y > target.y)) {
+            if (falling[i].char === key && !falling[i].returning &&
+                (target === null || falling[i].y > target.y)) {
                 target = falling[i];
             }
         }
@@ -1110,7 +1385,7 @@
 
     // ---------- start ----------
 
-    buildStars();
+    buildSky();
     reset();
     resize();
     lastFrame = performance.now();

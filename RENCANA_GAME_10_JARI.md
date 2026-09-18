@@ -85,8 +85,8 @@ Tinggal koreksi kalau ternyata JILID 5 mestinya lebih banyak.)*
 - Target akhir arc JILID 1–5: siswa idealnya bisa **~25 WPM**.
 - **Ini bukan syarat lulus** tiap JILID/boss — murni tolok ukur yang ditampilkan ke siswa/guru.
 - Konteks: target awal sempat dipasang **50 WPM**, ternyata siswa masih kesulitan mencapainya,
-  jadi tolok ukur diturunkan ke 25 untuk arc ini. Kecepatan target akan **dinaikkan lagi di
-  JILID atas** (JILID 6+) seiring jam terbang siswa bertambah.
+  jadi tolok ukur diturunkan ke 25 untuk arc ini. ~~Kecepatan target akan dinaikkan lagi di
+  JILID atas.~~ — **dibatalkan**, lihat §10.
 
 ### 3.8 Ruang Lingkup Sekarang
 - **Fokus: JILID 1–5 sampai berfungsi penuh** (intro, gelombang meteor, nyawa, boss per
@@ -146,8 +146,8 @@ masuk ke Raport akademik formal (`learner.raport`) — ini masih perlu dikonfirm
   keyboard/feedback dasar.
 - **Fase 2** — Boss per JILID (1–5) sesuai §3.5, deteksi menang/kalah, logika checkpoint §3.6.
 - **Fase 3** — Rekor per murid (JILID tercapai, WPM terakhir) + tampilan dashboard.
-- **Fase 4 (nanti)** — JILID 6 dst (kecepatan mulai naik, target WPM naik dari 25 → lebih
-  tinggi bertahap, kemungkinan mulai masuk baris atas/bawah keyboard).
+- ~~**Fase 4 (nanti)** — JILID 6 dst (kecepatan mulai naik, ...)~~ — **sudah dikerjakan, dengan
+  satu koreksi**: lihat §10. Kecepatan **tidak jadi** dinaikkan.
 
 ## 9. Prinsip Reuse
 
@@ -156,3 +156,38 @@ masuk ke Raport akademik formal (`learner.raport`) — ini masih perlu dikonfirm
   Ganda, dibalik defaultnya (JILID 1–4 default reset ke 1, JILID 5 mematikan reset itu).
 - Pola "attempt" tersimpan per percobaan → dipakai untuk rekor & buka JILID berikutnya.
 - Layout kartu tahap murid & style sidebar/dashboard yang sudah konsisten di app ini.
+
+## 10. JILID 6–10 — keputusan tambahan (2026-09-18)
+
+Arc kedua, disepakati setelah JILID 1–5 jalan. Tiga hal berbeda dari arc pertama:
+
+**a) Suasana pagi.** JILID 6–10 memakai `theme = 'pagi'`: langit biru, matahari rendah, awan
+bergerak, dan markas Al-Barokah terlihat kena cahaya siang (bukan siluet malam). Hanya tampilan
+— aturan mainnya sama persis.
+
+**b) Boss modern, bukan cerita rakyat.**
+
+| JILID | Boss | Senjata | Peluru/serangan | Checkpoint |
+|---|---|---|---|---|
+| 6 | Drone Pemburu | Roket Kembar | 5 | Tidak |
+| 7 | Mecha Baja | Meriam Plasma | 6 | Tidak |
+| 8 | Satelit Peretas | Paket Data | 7 | Tidak |
+| 9 | Kapal Siluman | Rudal Bayangan | 8 | Tidak |
+| 10 | Inti AI | Virus Inti | 10 | **Ya** |
+
+**c) Peluru memantul balik.** Di JILID 6–10 (`bullet_returns = true`), peluru yang hurufnya
+diketik **tidak hancur di tempat** — ia terbang balik ke boss dan baru meledak di sana, lalu
+mengurangi darah boss. JILID 1–5 sengaja **tidak** diubah dan tetap hancur seketika, supaya
+arc pertama yang sudah disetujui tidak bergeser rasanya.
+
+**Kecepatan: DIBATALKAN naiknya.** Rencana awal (§8 Fase 4) menyebut kecepatan jatuh mulai
+dinaikkan di JILID 6+. Ini **dibatalkan** atas permintaan langsung. Kecepatan jatuh meteor
+**sama persis di semua JILID 1–10**. Yang bertambah hanya **jumlah huruf**:
+
+- kerapatan spawn makin rapat (1700 ms di JILID 1 → 700 ms di JILID 10),
+- peluru boss per serangan makin banyak (1 → 10),
+- kumpulan huruf melebar keluar home row mulai JILID 6 (home row → +baris atas → +baris bawah,
+  sampai 29 huruf di JILID 10).
+
+Alasannya: kesulitan tetap datang dari *banyaknya* yang harus diketik, bukan dari waktu reaksi
+yang makin mepet — konsisten dengan prinsip §3.3 di arc pertama.

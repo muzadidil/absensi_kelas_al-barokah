@@ -5,6 +5,99 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 18 September 2026 — Game 10 Jari: JILID 6–10 (suasana pagi, boss modern, peluru memantul)
+
+**Yang dikerjakan**
+
+Lanjutan dari JILID 1–5. Sekarang ada 10 JILID. Tiga hal baru di babak kedua:
+
+**1. Suasana pagi.** JILID 6–10 tidak lagi malam. Langitnya biru dengan matahari rendah di
+ufuk, awan berjalan pelan, rumput hijau, dan markas Al-Barokah terlihat jelas kena cahaya
+siang — dinding krem, kubah hijau — bukan siluet hitam seperti di malam hari. JILID 1–5 tetap
+malam seperti semula.
+
+**2. Boss modern.**
+
+| JILID | Boss | Senjata | Huruf per serangan |
+|---|---|---|---|
+| 6 | Drone Pemburu | Roket Kembar | 5 |
+| 7 | Mecha Baja | Meriam Plasma | 6 |
+| 8 | Satelit Peretas | Paket Data | 7 |
+| 9 | Kapal Siluman | Rudal Bayangan | 8 |
+| 10 | Inti AI | Virus Inti | 10 |
+
+Drone berbaling-baling yang berputar, robot dengan visor menyala, satelit berpanel surya,
+kapal siluman bersudut tajam, dan sebagai penutup **Inti AI** dengan cincin-cincin berputar
+mengelilingi inti yang berdenyut. JILID 10 jadi **checkpoint** kedua.
+
+**3. Peluru memantul balik ke bossnya.** Ini yang paling terasa berbeda. Di JILID 1–5, peluru
+yang hurufnya diketik langsung hancur di tempat. Mulai JILID 6, peluru itu **tidak hancur** —
+ia menyala terang lalu **terbang balik ke arah bossnya** dan meledak di sana. Jadi darah boss
+baru berkurang setelah peluru benar-benar sampai, bukan saat tombol ditekan. Boss yang bergerak
+tetap dikejar peluru pantulannya.
+
+JILID 1–5 sengaja **tidak diubah** dan tetap hancur seketika, supaya babak pertama yang sudah
+disetujui tidak berubah rasanya.
+
+**Kecepatan tidak dinaikkan**
+
+Rencana lama menyebut kecepatan jatuh mulai dinaikkan di JILID 6 ke atas. Itu **dibatalkan**.
+Kecepatan jatuh sekarang **sama persis di semua JILID 1–10**. Yang bertambah hanya banyaknya
+huruf:
+
+- meteor turun makin rapat (jeda 1,7 detik di JILID 1 → 0,7 detik di JILID 10),
+- peluru boss per serangan makin banyak (1 → 10),
+- kumpulan hurufnya melebar keluar home row mulai JILID 6: JILID 6 mulai masuk `Q W E R T`,
+  JILID 7 seluruh baris atas, JILID 8–9 mulai baris bawah, JILID 10 penuh 29 huruf.
+
+Dokumen `RENCANA_GAME_10_JARI.md` sudah diperbarui (bagian 10) supaya catatan lama soal
+"kecepatan dinaikkan" tidak menyesatkan lagi.
+
+**Berkas yang disentuh**
+
+- Migrasi baru: 2 kolom di `meteor_game_levels` (`theme`, `bullet_returns`)
+- `MeteorGameLevelSeeder` — sekarang berisi JILID 1–10
+- `learner/meteor/play.blade.php` — langit pagi, 5 boss modern, mekanik pantul
+- `learner/meteor/index.blade.php` — penanda "Pagi", "Peluru memantul", jumlah huruf
+- `MeteorGameLevel` (model), `RENCANA_GAME_10_JARI.md`
+
+**Perintah yang perlu dijalankan setelah menarik perubahan ini**
+
+```
+php artisan migrate --force
+php artisan db:seed --class=MeteorGameLevelSeeder --force
+php artisan optimize:clear
+```
+
+Seeder wajib dijalankan lagi — kalau tidak, JILID 6–10 tidak akan muncul dan JILID 1–5 tidak
+akan punya penanda suasana.
+
+**Yang perlu dicoba**
+
+- Daftar JILID harus menampilkan **10 kartu**; JILID 6–10 bertanda "Pagi" dan "Peluru memantul".
+- Main JILID 6 → langitnya harus **pagi**, bukan malam.
+- Saat lawan Drone Pemburu, ketik huruf pada roketnya → roket harus **terbang balik ke drone**
+  dulu, baru darah drone berkurang. Bukan langsung hilang di tempat.
+- Main JILID 1 lagi → harus tetap malam, dan peluru tetap hancur seketika (tidak memantul).
+- JILID 10 setelah tembus harus tercatat sebagai checkpoint kedua.
+
+**Catatan pengujian**
+
+Diuji otomatis di Chrome tanpa jendela: **27 dari 27 lolos untuk JILID 6** (termasuk dua
+pemeriksaan khusus: darah boss TIDAK turun saat tombol ditekan, dan baru turun setelah peluru
+sampai ke boss). **26 dari 26 lolos untuk JILID 1** sebagai pemeriksaan bahwa babak lama tidak
+ikut berubah. Kelima boss baru sudah dipotret dan tampil benar.
+
+Seperti sebelumnya, **sisi PHP/Laravel belum dijalankan** di komputer pengerjaan karena PHP
+tidak terpasang di sana — migrasi dan seeder perlu dicoba sekali di server.
+
+**Belum dikerjakan**
+
+- Progres game belum tampil di Raport; masih hanya di daftar JILID.
+- JILID 11 ke atas belum direncanakan.
+
+---
+
 ## 18 September 2026 — Game 10 Jari: JILID 1–5 + lawan boss
 
 **Masalah yang diperbaiki**

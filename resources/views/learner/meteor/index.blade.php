@@ -73,6 +73,19 @@
                         <span class="badge bg-danger-subtle text-danger-emphasis">
                             <i class="bi bi-heart-fill me-1"></i>{{ $level->lives }} nyawa
                         </span>
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis">
+                            <i class="bi bi-type me-1"></i>{{ strlen($level->allowed_keys) }} huruf
+                        </span>
+                        @if($level->theme === 'pagi')
+                            <span class="badge bg-warning-subtle text-warning-emphasis">
+                                <i class="bi bi-sunrise me-1"></i>Pagi
+                            </span>
+                        @endif
+                        @if($level->bullet_returns)
+                            <span class="badge bg-info-subtle text-info-emphasis">
+                                <i class="bi bi-arrow-repeat me-1"></i>Peluru memantul
+                            </span>
+                        @endif
                         @if($level->is_checkpoint)
                             <span class="badge bg-success-subtle text-success-emphasis">
                                 <i class="bi bi-flag-fill me-1"></i>Checkpoint
@@ -111,8 +124,9 @@
 
 <p class="text-muted small mt-4 mb-0">
     <i class="bi bi-info-circle me-1"></i>
-    Gagal di JILID {{ $learner->meteor_checkpoint_level > 0 ? 'di atas checkpoint' : '1–4' }} membuat progres
-    diulang dari {{ $learner->meteor_checkpoint_level > 0 ? 'checkpoint terakhir' : 'JILID 1' }}.
+    Gagal membuat progres diulang dari
+    {{ $learner->meteor_checkpoint_level > 0 ? 'checkpoint terakhir (JILID ' . $learner->meteor_checkpoint_level . ')' : 'JILID 1' }}.
+    Kecepatan jatuh meteor sama di semua JILID — yang bertambah jumlah huruf dan kerapatannya.
     WPM hanya tolok ukur, bukan syarat lulus.
 </p>
 
