@@ -5,6 +5,83 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 18 September 2026 — Game 10 Jari ditulis ulang (banyak bug + tampilan dirombak)
+
+**Masalah yang diperbaiki**
+
+Versi pratinjau Game 10 Jari banyak bugnya. Akar masalahnya satu: meteor dijatuhkan
+memakai animasi CSS, sementara keputusan "meteor sudah mendarat" dihitung oleh
+penghitung waktu yang **terpisah** dari animasi itu. Dua penghitung ini gampang lepas
+sinkron, akibatnya:
+
+- Kalau murid pindah tab sebentar lalu kembali, nyawanya sudah habis sendiri padahal
+  meteornya masih kelihatan di tengah layar.
+- Kalau komputernya berat/lemot, meteor kadang langsung melompat ke dasar layar.
+- Menahan satu tombol dianggap sebagai puluhan ketikan.
+
+Selain itu tampilannya dinilai kurang rapi, dan ada dua permintaan khusus: deretan
+tombol `A S D F G H J K L ;` di bawah layar tidak diperlukan, dan meteor jangan cuma
+jatuh di 10 jalur tetap yang mengikuti letak tombol di keyboard.
+
+**Yang dikerjakan**
+
+- Seluruh permainan ditulis ulang di atas satu "kanvas" dengan satu penghitung waktu
+  saja, jadi yang terlihat di layar dan yang dihitung sistem selalu sama.
+- **Deretan tombol virtual dihapus.** Layarnya sekarang murni langit + markas.
+- **Posisi meteor sekarang acak menyebar** di seluruh lebar layar, tidak lagi terkunci
+  pada letak tombol. Titik jatuhnya dipilih dengan cara mencari celah paling lebar dari
+  meteor yang sudah ada, supaya tidak menumpuk di satu sisi.
+- Gerakannya dibuat lebih alami: meteor melayang sedikit ke samping, berputar, dan
+  ukurannya bervariasi. **Hurufnya tetap tegak** walaupun batunya berputar, jadi selalu
+  terbaca.
+- Permainan **otomatis berhenti (jeda)** saat tab ditinggal, dan bisa dijeda manual
+  dengan tombol `Esc`.
+- **Salah tekan tidak lagi mengurangi nyawa** — hanya menghanguskan kombo dan menurunkan
+  akurasi. Nyawa berkurang murni kalau meteor berhasil mendarat.
+- Tampilan baru: langit berbintang, siluet masjid berjendela menyala sebagai markas yang
+  dijaga, sinar penembak dari markas ke meteor, ledakan, getaran layar saat kebobolan,
+  dan penghitung kombo bertingkat.
+- Kecepatan jatuh meteor **tetap** sepanjang permainan; yang bertambah hanyalah *jumlah*
+  meteornya — sesuai kesepakatan di `RENCANA_GAME_10_JARI.md`.
+
+**Berkas yang disentuh**
+
+- `resources/views/learner/meteor/play.blade.php` (ditulis ulang)
+- `resources/views/learner/dashboard.blade.php` (label kartu: "Pratinjau" → "Mode Bebas")
+- `app/Http/Controllers/Learner/MeteorGameController.php` (hanya keterangan di komentar)
+
+Tidak ada migrasi database dan tidak ada perubahan role, jadi saat deploy **cukup**
+`git pull origin main` lalu `php artisan optimize:clear`.
+
+**Yang perlu dicoba**
+
+Buka menu **Game 10 Jari** dari akun murid, lalu:
+
+- Tekan `SPASI` → meteor mulai turun di posisi yang berbeda-beda tiap kali.
+- Ketik huruf pada meteor → meteor meledak dan ada sinar dari arah masjid.
+- Tekan huruf yang tidak ada meteornya → nyawa harus **tetap**, hanya kombo yang hilang.
+- Pindah ke tab lain lalu kembali → permainan harus dalam keadaan **jeda**, nyawa utuh.
+- Tekan `Esc` untuk jeda, `SPASI` untuk lanjut.
+- Coba juga lewat HP: tampilan harus menyesuaikan, dan muncul peringatan bahwa game ini
+  butuh keyboard fisik.
+
+**Catatan pengujian**
+
+Diuji otomatis di browser (Chrome tanpa jendela) dengan halaman permainan diekstrak jadi
+berkas mandiri: 28 dari 28 pemeriksaan perilaku lolos. Namun perlu dicatat, **halaman
+Blade-nya sendiri belum pernah dijalankan lewat Laravel** karena PHP tidak terpasang di
+komputer tempat pengerjaan ini — jadi tetap perlu dibuka sekali di server untuk memastikan.
+
+**Belum dikerjakan**
+
+- JILID 1–5, boss tiap JILID, checkpoint di JILID 5, dan penyimpanan rekor per murid.
+  Semua itu butuh tabel baru `meteor_game_levels` / `meteor_game_attempts` dan jawaban
+  atas pertanyaan terbuka di `RENCANA_GAME_10_JARI.md` bagian 7.
+- Saat ini permainan masih "mode bebas": main terus sampai nyawa habis, hasilnya belum
+  tersimpan ke database.
+
+---
+
 ## 31 Juli 2026 — Tahap 1: Kerangka tampilan responsif (sidebar HP)
 
 **Masalah yang diperbaiki**
