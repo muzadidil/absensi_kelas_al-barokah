@@ -60,9 +60,9 @@
                         @endif
                     </div>
 
-                    <h5 class="fw-bold mb-1">Boss: {{ $level->boss_name }}</h5>
+                    <h5 class="fw-bold mb-1">Boss: {{ $level->boss?->name ?? '—' }}</h5>
                     <p class="text-muted small flex-grow-1 mb-2">
-                        Senjata <strong>{{ $level->boss_weapon_name }}</strong> —
+                        Senjata <strong>{{ $level->bullet?->name ?? '—' }}</strong> —
                         tiap serangan memuntahkan {{ $level->boss_bullets_per_shot }} huruf sekaligus.
                     </p>
 
@@ -76,9 +76,9 @@
                         <span class="badge bg-secondary-subtle text-secondary-emphasis">
                             <i class="bi bi-type me-1"></i>{{ strlen($level->allowed_keys) }} huruf
                         </span>
-                        @if($level->theme === 'pagi')
+                        @if($level->theme)
                             <span class="badge bg-warning-subtle text-warning-emphasis">
-                                <i class="bi bi-sunrise me-1"></i>Pagi
+                                <i class="bi bi-image me-1"></i>{{ $level->theme->name }}
                             </span>
                         @endif
                         @if($level->bullet_returns)

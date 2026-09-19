@@ -103,10 +103,10 @@
     <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
         <div>
             <span class="badge bg-primary mb-1">{{ $meteorGameLevel->display_label }}</span>
-            <h5 class="fw-bold mb-1"><i class="bi bi-rocket-takeoff me-1"></i> Boss: {{ $meteorGameLevel->boss_name }}</h5>
+            <h5 class="fw-bold mb-1"><i class="bi bi-rocket-takeoff me-1"></i> Boss: {{ $meteorGameLevel->boss?->name ?? '—' }}</h5>
             <p class="text-muted small mb-0">
                 Hancurkan {{ $meteorGameLevel->wave_target }} meteor, lalu lawan
-                {{ $meteorGameLevel->boss_name }} dan senjata {{ $meteorGameLevel->boss_weapon_name }}-nya.
+                {{ $meteorGameLevel->boss?->name }} dan senjata {{ $meteorGameLevel->bullet?->name }}-nya.
                 Huruf: <code>{{ strtoupper(implode(' ', str_split($meteorGameLevel->allowed_keys))) }}</code>
             </p>
             @if($meteorGameLevel->bullet_returns)
@@ -156,7 +156,7 @@
                 </div>
 
                 <div class="overlay d-none" id="wonOverlay">
-                    <h4 class="mb-1">{{ $meteorGameLevel->boss_name }} tumbang!</h4>
+                    <h4 class="mb-1">{{ $meteorGameLevel->boss?->name ?? 'Boss' }} tumbang!</h4>
                     <p class="small mb-0">{{ $meteorGameLevel->display_label }} tembus. Al-Barokah selamat.</p>
 
                     <div class="result-grid">
@@ -217,26 +217,16 @@
 (function () {
     'use strict';
 
-    var LEVEL = {
-        number:      {{ $meteorGameLevel->level_number }},
-        label:       @json($meteorGameLevel->display_label),
-        theme:       @json($meteorGameLevel->theme),
-        returns:     {{ $meteorGameLevel->bullet_returns ? 'true' : 'false' }},
-        keys:        @json(str_split($meteorGameLevel->allowed_keys)),
-        lives:       {{ $meteorGameLevel->lives }},
-        waveTarget:  {{ $meteorGameLevel->wave_target }},
-        spawnMs:     {{ $meteorGameLevel->spawn_interval_ms }},
-        bossName:    @json($meteorGameLevel->boss_name),
-        bossWeapon:  @json($meteorGameLevel->boss_weapon_name),
-        bullets:     {{ $meteorGameLevel->boss_bullets_per_shot }},
-        bossHp:      {{ $meteorGameLevel->boss_hp }}
-    };
+    // Semuanya datang dari database (menu Game 10 Jari di admin) — tidak ada lagi
+    // angka kesulitan atau warna yang dipatok di dalam berkas ini.
+    var LEVEL = @json($meteorGameLevel->gameConfig());
+
     var ATTEMPT_URL = @json(route('learner.meteor.attempt', $meteorGameLevel->id));
     var CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    var FALL_SECONDS = 7.0;      // konstan di semua JILID & semua ukuran layar
-    var BULLET_SECONDS = 5.2;    // peluru boss sedikit lebih cepat dari meteor biasa
-    var BOSS_SHOT_GAP = 2.7;
+    var FALL_SECONDS = LEVEL.fallSeconds;
+    var BULLET_SECONDS = LEVEL.bulletSeconds;
+    var BOSS_SHOT_GAP = LEVEL.bossShotGap;
     var RETURN_SPEED = 820;      // laju peluru yang memantul balik ke boss
     var BOSS_INTRO = 2.2;
     var GROUND_H = 56;
@@ -269,7 +259,8 @@
     var lives, combo, bestCombo, destroyed, waveCleared, wrongKeys, missed;
     var elapsed, clock, spawnAcc, phaseTimer;
     var falling, particles, beams, stars, clouds;
-    var isPagi = LEVEL.theme === 'pagi';
+    var TH = LEVEL.theme;
+    var isTerang = !TH.isDark;          // latar terang: teks & kilatan perlu dibalik kontrasnya
     var boss, bossHp, bossTimer, bossCharge;
     var shake, hurt, wrongFlash, comboPop;
     var lastFrame = 0, hudTimer = 0, submitted = false;
@@ -515,8 +506,9 @@
             var x = spreadX(r);
             push('bullet', x, boss.y + 26, r);
         }
-        burst(boss.x, boss.y + 26, 16, 120, false, bossHue());
-        shake = Math.max(shake, 5);
+        var fx = LEVEL.bulletEffect;
+        burst(boss.x, boss.y + 26, Math.round(fx.particles * 0.8), Math.round(fx.spread * 0.8), false, fx.hue);
+        shake = Math.max(shake, fx.shake + 2);
     }
 
     function burst(x, y, amount, spread, upward, hue) {
@@ -536,25 +528,26 @@
     }
 
     function hitFalling(f) {
+        var fx = fxFor(f.kind);
         destroyed++;
         combo++;
         if (combo > bestCombo) bestCombo = combo;
         if (combo >= 2) comboPop = 1;
-        beams.push({ x: f.x, y: f.y, age: 0, life: 0.15 });
-        shake = Math.max(shake, 3);
+        beams.push({ x: f.x, y: f.y, age: 0, life: 0.15, color: fx.beam });
+        shake = Math.max(shake, fx.shake);
 
         // JILID ber-bullet_returns: peluru tidak hancur di tempat, tapi memantul
         // balik ke bossnya dan baru meledak di sana.
         if (f.kind === 'bullet' && LEVEL.returns && boss) {
             f.returning = true;
             f.trail.length = 0;
-            burst(f.x, f.y, 10, 90, false, bossHue());
+            burst(f.x, f.y, Math.round(fx.particles * 0.5), Math.round(fx.spread * 0.6), false, fx.hue);
             syncHud();
             return;
         }
 
         falling.splice(falling.indexOf(f), 1);
-        burst(f.x, f.y, 20, 150, false, f.kind === 'bullet' ? bossHue() : 18);
+        burst(f.x, f.y, fx.particles, fx.spread, false, fx.hue);
 
         if (f.kind === 'bullet') {
             damageBoss(f.x, f.y);
@@ -570,10 +563,11 @@
     }
 
     function damageBoss(x, y) {
+        var fx = LEVEL.bulletEffect;
         bossHp = Math.max(0, bossHp - 1);
         boss.flash = 1;
-        shake = Math.max(shake, 6);
-        burst(x, y, 22, 170, false, bossHue());
+        shake = Math.max(shake, fx.shake * 2);
+        burst(x, y, Math.round(fx.particles * 1.1), Math.round(fx.spread * 1.15), false, fx.hue);
         syncHud();
         if (bossHp <= 0) finish(true);
     }
@@ -584,7 +578,8 @@
         lives = Math.max(0, lives - 1);
         shake = 16;
         hurt = 1;
-        burst(f.x, groundY, 28, 190, true, f.kind === 'bullet' ? bossHue() : 18);
+        var fx = fxFor(f.kind);
+        burst(f.x, groundY, Math.round(fx.particles * 1.4), Math.round(fx.spread * 1.25), true, fx.hue);
         syncHud();
         if (lives <= 0) finish(false);
     }
@@ -676,7 +671,7 @@
             if (beams[b].age >= beams[b].life) beams.splice(b, 1);
         }
 
-        if (isPagi) {
+        if (TH.skyObject === 'awan') {
             for (var c = 0; c < clouds.length; c++) {
                 clouds[c].x += clouds[c].drift * dt;
                 if (clouds[c].x > 1.2) { clouds[c].x = -0.2; clouds[c].y = 0.06 + Math.random() * 0.46; }
@@ -698,30 +693,23 @@
 
     function drawSky() {
         var g = ctx.createLinearGradient(0, 0, 0, H);
-        if (isPagi) {
-            g.addColorStop(0, '#2f6fb5');
-            g.addColorStop(0.42, '#7dbbe9');
-            g.addColorStop(0.78, '#cbe6f7');
-            g.addColorStop(1, '#ffe6c2');
-        } else {
-            g.addColorStop(0, '#04061a');
-            g.addColorStop(0.55, '#101a45');
-            g.addColorStop(1, '#1d2764');
-        }
+        g.addColorStop(0, TH.skyTop);
+        g.addColorStop(isTerang ? 0.42 : 0.55, TH.skyMid);
+        g.addColorStop(1, TH.skyBottom);
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
 
-        if (isPagi) {
+        if (TH.skyObject === 'awan') {
             var sx = W * 0.78, sy = groundY - 76;
             var sun = ctx.createRadialGradient(sx, sy, 0, sx, sy, 175);
-            sun.addColorStop(0, 'rgba(255, 240, 185, .8)');
-            sun.addColorStop(0.32, 'rgba(255, 208, 125, .32)');
-            sun.addColorStop(1, 'rgba(255, 195, 115, 0)');
+            sun.addColorStop(0, hexToRgba(TH.accent, 0.78));
+            sun.addColorStop(0.32, hexToRgba(TH.accent, 0.3));
+            sun.addColorStop(1, hexToRgba(TH.accent, 0));
             ctx.fillStyle = sun;
             ctx.beginPath(); ctx.arc(sx, sy, 175, 0, TAU); ctx.fill();
-            ctx.fillStyle = '#fff6d2';
+            ctx.fillStyle = hexToRgba(TH.accent, 0.95);
             ctx.beginPath(); ctx.arc(sx, sy, 30, 0, TAU); ctx.fill();
-        } else {
+        } else if (TH.skyObject === 'bintang') {
             var neb = ctx.createRadialGradient(W * 0.22, H * 0.28, 0, W * 0.22, H * 0.28, W * 0.42);
             neb.addColorStop(0, 'rgba(96, 84, 200, .22)');
             neb.addColorStop(1, 'rgba(96, 84, 200, 0)');
@@ -733,7 +721,8 @@
     function puff(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
 
     function drawSkyDetail() {
-        if (isPagi) {
+        if (TH.skyObject === 'tidak_ada') return;
+        if (TH.skyObject === 'awan') {
             for (var c = 0; c < clouds.length; c++) {
                 var k = clouds[c];
                 var x = k.x * W, y = k.y * groundY, s = k.s;
@@ -762,68 +751,56 @@
         var s  = Math.max(0.8, Math.min(1.7, W / 640));
         var ratio = lives / LEVEL.lives;
 
-        var shieldRgb = isPagi ? '255, 214, 130' : '110, 200, 255';
         var glow = ctx.createLinearGradient(0, y - 90 * s, 0, y);
-        glow.addColorStop(0, 'rgba(' + shieldRgb + ', 0)');
-        glow.addColorStop(1, 'rgba(' + shieldRgb + ', ' + (0.09 + 0.19 * ratio).toFixed(3) + ')');
+        glow.addColorStop(0, hexToRgba(TH.accent, 0));
+        glow.addColorStop(1, hexToRgba(TH.accent, 0.09 + 0.19 * ratio));
         ctx.fillStyle = glow;
         ctx.fillRect(0, y - 90 * s, W, 90 * s);
 
         var ground = ctx.createLinearGradient(0, y, 0, H);
-        if (isPagi) { ground.addColorStop(0, '#5aa84a'); ground.addColorStop(1, '#27622a'); }
-        else        { ground.addColorStop(0, '#16371f'); ground.addColorStop(1, '#040c07'); }
+        ground.addColorStop(0, TH.groundTop);
+        ground.addColorStop(1, TH.groundBottom);
         ctx.fillStyle = ground;
         ctx.fillRect(0, y, W, H - y);
 
         var domeR = 32 * s, hallW = 68 * s, hallH = 26 * s, towerX = 96 * s, towerH = 52 * s;
 
-        ctx.fillStyle = isPagi ? '#f2e7d0' : '#04150c';
+        ctx.fillStyle = TH.wall;
         ctx.beginPath(); ctx.rect(cx - hallW, y - hallH, hallW * 2, hallH); ctx.fill();
-        ctx.fillStyle = isPagi ? '#2f8f6a' : '#04150c';
-        ctx.beginPath(); ctx.arc(cx, y - hallH, domeR, Math.PI, TAU); ctx.fill();
-        ctx.beginPath(); ctx.rect(cx - 1.5 * s, y - hallH - domeR - 12 * s, 3 * s, 12 * s); ctx.fill();
-
-        ctx.fillStyle = isPagi ? '#f2e7d0' : '#04150c';
         [-towerX, towerX].forEach(function (dx) {
             ctx.beginPath(); ctx.rect(cx + dx - 7 * s, y - towerH, 14 * s, towerH); ctx.fill();
         });
-        ctx.fillStyle = isPagi ? '#2f8f6a' : '#04150c';
+
+        ctx.fillStyle = TH.dome;
+        ctx.beginPath(); ctx.arc(cx, y - hallH, domeR, Math.PI, TAU); ctx.fill();
+        ctx.beginPath(); ctx.rect(cx - 1.5 * s, y - hallH - domeR - 12 * s, 3 * s, 12 * s); ctx.fill();
         [-towerX, towerX].forEach(function (dx) {
             ctx.beginPath(); ctx.arc(cx + dx, y - towerH, 8 * s, Math.PI, TAU); ctx.fill();
         });
 
-        ctx.fillStyle = isPagi
+        ctx.fillStyle = isTerang
             ? 'rgba(84, 56, 30, ' + (0.35 + 0.35 * ratio).toFixed(3) + ')'
             : 'rgba(255, 198, 106, ' + (0.25 + 0.45 * ratio).toFixed(3) + ')';
         for (var i = -2; i <= 2; i++) {
             ctx.fillRect(cx + i * 24 * s - 3 * s, y - hallH * 0.68, 6 * s, 9 * s);
         }
 
-        ctx.strokeStyle = 'rgba(' + shieldRgb + ', ' + (0.22 + 0.5 * ratio).toFixed(3) + ')';
+        ctx.strokeStyle = hexToRgba(TH.accent, 0.22 + 0.5 * ratio);
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
     // ---------- gambar: boss ----------
 
-    function bossHue() {
-        return [18, 190, 100, 280, 160, 12, 195, 130, 265, 310][LEVEL.number - 1] || 18;
-    }
+    var BOSS_PAINTERS = {
+        pocong: drawPocong, wewe: drawWewe, genderuwo: drawGenderuwo,
+        kelelawar: drawKelelawar, ufo: drawUfo, drone: drawDrone,
+        mecha: drawMecha, satelit: drawSatelit, kapal: drawKapal, inti_ai: drawIntiAi
+    };
 
-    function bossBulletColors() {
-        switch (LEVEL.number) {
-            case 2:  return ['#eaf7ff', '#7fd4ff', '#2f7fb5'];   // bola es salju
-            case 3:  return ['#e6ffd9', '#8fd45a', '#2f6b1c'];   // rumput bulat
-            case 4:  return ['#e8dcff', '#9b7bd4', '#3d2470'];   // anak kelelawar
-            case 5:  return ['#dcfff4', '#5fe6c0', '#136b52'];   // tembakan UFO
-            case 6:  return ['#ffe0d0', '#ff6a3d', '#8f2408'];   // roket kembar
-            case 7:  return ['#d9f5ff', '#3fc2ff', '#0a4f7a'];   // meriam plasma
-            case 8:  return ['#d8ffe6', '#39e07f', '#0d5c30'];   // paket data
-            case 9:  return ['#ded6ff', '#7a5cf0', '#281c5c'];   // rudal bayangan
-            case 10: return ['#ffd9f4', '#ff4fc4', '#7a0d58'];   // virus inti
-            default: return ['#ffdca6', '#ff8b3d', '#8b2b07'];   // bola api
-        }
-    }
+    function bossHue() { return LEVEL.bossHue; }
+    function bossBulletColors() { return LEVEL.bulletColors; }
+    function fxFor(kind) { return kind === 'bullet' ? LEVEL.bulletEffect : LEVEL.meteorEffect; }
 
     function drawBoss() {
         if (!boss) return;
@@ -842,9 +819,7 @@
             ctx.beginPath(); ctx.arc(0, 0, 90, 0, TAU); ctx.fill();
         }
 
-        var painters = [drawPocong, drawWewe, drawGenderuwo, drawKelelawar, drawUfo,
-                        drawDrone, drawMecha, drawSatelit, drawKapal, drawIntiAi];
-        (painters[LEVEL.number - 1] || drawPocong)();
+        (BOSS_PAINTERS[LEVEL.bossSprite] || drawPocong)();
 
         if (boss.flash > 0) {
             ctx.globalCompositeOperation = 'lighter';
@@ -1150,7 +1125,7 @@
         ctx.font = '700 11px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillStyle = isPagi ? '#16233f' : '#dbe3ff';
+        ctx.fillStyle = isTerang ? '#16233f' : '#dbe3ff';
         ctx.fillText(LEVEL.bossName.toUpperCase(), W / 2, y + 15);
     }
 
@@ -1163,13 +1138,13 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '800 15px system-ui, sans-serif';
-        ctx.fillStyle = isPagi ? 'rgba(190, 30, 40, .95)' : 'rgba(255, 120, 120, .9)';
+        ctx.fillStyle = isTerang ? 'rgba(190, 30, 40, .95)' : 'rgba(255, 120, 120, .9)';
         ctx.fillText('BOSS ' + LEVEL.label, 0, -34);
         ctx.font = '800 40px system-ui, sans-serif';
-        ctx.fillStyle = isPagi ? '#10192e' : '#fff';
+        ctx.fillStyle = isTerang ? '#10192e' : '#fff';
         ctx.fillText(LEVEL.bossName, 0, 0);
         ctx.font = '600 13px system-ui, sans-serif';
-        ctx.fillStyle = isPagi ? 'rgba(26, 40, 70, .9)' : 'rgba(210, 220, 255, .85)';
+        ctx.fillStyle = isTerang ? 'rgba(26, 40, 70, .9)' : 'rgba(210, 220, 255, .85)';
         ctx.fillText('Senjata: ' + LEVEL.bossWeapon, 0, 30);
         ctx.restore();
     }
@@ -1178,14 +1153,13 @@
 
     function drawBeams() {
         var ox = W / 2, oy = groundY - 14;
-        // di langit pagi sinar biru muda nyaris tak terlihat, jadi dibuat jingga
-        var rgb = isPagi ? '255, 130, 50' : '140, 230, 255';
         for (var i = 0; i < beams.length; i++) {
             var b = beams[i];
             var a = 1 - b.age / b.life;
-            ctx.strokeStyle = 'rgba(' + rgb + ', ' + (a * 0.85).toFixed(3) + ')';
+            var color = b.color || '#8ce6ff';
+            ctx.strokeStyle = hexToRgba(color, a * 0.85);
             ctx.lineWidth = 2 + a * 3;
-            ctx.shadowColor = 'rgba(' + rgb + ', .9)';
+            ctx.shadowColor = hexToRgba(color, 0.9);
             ctx.shadowBlur = 12;
             ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(b.x, b.y); ctx.stroke();
             ctx.shadowBlur = 0;
@@ -1241,8 +1215,12 @@
         ctx.restore();
     }
 
+    // Warna ini diketik admin, jadi nilai aneh tidak boleh membuat kanvas gagal menggambar.
     function hexToRgba(hex, a) {
-        var n = parseInt(hex.slice(1), 16);
+        var s = String(hex || '').replace('#', '');
+        if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+        var n = parseInt(s, 16);
+        if (!isFinite(n)) n = 0;
         return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
     }
 
@@ -1263,7 +1241,7 @@
         ctx.scale(pop, pop);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        var rgb = isPagi ? '150, 80, 0' : '255, 224, 130';
+        var rgb = isTerang ? '150, 80, 0' : '255, 224, 130';
         ctx.font = '800 34px ui-monospace, Consolas, monospace';
         ctx.fillStyle = 'rgba(' + rgb + ', ' + (0.26 + comboPop * 0.45).toFixed(3) + ')';
         ctx.fillText(combo + '×', 0, 0);
@@ -1283,7 +1261,7 @@
         }
         if (wrongFlash > 0) {
             // kilatan putih tak terlihat di langit pagi, jadi dibalik jadi gelap
-            ctx.fillStyle = isPagi
+            ctx.fillStyle = isTerang
                 ? 'rgba(20, 30, 60, ' + (wrongFlash * 0.12).toFixed(3) + ')'
                 : 'rgba(255, 255, 255, ' + (wrongFlash * 0.09).toFixed(3) + ')';
             ctx.fillRect(0, 0, W, H);

@@ -23,7 +23,7 @@ class MeteorGameController extends Controller
     {
         $learner = Learner::find(session('learner_id'));
 
-        $levels = MeteorGameLevel::orderBy('level_number')->get();
+        $levels = MeteorGameLevel::with(['theme', 'boss', 'bullet'])->orderBy('level_number')->get();
         $passed = $this->passedLevelNumbers($learner, $levels);
 
         $unlocked = [];
@@ -52,7 +52,7 @@ class MeteorGameController extends Controller
     {
         $learner = Learner::find(session('learner_id'));
 
-        $levels = MeteorGameLevel::orderBy('level_number')->get();
+        $levels = MeteorGameLevel::with('boss')->orderBy('level_number')->get();
         $passed = $this->passedLevelNumbers($learner, $levels);
 
         $prev = $levels->where('level_number', '<', $meteorGameLevel->level_number)
@@ -60,9 +60,12 @@ class MeteorGameController extends Controller
             ->first();
 
         if ($prev && ! $passed->contains($prev->level_number)) {
+            $bossName = $prev->boss?->name ?? 'boss';
             return redirect()->route('learner.meteor.index')
-                ->with('error', "Kalahkan dulu boss {$prev->display_label} ({$prev->boss_name}) untuk membuka {$meteorGameLevel->display_label}.");
+                ->with('error', "Kalahkan dulu {$bossName} di {$prev->display_label} untuk membuka {$meteorGameLevel->display_label}.");
         }
+
+        $meteorGameLevel->load(['theme', 'boss', 'bullet.effect', 'effect']);
 
         $nextLevel = $levels->where('level_number', '>', $meteorGameLevel->level_number)
             ->sortBy('level_number')
