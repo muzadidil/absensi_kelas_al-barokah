@@ -5,6 +5,38 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 19 September 2026 — SPASI untuk lanjut ke JILID berikutnya
+
+**Yang dikerjakan**
+
+Setelah boss tumbang, tangan masih di keyboard tapi untuk lanjut ke JILID berikutnya harus
+meraih tetikus. Sekarang cukup tekan **SPASI**.
+
+- Layar **menang** → SPASI langsung membuka JILID berikutnya. Kalau sudah JILID terakhir,
+  SPASI tidak melakukan apa-apa (tombol Ulangi dan Daftar JILID tetap bisa diklik).
+- Layar **kalah** → SPASI mengulang JILID yang sama, sama seperti tombol "Coba Lagi".
+- Tombolnya tetap ada seperti biasa, jadi di HP pun tidak ada yang berubah.
+
+**Penjaga supaya tidak kepencet**
+
+Saat boss tumbang, biasanya murid masih menekan-nekan tombol. Kalau SPASI langsung aktif,
+layar hasil bisa terlewat begitu saja tanpa sempat dibaca. Karena itu SPASI baru berfungsi
+**0,6 detik setelah** layar hasil muncul. Tombolnya sendiri bisa diklik kapan saja.
+
+**Berkas yang disentuh**
+
+- `resources/views/learner/meteor/play.blade.php`
+
+Tidak ada perubahan database. Deploy cukup `git pull` lalu `php artisan optimize:clear`.
+
+**Yang perlu dicoba**
+
+- Menangkan satu JILID → coba tekan SPASI secepatnya → harus **tidak** langsung lompat.
+- Tunggu sebentar → tekan SPASI → harus pindah ke JILID berikutnya.
+- Kalah di satu JILID → tekan SPASI → JILID yang sama harus dimulai ulang dengan nyawa penuh.
+
+---
+
 ## 19 September 2026 — Game 10 Jari bisa dimulai tanpa keyboard
 
 **Masalah yang diperbaiki**

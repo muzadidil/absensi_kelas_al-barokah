@@ -210,7 +210,8 @@
 
                     <div class="d-flex flex-wrap gap-2 justify-content-center">
                         @if($nextLevel)
-                            <a href="{{ route('learner.meteor.play', $nextLevel->id) }}" class="btn btn-primary px-4">
+                            <a href="{{ route('learner.meteor.play', $nextLevel->id) }}"
+                               id="nextLevelBtn" class="btn btn-primary px-4">
                                 Lanjut {{ $nextLevel->display_label }} <i class="bi bi-arrow-right ms-1"></i>
                             </a>
                         @endif
@@ -219,6 +220,9 @@
                         </button>
                         <a href="{{ route('learner.meteor.index') }}" class="btn btn-outline-light px-4">Daftar JILID</a>
                     </div>
+                    @if($nextLevel)
+                        <p class="small mt-3 mb-0">atau tekan <span class="hint-key">SPASI</span> untuk lanjut</p>
+                    @endif
                 </div>
 
                 <div class="overlay d-none" id="lostOverlay">
@@ -238,7 +242,8 @@
                         </button>
                         <a href="{{ route('learner.meteor.index') }}" class="btn btn-outline-light px-4">Daftar JILID</a>
                     </div>
-                    <p class="small mt-3 mb-0" id="lostResetNote"></p>
+                    <p class="small mt-3 mb-0">atau tekan <span class="hint-key">SPASI</span> untuk coba lagi</p>
+                    <p class="small mt-2 mb-0" id="lostResetNote"></p>
                 </div>
             </div>
 
@@ -305,7 +310,9 @@
     var boss, bossHp, bossTimer, bossCharge;
     var shake, hurt, wrongFlash, comboPop;
     var lastFrame = 0, hudTimer = 0, submitted = false;
-    var lastChar = '', lastCharAt = -1e9;
+    var lastChar = '', lastCharAt = -1e9, finishedAt = -1e9;
+    var nextLevelBtn = document.getElementById('nextLevelBtn');   // null di JILID terakhir
+    function now() { return window.performance ? performance.now() : Date.now(); }
     var isTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
     var softKey = document.getElementById('softKey');
 
@@ -447,6 +454,7 @@
 
     function finish(won) {
         state = won ? 'won' : 'lost';
+        finishedAt = now();
         hide(pauseBtn);
 
         if (won) {
@@ -1373,7 +1381,16 @@
             if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); startGame(); }
             return;
         }
-        if (state === 'won' || state === 'lost') return;
+        // Jeda singkat supaya ketikan sisa dari pertempuran tidak langsung
+        // melompati layar hasil begitu boss tumbang.
+        if (state === 'won' || state === 'lost') {
+            if (e.code !== 'Space' && e.key !== 'Enter') return;
+            e.preventDefault();
+            if (now() - finishedAt < 600) return;
+            if (state === 'lost') { startGame(); }
+            else if (nextLevelBtn) { nextLevelBtn.click(); }
+            return;
+        }
 
         if (e.key === 'Escape') { e.preventDefault(); setPaused(state === 'playing'); return; }
         if (state === 'paused') {
@@ -1396,10 +1413,10 @@
     function handleChar(key) {
         if (state !== 'playing' || LEVEL.keys.indexOf(key) === -1) return;
 
-        var now = window.performance ? performance.now() : Date.now();
-        if (key === lastChar && now - lastCharAt < 40) return;
+        var t = now();
+        if (key === lastChar && t - lastCharAt < 40) return;
         lastChar = key;
-        lastCharAt = now;
+        lastCharAt = t;
 
         var target = null;
         for (var i = 0; i < falling.length; i++) {
