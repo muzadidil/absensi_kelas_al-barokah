@@ -57,6 +57,21 @@
         gap: .4rem .75rem;
         margin-bottom: .6rem;
     }
+
+    /* Saat layar penuh, HUD dipindah ke dalam arena supaya tetap kelihatan. */
+    .meteor-page .arena-wrap:fullscreen { border-radius: 0; box-shadow: none; }
+    .meteor-page .hud.hud-float {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        z-index: 4;
+        margin: 0;
+        padding: .6rem .9rem;
+        background: linear-gradient(to bottom, rgba(6, 9, 26, .72), rgba(6, 9, 26, 0));
+    }
+    .meteor-page .hud.hud-float .chip {
+        background: rgba(255, 255, 255, .92);
+        border-color: rgba(255, 255, 255, .4);
+    }
     .meteor-page .chip {
         display: inline-flex;
         align-items: baseline;
@@ -129,14 +144,17 @@
     <div class="card">
         <div class="card-body">
 
-            <div class="hud">
+            <div class="hud" id="hudBar">
                 <span class="chip">Nyawa <b class="lives" id="hudLives"></b></span>
                 <span class="chip" id="chipProgress">Meteor <b id="hudProgress">0</b></span>
                 <span class="chip">Kombo <b id="hudCombo">—</b></span>
                 <span class="chip">Akurasi <b id="hudAcc">100%</b></span>
                 <span class="chip">WPM <b id="hudWpm">0</b></span>
                 <span class="chip">Waktu <b id="hudTime">0</b>dtk</span>
-                <button type="button" id="pauseBtn" class="btn btn-outline-secondary btn-sm ms-auto d-none">
+                <button type="button" id="fsBtn" class="btn btn-outline-primary btn-sm ms-auto">
+                    <i class="bi bi-arrows-fullscreen"></i> Layar Penuh
+                </button>
+                <button type="button" id="pauseBtn" class="btn btn-outline-secondary btn-sm d-none">
                     <i class="bi bi-pause-fill"></i> Jeda
                 </button>
             </div>
@@ -229,7 +247,6 @@
     var BOSS_SHOT_GAP = LEVEL.bossShotGap;
     var RETURN_SPEED = 820;      // laju peluru yang memantul balik ke boss
     var BOSS_INTRO = 2.2;
-    var GROUND_H = 56;
     var TAU = Math.PI * 2;
 
     var canvas = document.getElementById('meteorCanvas');
@@ -290,9 +307,17 @@
         }
     }
 
+    function isFullscreen() {
+        return (document.fullscreenElement || document.webkitFullscreenElement) === wrap;
+    }
+
     function resize() {
+        // Saat layar penuh arena mengikuti ukuran layar; di luar itu tingginya dibatasi
+        // supaya kartu di halaman tidak kepanjangan.
         var cssW = Math.max(280, Math.round(wrap.clientWidth));
-        var cssH = Math.round(Math.min(560, Math.max(330, cssW * 0.58)));
+        var cssH = isFullscreen()
+            ? Math.max(260, Math.round(wrap.clientHeight))
+            : Math.round(Math.min(560, Math.max(330, cssW * 0.58)));
         var dpr  = Math.min(2, window.devicePixelRatio || 1);
         var pxW  = Math.round(cssW * dpr);
         var pxH  = Math.round(cssH * dpr);
@@ -305,7 +330,7 @@
 
         W = cssW;
         H = cssH;
-        groundY = H - GROUND_H;
+        groundY = H - Math.max(50, Math.min(120, Math.round(H * 0.12)));
 
         canvas.width  = pxW;
         canvas.height = pxH;
@@ -494,15 +519,20 @@
         falling.push(f);
     }
 
+    // di arena besar (layar penuh) huruf ikut dibesarkan supaya tetap enak dibaca
+    function sizeScale() {
+        return Math.max(1, Math.min(1.7, W / 900));
+    }
+
     function spawnMeteor() {
-        var r = 21 + Math.random() * 8;
+        var r = (21 + Math.random() * 8) * sizeScale();
         push('meteor', spreadX(r), -r - 10, r);
     }
 
     function bossVolley() {
         var n = LEVEL.bullets;
         for (var i = 0; i < n; i++) {
-            var r = 17 + Math.random() * 5;
+            var r = (17 + Math.random() * 5) * sizeScale();
             var x = spreadX(r);
             push('bullet', x, boss.y + 26, r);
         }
@@ -748,7 +778,7 @@
     function drawBase() {
         var cx = W / 2;
         var y  = groundY;
-        var s  = Math.max(0.8, Math.min(1.7, W / 640));
+        var s  = Math.max(0.8, Math.min(2.2, W / 640));
         var ratio = lives / LEVEL.lives;
 
         var glow = ctx.createLinearGradient(0, y - 90 * s, 0, y);
@@ -805,7 +835,7 @@
     function drawBoss() {
         if (!boss) return;
         var bob = Math.sin(clock * 2.2) * 7;
-        var s = Math.max(0.85, Math.min(1.5, W / 700));
+        var s = Math.max(0.85, Math.min(1.9, W / 700));
 
         ctx.save();
         ctx.translate(boss.x, boss.y + bob);
@@ -1341,7 +1371,44 @@
     }
 
     window.addEventListener('keydown', onKeyDown);
-    pauseBtn.addEventListener('click', function () { setPaused(state === 'playing'); });
+
+    // blur() penting: tombol yang masih ter-fokus ikut tertekan saat pemain menekan SPASI
+    pauseBtn.addEventListener('click', function () { this.blur(); setPaused(state === 'playing'); });
+
+    var fsBtn = document.getElementById('fsBtn');
+    var hudBar = document.getElementById('hudBar');
+    var hudHome = hudBar.parentNode;
+    var canFullscreen = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+
+    function onFullscreenChange() {
+        var full = isFullscreen();
+        if (full) {
+            wrap.appendChild(hudBar);
+            hudBar.classList.add('hud-float');
+        } else {
+            hudHome.insertBefore(hudBar, hudHome.firstChild);
+            hudBar.classList.remove('hud-float');
+        }
+        fsBtn.innerHTML = full
+            ? '<i class="bi bi-fullscreen-exit"></i> Keluar'
+            : '<i class="bi bi-arrows-fullscreen"></i> Layar Penuh';
+        resize();
+    }
+
+    if (canFullscreen) {
+        fsBtn.addEventListener('click', function () {
+            this.blur();
+            if (isFullscreen()) {
+                (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+            } else {
+                canFullscreen.call(wrap);
+            }
+        });
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    } else {
+        fsBtn.classList.add('d-none');
+    }
     document.getElementById('retryBtn').addEventListener('click', startGame);
     document.getElementById('replayBtn').addEventListener('click', startGame);
     document.addEventListener('visibilitychange', function () {

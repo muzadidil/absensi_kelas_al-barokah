@@ -5,6 +5,44 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 19 September 2026 — Game 10 Jari: tombol Layar Penuh
+
+**Masalah yang diperbaiki**
+
+Arena permainan tingginya dibatasi 560 piksel, jadi di layar lebar terlihat kecil dan seperti
+terpotong. Tidak ada cara memperbesarnya, dan menekan F11 di browser pun tidak membantu karena
+ukuran arenanya tetap dihitung dari lebar kartu, bukan dari layar.
+
+**Yang dikerjakan**
+
+- Tombol **Layar Penuh** di samping tombol Jeda. Ditekan sekali, arena memenuhi seluruh layar;
+  ditekan lagi (atau tekan `Esc`) kembali normal.
+- Saat layar penuh, deretan informasi (nyawa, darah boss, kombo, akurasi, WPM, waktu)
+  **ikut pindah ke dalam arena** dan mengambang di atas, supaya tetap kelihatan.
+- Tebal tanah sekarang mengikuti tinggi arena, tidak lagi dipatok 56 piksel, agar tidak
+  terlihat setipis garis di layar besar.
+- Masjid, boss, dan huruf pada meteor ikut membesar di arena besar supaya tetap enak dibaca.
+
+**Perbaikan sampingan**
+
+Tombol yang baru saja diklik tetap dalam keadaan terpilih, sehingga saat pemain menekan
+**SPASI** untuk melanjutkan permainan, tombol itu ikut tertekan dan permainan langsung terjeda
+lagi. Sekarang fokusnya dilepas setiap kali tombol diklik.
+
+**Berkas yang disentuh**
+
+- `resources/views/learner/meteor/play.blade.php`
+
+Tidak ada perubahan database. Deploy cukup `git pull` lalu `php artisan optimize:clear`.
+
+**Yang perlu dicoba**
+
+- Tekan **Layar Penuh** saat bermain → arena harus memenuhi layar dan informasi nyawa tetap terlihat.
+- Tekan `Esc` → keluar dari layar penuh dan tampilan kembali seperti semula.
+- Jeda permainan, lalu tekan **SPASI** → harus langsung lanjut, tidak terjeda lagi seketika.
+
+---
+
 ## 19 September 2026 — Game 10 Jari bisa diatur sendiri dari Admin
 
 **Masalah yang diperbaiki**
