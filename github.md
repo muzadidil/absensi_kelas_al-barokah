@@ -5,6 +5,42 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 19 September 2026 — Tombol Salin JILID
+
+**Yang dikerjakan**
+
+Membuat JILID lanjutan berarti mengisi ulang belasan isian yang sebagian besar sama dengan
+JILID sebelumnya. Sekarang ada tombol **Salin** di tiap baris JILID pada
+**Admin → Game 10 Jari**.
+
+- Sekali tekan, seluruh pengaturan JILID itu disalin jadi JILID baru di urutan paling akhir —
+  huruf, kata, kecepatan, boss, peluru, nuansa, efek, semuanya ikut.
+- Namanya diberi tanda **"(salinan)"** supaya jelas masih perlu diubah.
+- **Riwayat percobaan murid tidak ikut tersalin** — JILID barunya bersih.
+
+**Konfirmasi**
+
+Menekan Salin akan memunculkan pertanyaan lebih dulu, lengkap dengan nama JILID yang akan
+disalin, jadi tidak ada salinan yang terbuat karena salah pencet. Setelah tersalin, muncul
+pesan hijau yang menyebutkan nama salinannya dan di urutan berapa ia dibuat.
+
+**Berkas yang disentuh**
+
+- `Admin\MeteorGameController` (method `duplicateLevel`)
+- `routes/web.php`, `resources/views/admin/meteor/index.blade.php`
+
+Tidak ada perubahan database. Deploy cukup `git pull` lalu `php artisan optimize:clear`.
+
+**Yang perlu dicoba**
+
+- Buka **Admin → Game 10 Jari** → tekan tombol salin (ikon dua lembar) di salah satu JILID.
+- Harus muncul pertanyaan dulu. Tekan **Batal** → tidak terjadi apa-apa.
+- Tekan lagi lalu setujui → muncul pesan hijau, dan JILID baru bertanda "(salinan)" ada di
+  urutan paling bawah dengan pengaturan sama persis.
+- Ubah JILID salinan itu → JILID aslinya harus tidak ikut berubah.
+
+---
+
 ## 19 September 2026 — Huruf boss dipisah, dan mode KATA
 
 **Yang dikerjakan**

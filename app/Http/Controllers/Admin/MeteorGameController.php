@@ -50,6 +50,26 @@ class MeteorGameController extends Controller
         return back()->with('success', 'JILID berhasil diperbarui.');
     }
 
+    /**
+     * Salin satu JILID beserta seluruh pengaturannya jadi JILID baru di urutan
+     * paling akhir — dipakai saat membuat JILID lanjutan yang mirip pendahulunya.
+     * Riwayat percobaan murid sengaja TIDAK ikut tersalin.
+     */
+    public function duplicateLevel(MeteorGameLevel $meteorGameLevel)
+    {
+        $copy = $meteorGameLevel->replicate();
+        $copy->level_number = (int) MeteorGameLevel::max('level_number') + 1;
+        $copy->display_label = mb_substr($meteorGameLevel->display_label . ' (salinan)', 0, 255);
+        $copy->save();
+
+        return back()->with('success', sprintf(
+            '%s berhasil disalin jadi "%s" di urutan %d. Silakan ubah nama & pengaturannya.',
+            $meteorGameLevel->display_label,
+            $copy->display_label,
+            $copy->level_number
+        ));
+    }
+
     public function destroyLevel(MeteorGameLevel $meteorGameLevel)
     {
         $label = $meteorGameLevel->display_label;

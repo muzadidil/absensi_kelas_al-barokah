@@ -174,6 +174,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/admin/game-jari/jilid', [AdminMeteorGameController::class, 'storeLevel'])->name('admin.meteor.levels.store');
         Route::put('/admin/game-jari/jilid/{meteorGameLevel}', [AdminMeteorGameController::class, 'updateLevel'])->name('admin.meteor.levels.update');
+        Route::post('/admin/game-jari/jilid/{meteorGameLevel}/salin', [AdminMeteorGameController::class, 'duplicateLevel'])->name('admin.meteor.levels.duplicate');
         Route::delete('/admin/game-jari/jilid/{meteorGameLevel}', [AdminMeteorGameController::class, 'destroyLevel'])->name('admin.meteor.levels.destroy');
 
         Route::post('/admin/game-jari/nuansa', [AdminMeteorGameController::class, 'storeTheme'])->name('admin.meteor.themes.store');

@@ -93,8 +93,13 @@
                             <td class="text-end text-nowrap">
                                 <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#levelModal"
                                         data-mode="edit" data-action="{{ route('admin.meteor.levels.update', $l->id) }}"
-                                        data-json='@json($l)'><i class="bi bi-pencil"></i></button>
-                                <form action="{{ route('admin.meteor.levels.destroy', $l->id) }}" method="POST" class="d-inline js-hapus">
+                                        data-json='@json($l)' title="Ubah"><i class="bi bi-pencil"></i></button>
+                                <form action="{{ route('admin.meteor.levels.duplicate', $l->id) }}" method="POST" class="d-inline js-salin"
+                                      data-pesan="Salin {{ $l->display_label }}? Salinannya dibuat di urutan paling akhir dengan pengaturan yang sama persis, lalu bisa langsung diubah.">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-secondary" title="Salin JILID ini"><i class="bi bi-copy"></i></button>
+                                </form>
+                                <form action="{{ route('admin.meteor.levels.destroy', $l->id) }}" method="POST" class="d-inline js-hapus"
                                     @csrf @method('DELETE')
                                     <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                                 </form>
@@ -472,9 +477,10 @@
         });
     });
 
-    document.querySelectorAll('.js-hapus').forEach(function (form) {
+    document.querySelectorAll('.js-hapus, .js-salin').forEach(function (form) {
         form.addEventListener('submit', function (ev) {
-            if (!confirm('Hapus data ini? Tindakan ini tidak bisa dibatalkan.')) ev.preventDefault();
+            var pesan = form.dataset.pesan || 'Hapus data ini? Tindakan ini tidak bisa dibatalkan.';
+            if (!confirm(pesan)) ev.preventDefault();
         });
     });
 })();
