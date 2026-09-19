@@ -66,7 +66,24 @@
                                 @if($l->is_checkpoint)<span class="badge bg-success-subtle text-success-emphasis ms-1">Checkpoint</span>@endif
                                 @if($l->bullet_returns)<span class="badge bg-info-subtle text-info-emphasis ms-1">Pantul</span>@endif
                             </td>
-                            <td><code class="small">{{ strtoupper($l->allowed_keys) }}</code> <span class="text-muted small">({{ strlen($l->allowed_keys) }})</span></td>
+                            <td class="small">
+                                <div>
+                                    <span class="text-muted">Meteor:</span>
+                                    @if($l->waveWords())
+                                        <span class="badge bg-info-subtle text-info-emphasis">{{ count($l->waveWords()) }} kata</span>
+                                    @else
+                                        <code>{{ strtoupper($l->allowed_keys) }}</code>
+                                    @endif
+                                </div>
+                                <div>
+                                    <span class="text-muted">Boss:</span>
+                                    @if($l->bossWords())
+                                        <span class="badge bg-info-subtle text-info-emphasis">{{ count($l->bossWords()) }} kata</span>
+                                    @else
+                                        <code>{{ strtoupper($l->effectiveBossKeys()) }}</code>
+                                    @endif
+                                </div>
+                            </td>
                             <td>{{ $l->wave_target }}</td>
                             <td>{{ rtrim(rtrim(number_format($l->fall_seconds, 1), '0'), '.') }}s</td>
                             <td>{{ $l->spawn_interval_ms }}ms</td>
@@ -257,10 +274,22 @@
               <div class="col-4"><label class="form-label small">Urutan</label><input type="number" name="level_number" class="form-control" min="1" required></div>
               <div class="col-8"><label class="form-label small">Nama tampil</label><input name="display_label" class="form-control" placeholder="JILID 1" required></div>
 
+              <div class="col-12"><hr class="my-1"><span class="small fw-semibold text-muted">Isi gelombang meteor</span></div>
+
               <div class="col-12">
-                <label class="form-label small">Huruf yang keluar</label>
+                <label class="form-label small">Huruf meteor</label>
                 <input name="allowed_keys" class="form-control font-monospace" placeholder="asdfghjkl;" required>
-                <div class="form-text">Ketik hurufnya berdempetan tanpa spasi. Huruf dobel otomatis dibuang. Makin banyak huruf, makin sulit.</div>
+                <div class="form-text">Ketik berdempetan tanpa spasi. Huruf dobel otomatis dibuang. Makin banyak huruf, makin sulit.</div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small">Kata meteor <span class="text-muted fw-normal">(opsional)</span></label>
+                <textarea name="wave_words" rows="2" class="form-control font-monospace" placeholder="ada, kaki, jalan, sekolah"></textarea>
+                <div class="form-text">
+                  Kalau diisi, meteornya membawa <strong>kata</strong> dan kolom huruf di atas tidak dipakai.
+                  Murid mengetik kata itu sampai selesai untuk menghancurkannya.
+                  Kosongkan kalau mau kembali ke huruf tunggal. Pisahkan dengan koma atau baris baru.
+                </div>
               </div>
 
               <div class="col-6 col-md-3"><label class="form-label small">Nyawa</label><input type="number" name="lives" class="form-control" min="1" max="20" required></div>
@@ -273,6 +302,18 @@
               <div class="col-6 col-md-4"><label class="form-label small">Boss</label><select name="meteor_boss_id" class="form-select"><option value="">— tidak ada —</option>@foreach($bosses as $b)<option value="{{ $b->id }}">{{ $b->name }}</option>@endforeach</select></div>
               <div class="col-6 col-md-4"><label class="form-label small">Peluru boss</label><select name="meteor_bullet_id" class="form-select"><option value="">— bawaan —</option>@foreach($bullets as $b)<option value="{{ $b->id }}">{{ $b->name }}</option>@endforeach</select></div>
               <div class="col-6 col-md-4"><label class="form-label small">Darah boss</label><input type="number" name="boss_hp" class="form-control" min="1" required></div>
+
+              <div class="col-12">
+                <label class="form-label small">Huruf peluru boss</label>
+                <input name="boss_keys" class="form-control font-monospace" placeholder="kosongkan = ikut huruf meteor">
+                <div class="form-text">Isi kalau mau huruf saat lawan boss berbeda dari huruf gelombang meteornya.</div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small">Kata peluru boss <span class="text-muted fw-normal">(opsional)</span></label>
+                <textarea name="boss_words" rows="2" class="form-control font-monospace" placeholder="api, badai, meteor"></textarea>
+                <div class="form-text">Aturannya sama: diisi &rarr; peluru boss membawa kata, dikosongkan &rarr; pakai huruf.</div>
+              </div>
 
               <div class="col-6 col-md-4"><label class="form-label small">Peluru per serangan</label><input type="number" name="boss_bullets_per_shot" class="form-control" min="1" max="20" required></div>
               <div class="col-6 col-md-4"><label class="form-label small">Jeda serangan (detik)</label><input type="number" step="0.1" name="boss_shot_gap" class="form-control" min="0.5" max="30" required></div>
@@ -387,7 +428,8 @@
 (function () {
     // Satu modal dipakai bersama semua baris: isinya diisi dari data-json tombol yang diklik.
     var DEFAULTS = {
-        levelModal:  { level_number: '', display_label: '', allowed_keys: 'asdfghjkl;', lives: 5,
+        levelModal:  { level_number: '', display_label: '', allowed_keys: 'asdfghjkl;',
+                       boss_keys: '', wave_words: '', boss_words: '', lives: 5,
                        wave_target: 12, spawn_interval_ms: 1500, fall_seconds: 7, bullet_seconds: 5.5,
                        boss_shot_gap: 2.8, boss_bullets_per_shot: 2, boss_hp: 12,
                        meteor_theme_id: '', meteor_boss_id: '', meteor_bullet_id: '', meteor_effect_id: '',

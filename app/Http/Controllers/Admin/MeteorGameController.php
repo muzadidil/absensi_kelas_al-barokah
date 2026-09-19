@@ -69,6 +69,9 @@ class MeteorGameController extends Controller
             'meteor_bullet_id' => 'nullable|exists:meteor_bullets,id',
             'meteor_effect_id' => 'nullable|exists:meteor_effects,id',
             'allowed_keys' => 'required|string|max:60',
+            'boss_keys' => 'nullable|string|max:60',
+            'wave_words' => 'nullable|string|max:4000',
+            'boss_words' => 'nullable|string|max:4000',
             'lives' => 'required|integer|min:1|max:20',
             'wave_target' => 'required|integer|min:1|max:500',
             'spawn_interval_ms' => 'required|integer|min:200|max:10000',
@@ -84,13 +87,26 @@ class MeteorGameController extends Controller
         ]);
 
         // huruf dirapikan di sini supaya tidak ada huruf dobel atau spasi nyasar
-        $data['allowed_keys'] = implode('', array_unique(str_split(
-            preg_replace('/\s+/', '', strtolower($data['allowed_keys']))
-        )));
+        $data['allowed_keys'] = implode('', MeteorGameLevel::keyList($data['allowed_keys']));
+        $data['boss_keys'] = $request->filled('boss_keys')
+            ? implode('', MeteorGameLevel::keyList($request->input('boss_keys')))
+            : null;
+
+        $data['wave_words'] = self::joinWords($request->input('wave_words'));
+        $data['boss_words'] = self::joinWords($request->input('boss_words'));
+
         $data['bullet_returns'] = $request->boolean('bullet_returns');
         $data['is_checkpoint'] = $request->boolean('is_checkpoint');
 
         return $data;
+    }
+
+    /** Kata disimpan satu per baris supaya rapi saat dibuka lagi di form. */
+    private static function joinWords(?string $raw): ?string
+    {
+        $words = MeteorGameLevel::wordList($raw);
+
+        return $words ? implode("\n", $words) : null;
     }
 
     // ---------- Nuansa ----------

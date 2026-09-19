@@ -133,7 +133,20 @@
             <p class="text-muted small mb-0">
                 Hancurkan {{ $meteorGameLevel->wave_target }} meteor, lalu lawan
                 {{ $meteorGameLevel->boss?->name }} dan senjata {{ $meteorGameLevel->bullet?->name }}-nya.
-                Huruf: <code>{{ strtoupper(implode(' ', str_split($meteorGameLevel->allowed_keys))) }}</code>
+            </p>
+            <p class="text-muted small mb-0">
+                Meteor:
+                @if($meteorGameLevel->waveWords())
+                    <strong>{{ count($meteorGameLevel->waveWords()) }} kata</strong>
+                @else
+                    <code>{{ strtoupper(implode(' ', str_split($meteorGameLevel->allowed_keys))) }}</code>
+                @endif
+                &nbsp;&middot;&nbsp; Boss:
+                @if($meteorGameLevel->bossWords())
+                    <strong>{{ count($meteorGameLevel->bossWords()) }} kata</strong>
+                @else
+                    <code>{{ strtoupper(implode(' ', str_split($meteorGameLevel->effectiveBossKeys()))) }}</code>
+                @endif
             </p>
             @if($meteorGameLevel->bullet_returns)
                 <p class="small text-primary mb-0 mt-1">
@@ -302,7 +315,7 @@
     var W = 0, H = 0, groundY = 0;
     var state = 'intro';   // intro | playing | paused | won | lost
     var phase = 'wave';    // wave | bossIntro | boss
-    var lives, combo, bestCombo, destroyed, waveCleared, wrongKeys, missed;
+    var lives, combo, bestCombo, destroyed, waveCleared, correctKeys, wrongKeys, missed;
     var elapsed, clock, spawnAcc, phaseTimer;
     var falling, particles, beams, stars, clouds;
     var TH = LEVEL.theme;
@@ -310,7 +323,7 @@
     var boss, bossHp, bossTimer, bossCharge;
     var shake, hurt, wrongFlash, comboPop;
     var lastFrame = 0, hudTimer = 0, submitted = false;
-    var lastChar = '', lastCharAt = -1e9, finishedAt = -1e9;
+    var lastChar = '', lastSource = '', lastCharAt = -1e9, finishedAt = -1e9;
     var nextLevelBtn = document.getElementById('nextLevelBtn');   // null di JILID terakhir
     function now() { return window.performance ? performance.now() : Date.now(); }
     var isTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
@@ -393,7 +406,7 @@
     function reset() {
         lives = LEVEL.lives;
         combo = 0; bestCombo = 0;
-        destroyed = 0; waveCleared = 0; wrongKeys = 0; missed = 0;
+        destroyed = 0; waveCleared = 0; correctKeys = 0; wrongKeys = 0; missed = 0;
         elapsed = 0; clock = 0; spawnAcc = 0; phaseTimer = 0;
         falling = []; particles = []; beams = [];
         boss = null; bossHp = LEVEL.bossHp; bossTimer = 0; bossCharge = 0;
@@ -403,14 +416,15 @@
         syncHud();
     }
 
+    // Dihitung per KETIKAN, bukan per objek hancur, supaya adil di mode kata.
     function accuracy() {
-        var total = destroyed + wrongKeys;
-        return total === 0 ? 100 : Math.round((destroyed / total) * 100);
+        var total = correctKeys + wrongKeys;
+        return total === 0 ? 100 : Math.round((correctKeys / total) * 100);
     }
 
     function wpm() {
         if (elapsed < 1) return 0;
-        return Math.round((destroyed / 5) / (elapsed / 60));
+        return Math.round((correctKeys / 5) / (elapsed / 60));
     }
 
     function multiplier() {
@@ -510,16 +524,34 @@
 
     // ---------- objek jatuh ----------
 
-    function pickChar() {
-        var onScreen = falling.filter(function (f) { return !f.returning; })
-                              .map(function (f) { return f.char; });
-        var pool = LEVEL.keys.filter(function (c) { return onScreen.indexOf(c) === -1; });
-        if (pool.length === 0) pool = LEVEL.keys;
+    // Isi gelombang meteor dan isi peluru boss bisa berbeda, termasuk modenya
+    // (huruf tunggal atau kata) — keduanya diatur terpisah di admin.
+    function spec() {
+        return phase === 'wave' ? LEVEL.wave : LEVEL.boss;
+    }
+
+    // Hindari dua sasaran berhuruf awal sama, supaya tidak ambigu saat mulai mengetik.
+    function pickText() {
+        var items = spec().items;
+        var taken = falling.filter(function (f) { return !f.returning; })
+                           .map(function (f) { return f.text.charAt(0); });
+        var pool = items.filter(function (t) { return taken.indexOf(t.charAt(0)) === -1; });
+        if (!pool.length) pool = items;
         return pool[(Math.random() * pool.length) | 0];
     }
 
-    function spreadX(r) {
-        var margin = r + 12;
+    function wordFont(r) {
+        return '800 ' + Math.round(r * 0.8) + 'px ui-monospace, Consolas, "Courier New", monospace';
+    }
+
+    function halfWidthFor(text, r) {
+        if (text.length <= 1) return r;
+        ctx.font = wordFont(r);
+        return Math.max(r, ctx.measureText(text.toUpperCase()).width / 2 + r * 0.55);
+    }
+
+    function spreadX(halfW) {
+        var margin = halfW + 12;
         var span = Math.max(1, W - margin * 2);
         var x = margin + Math.random() * span;
         if (falling.length === 0) return x;
@@ -537,11 +569,14 @@
         return x;
     }
 
-    function push(kind, x, y, r) {
+    function push(kind, r, y) {
+        var text = pickText();
+        var halfW = halfWidthFor(text, r);
         var f = {
             kind: kind,
-            char: pickChar(),
-            x: x, y: y, r: r,
+            text: text,
+            typed: 0,
+            x: spreadX(halfW), y: y, r: r, halfW: halfW,
             spawnY: y,
             vx: (Math.random() - 0.5) * 26,
             speedVar: 0.92 + Math.random() * 0.16,
@@ -561,15 +596,14 @@
 
     function spawnMeteor() {
         var r = (21 + Math.random() * 8) * sizeScale();
-        push('meteor', spreadX(r), -r - 10, r);
+        push('meteor', r, -r - 10);
     }
 
     function bossVolley() {
         var n = LEVEL.bullets;
         for (var i = 0; i < n; i++) {
             var r = (17 + Math.random() * 5) * sizeScale();
-            var x = spreadX(r);
-            push('bullet', x, boss.y + 26, r);
+            push('bullet', r, boss.y + 26);
         }
         var fx = LEVEL.bulletEffect;
         burst(boss.x, boss.y + 26, Math.round(fx.particles * 0.8), Math.round(fx.spread * 0.8), false, fx.hue);
@@ -708,8 +742,8 @@
             f.x += f.vx * dt;
             f.angle += f.spin * dt;
 
-            if (f.x < f.r)     { f.x = f.r;     f.vx =  Math.abs(f.vx); }
-            if (f.x > W - f.r) { f.x = W - f.r; f.vx = -Math.abs(f.vx); }
+            if (f.x < f.halfW)     { f.x = f.halfW;     f.vx =  Math.abs(f.vx); }
+            if (f.x > W - f.halfW) { f.x = W - f.halfW; f.vx = -Math.abs(f.vx); }
 
             f.trail.unshift({ x: f.x, y: f.y });
             if (f.trail.length > 9) f.trail.pop();
@@ -1245,7 +1279,12 @@
 
         ctx.save();
         ctx.translate(f.x, f.y);
+        if (f.text.length <= 1) drawSingle(f, colors);
+        else drawWord(f, colors);
+        ctx.restore();
+    }
 
+    function drawSingle(f, colors) {
         var halo = ctx.createRadialGradient(0, 0, f.r * 0.45, 0, 0, f.r * 1.95);
         halo.addColorStop(0, hexToRgba(colors[1], 0.5));
         halo.addColorStop(1, hexToRgba(colors[1], 0));
@@ -1275,9 +1314,52 @@
         ctx.shadowColor = hexToRgba(colors[0], 0.95);
         ctx.shadowBlur = 10;
         ctx.fillStyle = '#fff6e2';
-        ctx.fillText(f.char.toUpperCase(), 0, f.r * 0.05);
+        ctx.fillText(f.text.toUpperCase(), 0, f.r * 0.05);
         ctx.shadowBlur = 0;
-        ctx.restore();
+    }
+
+    /** Kata digambar sebagai kapsul; bagian yang sudah diketik diredupkan. */
+    function drawWord(f, colors) {
+        var h = f.r * 1.5;
+        var w = f.halfW * 2;
+
+        var halo = ctx.createRadialGradient(0, 0, f.r * 0.5, 0, 0, f.halfW * 1.5);
+        halo.addColorStop(0, hexToRgba(colors[1], 0.45));
+        halo.addColorStop(1, hexToRgba(colors[1], 0));
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.ellipse(0, 0, f.halfW * 1.5, f.r * 1.8, 0, 0, TAU); ctx.fill();
+
+        var body = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
+        body.addColorStop(0, colors[1]);
+        body.addColorStop(1, colors[2]);
+        ctx.fillStyle = body;
+        roundRect(-w / 2, -h / 2, w, h, h / 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(14, 9, 4, .8)';
+        roundRect(-w / 2 + 3, -h / 2 + 3, w - 6, h - 6, (h - 6) / 2);
+        ctx.fill();
+
+        var txt = f.text.toUpperCase();
+        var done = txt.slice(0, f.typed);
+
+        ctx.font = wordFont(f.r);
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        var x = -ctx.measureText(txt).width / 2;
+
+        if (done) {
+            ctx.fillStyle = hexToRgba(colors[0], 0.4);
+            ctx.fillText(done, x, 0);
+            x += ctx.measureText(done).width;
+        }
+
+        ctx.shadowColor = hexToRgba(colors[0], 0.95);
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#fff6e2';
+        ctx.fillText(txt.slice(f.typed), x, 0);
+        ctx.shadowBlur = 0;
+        ctx.textAlign = 'center';
     }
 
     // Warna ini diketik admin, jadi nilai aneh tidak boleh membuat kanvas gagal menggambar.
@@ -1400,9 +1482,9 @@
         if (e.repeat) return;
 
         var key = e.key.length === 1 ? e.key.toLowerCase() : '';
-        if (LEVEL.keys.indexOf(key) === -1) return;
+        if (!key || spec().alphabet.indexOf(key) === -1) return;
         e.preventDefault();
-        handleChar(key);
+        handleChar(key, 'fisik');
     }
 
     /**
@@ -1410,23 +1492,47 @@
      * layar di HP (event input). Kalau sebuah tombol menyalakan keduanya, yang
      * kedua diabaikan supaya tidak terhitung dua kali.
      */
-    function handleChar(key) {
-        if (state !== 'playing' || LEVEL.keys.indexOf(key) === -1) return;
+    function handleChar(key, source) {
+        if (state !== 'playing' || spec().alphabet.indexOf(key) === -1) return;
 
+        // Dobel hanya kalau huruf yang sama datang dari JALUR BERBEDA dalam waktu
+        // dekat. Huruf kembar dalam satu kata (mis. "keenakan") tetap dihitung.
         var t = now();
-        if (key === lastChar && t - lastCharAt < 40) return;
+        if (key === lastChar && source !== lastSource && t - lastCharAt < 40) return;
         lastChar = key;
+        lastSource = source;
         lastCharAt = t;
 
-        var target = null;
+        // Sasaran yang sudah mulai diketik mengunci ketikan berikutnya, supaya
+        // tidak bingung saat ada beberapa kata berjatuhan sekaligus.
+        var locked = null;
         for (var i = 0; i < falling.length; i++) {
-            if (falling[i].char === key && !falling[i].returning &&
-                (target === null || falling[i].y > target.y)) {
-                target = falling[i];
+            if (falling[i].typed > 0 && !falling[i].returning) { locked = falling[i]; break; }
+        }
+
+        if (locked) {
+            if (locked.text.charAt(locked.typed) === key) advance(locked);
+            else wrongKey();
+            return;
+        }
+
+        var target = null;
+        for (var j = 0; j < falling.length; j++) {
+            var f = falling[j];
+            if (!f.returning && f.text.charAt(0) === key &&
+                (target === null || f.y > target.y)) {
+                target = f;
             }
         }
         if (target === null) { wrongKey(); return; }
-        hitFalling(target);
+        advance(target);
+    }
+
+    function advance(f) {
+        correctKeys++;
+        f.typed++;
+        if (f.typed >= f.text.length) hitFalling(f);
+        else syncHud();
     }
 
     window.addEventListener('keydown', onKeyDown);
@@ -1447,7 +1553,7 @@
     softKey.addEventListener('input', function () {
         var typed = softKey.value;
         softKey.value = '';
-        if (typed) handleChar(typed.charAt(typed.length - 1).toLowerCase());
+        if (typed) handleChar(typed.charAt(typed.length - 1).toLowerCase(), 'layar');
     });
 
     if (isTouch) {

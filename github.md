@@ -5,6 +5,79 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 19 September 2026 — Huruf boss dipisah, dan mode KATA
+
+**Yang dikerjakan**
+
+Dua hal yang selama ini belum bisa:
+
+**1. Huruf saat lawan boss bisa berbeda dari huruf gelombang meteor.** Dulu satu daftar huruf
+dipakai untuk keduanya. Sekarang ada isian terpisah **"Huruf peluru boss"** di form JILID.
+Dikosongkan = ikut huruf meteor seperti sebelumnya, jadi JILID yang sudah ada tidak berubah.
+
+**2. Bisa pakai KATA, bukan cuma huruf tunggal.** Ada dua isian baru: **"Kata meteor"** dan
+**"Kata peluru boss"**. Kata dipisah koma atau baris baru.
+
+- Kalau kolom kata **diisi**, fase itu memakai kata — meteornya membawa kata utuh dan murid
+  harus mengetiknya sampai habis untuk menghancurkannya.
+- Kalau **dikosongkan**, fase itu kembali ke huruf tunggal seperti semula.
+
+Jadi tidak perlu tombol "mode" terpisah — ada atau tidaknya kata yang menentukan. Dan karena
+gelombang dan boss diatur sendiri-sendiri, bisa dibuat misalnya: **gelombang pakai huruf, boss
+pakai kata** — atau sebaliknya.
+
+**Cara mengetik kata**
+
+- Meteor yang sudah mulai diketik akan **mengunci** ketikan berikutnya, jadi tidak bingung
+  walau ada beberapa kata berjatuhan sekaligus.
+- Huruf yang sudah diketik ditampilkan **meredup**, sisanya tetap terang — murid bisa melihat
+  sampai mana ketikannya.
+- Kata digambar sebagai kapsul memanjang, bukan bola, supaya muat dan tetap terbaca.
+- Meteor yang berjatuhan sengaja dipilih yang **huruf awalnya berbeda-beda**, supaya jelas kata
+  mana yang sedang dimulai.
+
+**Akurasi & WPM sekarang dihitung per ketikan**
+
+Dulu dihitung per objek yang hancur. Di mode kata itu tidak adil — satu kata butuh banyak
+ketikan. Sekarang keduanya dihitung dari jumlah huruf yang diketik. Di mode huruf hasilnya
+sama persis seperti sebelumnya, jadi angka lama tetap sebanding.
+
+**Berkas yang disentuh**
+
+- Migrasi baru: 3 kolom di `meteor_game_levels` (`boss_keys`, `wave_words`, `boss_words`)
+- `MeteorGameLevel` — pemisahan isi per fase
+- `Admin\MeteorGameController` + form JILID di `admin/meteor/index.blade.php`
+- `learner/meteor/play.blade.php` — penguncian ketikan, gambar kapsul, hitungan per ketikan
+
+**Perintah yang perlu dijalankan setelah menarik perubahan ini**
+
+```
+php artisan migrate --force
+php artisan optimize:clear
+```
+
+Seeder **tidak perlu** dijalankan ulang — JILID yang sudah ada tetap memakai huruf seperti
+semula sampai Anda sendiri mengisi kolom katanya.
+
+**Yang perlu dicoba**
+
+- Buka **Admin → Game 10 Jari → ubah satu JILID**. Isi **Kata meteor** dengan
+  `sekolah, guru, murid, belajar` lalu simpan.
+- Mainkan JILID itu → meteornya harus membawa kata, dan baru hancur setelah katanya selesai
+  diketik. Huruf yang sudah diketik harus terlihat meredup.
+- Isi **Huruf peluru boss** dengan huruf lain (misal `qwe`) → saat lawan boss, hurufnya harus
+  berbeda dari gelombang meteornya.
+- Kosongkan lagi kolom katanya → harus kembali ke huruf tunggal.
+
+**Catatan pengujian**
+
+Diuji di Chrome tanpa jendela: **42/42** untuk mode kata + huruf boss terpisah, dan **39/39**
+untuk mode huruf sebagai pemeriksaan bahwa yang lama tidak berubah. Termasuk bukti bahwa kata
+yang belum selesai tidak menghancurkan meteor, huruf benar di tengah kata tidak dihitung salah,
+dan huruf khusus fase gelombang diabaikan saat lawan boss.
+
+---
+
 ## 19 September 2026 — SPASI untuk lanjut ke JILID berikutnya
 
 **Yang dikerjakan**

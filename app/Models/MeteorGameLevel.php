@@ -14,6 +14,9 @@ class MeteorGameLevel extends Model
         'meteor_bullet_id',
         'meteor_effect_id',
         'allowed_keys',
+        'boss_keys',
+        'wave_words',
+        'boss_words',
         'lives',
         'wave_target',
         'spawn_interval_ms',
@@ -71,7 +74,8 @@ class MeteorGameLevel extends Model
         return [
             'number' => (int) $this->level_number,
             'label' => $this->display_label,
-            'keys' => $this->keyList(),
+            'wave' => $this->phaseSpec($this->allowed_keys, $this->wave_words),
+            'boss' => $this->phaseSpec($this->boss_keys ?: $this->allowed_keys, $this->boss_words),
             'lives' => (int) $this->lives,
             'waveTarget' => (int) $this->wave_target,
             'spawnMs' => (int) $this->spawn_interval_ms,
@@ -99,12 +103,58 @@ class MeteorGameLevel extends Model
     }
 
     /** Huruf unik, huruf kecil, dan tidak pernah kosong. */
-    public function keyList(): array
+    public static function keyList(?string $raw): array
     {
-        $keys = array_unique(str_split(strtolower(trim((string) $this->allowed_keys))));
-        $keys = array_values(array_filter($keys, fn ($c) => $c !== ' '));
+        $keys = array_unique(str_split(strtolower(trim((string) $raw))));
+        $keys = array_values(array_filter($keys, fn ($c) => trim($c) !== ''));
 
         return $keys ?: str_split('asdfghjkl;');
+    }
+
+    public function waveWords(): array
+    {
+        return self::wordList($this->wave_words);
+    }
+
+    public function bossWords(): array
+    {
+        return self::wordList($this->boss_words);
+    }
+
+    /** Huruf peluru boss; kalau tidak diisi, ikut huruf meteor. */
+    public function effectiveBossKeys(): string
+    {
+        return (string) ($this->boss_keys ?: $this->allowed_keys);
+    }
+
+    /** Bank kata dipisah koma atau baris baru; baris kosong dibuang. */
+    public static function wordList(?string $raw): array
+    {
+        $words = preg_split('/[,\r\n]+/', strtolower((string) $raw)) ?: [];
+        $words = array_map(fn ($w) => trim($w), $words);
+
+        return array_values(array_unique(array_filter($words, fn ($w) => $w !== '')));
+    }
+
+    /**
+     * Isi satu fase. Adanya bank kata yang menentukan modenya — kalau kata diisi,
+     * fase itu memakai kata; kalau kosong, kembali ke huruf tunggal.
+     * `alphabet` adalah tombol yang dianggap bagian dari permainan pada fase itu,
+     * dipakai game untuk mengabaikan tombol di luar materi.
+     */
+    private function phaseSpec(?string $keys, ?string $words): array
+    {
+        $wordList = self::wordList($words);
+
+        if ($wordList) {
+            $alphabet = array_values(array_unique(str_split(str_replace(' ', '', implode('', $wordList)))));
+
+            return ['mode' => 'kata', 'items' => $wordList, 'alphabet' => $alphabet];
+        }
+
+        $keyList = self::keyList($keys);
+
+        return ['mode' => 'huruf', 'items' => $keyList, 'alphabet' => $keyList];
     }
 
     private function themeConfig(): array
