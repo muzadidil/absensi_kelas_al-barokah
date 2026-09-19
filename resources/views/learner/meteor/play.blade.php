@@ -47,6 +47,17 @@
         font-weight: 700;
         color: #ffd76a;
     }
+    .meteor-page .soft-key {
+        position: absolute;
+        bottom: 6px;
+        left: 50%;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
     .meteor-page .blink { animation: meteorBlink 1.2s ease-in-out infinite; }
     @keyframes meteorBlink { 50% { opacity: .3; } }
 
@@ -138,7 +149,8 @@
 
     <div id="touchNotice" class="alert alert-warning py-2 small d-none">
         <i class="bi bi-keyboard me-1"></i>
-        Game ini butuh <strong>keyboard fisik</strong>. Di HP/tablet tanpa keyboard, permainan tidak bisa dimainkan.
+        Game ini dirancang untuk <strong>keyboard fisik</strong> — latihan 10 jari tidak bisa dilakukan di layar sentuh.
+        Untuk sekadar mencoba, tekan <strong>Mulai</strong> lalu <strong>sentuh arenanya</strong> supaya keyboard layar muncul.
     </div>
 
     <div class="card">
@@ -164,14 +176,26 @@
 
                 <div class="overlay" id="introOverlay">
                     <h4 class="mb-2">Selamat datang, {{ $learner->nama_lengkap }}!</h4>
-                    <p class="mb-4">Apakah kamu siap menyelamatkan Al-Barokah dari Meteor?</p>
-                    <p class="blink mb-0">Tekan <span class="hint-key">SPASI</span> jika siap</p>
+                    <p class="mb-3">Apakah kamu siap menyelamatkan Al-Barokah dari Meteor?</p>
+                    <button type="button" id="startBtn" class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-play-fill me-1"></i> Mulai
+                    </button>
+                    <p class="blink small mt-3 mb-0">atau tekan <span class="hint-key">SPASI</span></p>
                 </div>
 
                 <div class="overlay d-none" id="pauseOverlay">
-                    <h4 class="mb-2"><i class="bi bi-pause-circle me-1"></i> Jeda</h4>
-                    <p class="mb-0">Tekan <span class="hint-key">SPASI</span> untuk lanjut</p>
+                    <h4 class="mb-3"><i class="bi bi-pause-circle me-1"></i> Jeda</h4>
+                    <button type="button" id="resumeBtn" class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-play-fill me-1"></i> Lanjut
+                    </button>
+                    <p class="small mt-3 mb-0">atau tekan <span class="hint-key">SPASI</span></p>
                 </div>
+
+                {{-- Di HP tidak ada keyboard fisik: kotak tak terlihat ini yang dipakai
+                     untuk memunculkan keyboard layar saat arena disentuh. --}}
+                <input id="softKey" class="soft-key" type="text" inputmode="text"
+                       autocomplete="off" autocorrect="off" autocapitalize="off"
+                       spellcheck="false" tabindex="-1" aria-hidden="true">
 
                 <div class="overlay d-none" id="wonOverlay">
                     <h4 class="mb-1">{{ $meteorGameLevel->boss?->name ?? 'Boss' }} tumbang!</h4>
@@ -281,6 +305,9 @@
     var boss, bossHp, bossTimer, bossCharge;
     var shake, hurt, wrongFlash, comboPop;
     var lastFrame = 0, hudTimer = 0, submitted = false;
+    var lastChar = '', lastCharAt = -1e9;
+    var isTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+    var softKey = document.getElementById('softKey');
 
     // ---------- ukuran & bintang ----------
 
@@ -1358,6 +1385,21 @@
         var key = e.key.length === 1 ? e.key.toLowerCase() : '';
         if (LEVEL.keys.indexOf(key) === -1) return;
         e.preventDefault();
+        handleChar(key);
+    }
+
+    /**
+     * Satu pintu untuk dua jalur ketikan: keyboard fisik (keydown) dan keyboard
+     * layar di HP (event input). Kalau sebuah tombol menyalakan keduanya, yang
+     * kedua diabaikan supaya tidak terhitung dua kali.
+     */
+    function handleChar(key) {
+        if (state !== 'playing' || LEVEL.keys.indexOf(key) === -1) return;
+
+        var now = window.performance ? performance.now() : Date.now();
+        if (key === lastChar && now - lastCharAt < 40) return;
+        lastChar = key;
+        lastCharAt = now;
 
         var target = null;
         for (var i = 0; i < falling.length; i++) {
@@ -1374,6 +1416,26 @@
 
     // blur() penting: tombol yang masih ter-fokus ikut tertekan saat pemain menekan SPASI
     pauseBtn.addEventListener('click', function () { this.blur(); setPaused(state === 'playing'); });
+    document.getElementById('startBtn').addEventListener('click', function () { this.blur(); startGame(); });
+    document.getElementById('resumeBtn').addEventListener('click', function () { this.blur(); setPaused(false); });
+
+    // Di HP: sentuhan pada arena memunculkan keyboard layar lewat kotak tak terlihat.
+    // focus() hanya membuka keyboard kalau dipanggil di dalam sentuhan pengguna,
+    // jadi ini sengaja menumpang pada event click yang menggelembung dari tombol.
+    function focusSoftKey() {
+        if (!isTouch || state !== 'playing') return;
+        try { softKey.focus({ preventScroll: true }); } catch (e) { softKey.focus(); }
+    }
+
+    softKey.addEventListener('input', function () {
+        var typed = softKey.value;
+        softKey.value = '';
+        if (typed) handleChar(typed.charAt(typed.length - 1).toLowerCase());
+    });
+
+    if (isTouch) {
+        wrap.addEventListener('click', focusSoftKey);
+    }
 
     var fsBtn = document.getElementById('fsBtn');
     var hudBar = document.getElementById('hudBar');
@@ -1424,7 +1486,7 @@
         window.addEventListener('resize', resize);
     }
 
-    if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    if (isTouch) {
         document.getElementById('touchNotice').classList.remove('d-none');
     }
 

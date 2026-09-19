@@ -5,6 +5,44 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 19 September 2026 — Game 10 Jari bisa dimulai tanpa keyboard
+
+**Masalah yang diperbaiki**
+
+Satu-satunya cara memulai permainan dan melanjutkan dari jeda adalah menekan **SPASI**. Di HP
+tidak ada tombol SPASI, jadi permainannya sama sekali tidak bisa dibuka untuk dicoba.
+
+**Yang dikerjakan**
+
+- Tombol **Mulai** di layar pembuka dan tombol **Lanjut** di layar jeda. Tulisan
+  "atau tekan SPASI" tetap ada, jadi keduanya bisa dipakai — mana saja yang lebih enak.
+- Di HP, **menyentuh arena akan memunculkan keyboard layar**, sehingga hurufnya bisa diketik
+  untuk sekadar mencoba. Caranya: tekan Mulai, lalu sentuh arenanya.
+- Keterangan peringatan di atas arena diperbarui: game ini tetap dirancang untuk keyboard
+  fisik (latihan 10 jari memang tidak bisa dilatih di layar sentuh), tapi sekarang dijelaskan
+  cara mencobanya di HP.
+
+**Catatan teknis**
+
+Satu tombol fisik bisa menyalakan dua kejadian sekaligus (tombol ditekan **dan** teks masuk),
+terutama di tablet yang punya keyboard. Supaya satu ketikan tidak terhitung dua kali, ketikan
+yang sama dalam waktu sangat berdekatan hanya diproses sekali.
+
+**Berkas yang disentuh**
+
+- `resources/views/learner/meteor/play.blade.php`
+
+Tidak ada perubahan database. Deploy cukup `git pull` lalu `php artisan optimize:clear`.
+
+**Yang perlu dicoba**
+
+- Buka di HP → tekan **Mulai** → permainan harus jalan tanpa perlu keyboard.
+- Sentuh arenanya → keyboard layar harus muncul, dan huruf yang diketik menghancurkan meteor.
+- Jeda → tekan tombol **Lanjut** → permainan lanjut.
+- Di komputer, **SPASI** harus tetap berfungsi seperti biasa untuk mulai dan lanjut.
+
+---
+
 ## 19 September 2026 — Game 10 Jari: tombol Layar Penuh
 
 **Masalah yang diperbaiki**
