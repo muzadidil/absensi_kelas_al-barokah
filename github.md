@@ -5,6 +5,102 @@ Tujuannya supaya mudah dibaca tanpa harus menelusuri riwayat commit satu per sat
 
 ---
 
+## 19 September 2026 — Game 10 Jari bisa diatur sendiri dari Admin
+
+**Masalah yang diperbaiki**
+
+JILID 6 dan 7 ternyata terlalu berat — bahkan untuk yang sudah terbiasa mengetik 10 jari.
+Penyebabnya, di JILID 6 ada **tiga hal yang naik sekaligus**: huruf baru bertambah satu baris
+penuh, peluru boss melonjak jadi 5 butir, dan meteor turun makin rapat. Ketiganya menumpuk.
+
+Masalah yang lebih besar: semua angka kesulitan itu **terkunci di dalam kode**. Setiap kali
+terlalu berat atau terlalu ringan, harus menunggu programmer mengubahnya. Padahal yang paling
+tahu kemampuan murid adalah gurunya sendiri.
+
+**Yang dikerjakan**
+
+Sekarang ada menu **Game 10 Jari** di sidebar Admin. Semua bisa diatur sendiri lewat lima tab:
+
+| Tab | Isinya |
+|---|---|
+| **JILID** | Urutan, huruf yang keluar, nyawa, jumlah meteor, jeda antar meteor, **lama meteor jatuh**, boss & pelurunya, darah boss, jumlah peluru per serangan, jeda serangan, centang "peluru memantul" dan "checkpoint" |
+| **Nuansa** | Warna langit (3 lapis), tanah, dinding & kubah markas, cahaya perisai, objek langit (bintang/awan/polos), dan apakah latarnya gelap |
+| **Efek** | Jumlah & sebaran partikel ledakan, warna partikel, kekuatan getaran layar, warna sinar tembakan |
+| **Peluru** | Nama (sekaligus jadi nama senjata boss), tiga warna bolanya, dan efek saat kena |
+| **Boss** | Nama bebas, pilih gambarnya dari 10 yang tersedia, dan warna auranya |
+
+Nuansa, Efek, Peluru, dan Boss adalah **master** — dibuat sekali, boleh dipakai berkali-kali di
+JILID mana pun. Jadi kalau mau bikin JILID baru bertema Senja dengan boss Mecha dan peluru es,
+tinggal pilih dari daftar, tidak perlu bikin ulang.
+
+**Kecepatan sekarang bisa diatur**
+
+Dulu lama meteor jatuh terkunci 7 detik di dalam kode. Sekarang ada isiannya per JILID
+(**makin besar angkanya, makin pelan meteornya**), begitu juga lama peluru boss jatuh dan jeda
+antar serangan boss.
+
+**Keseimbangan bawaan dilandaikan**
+
+Selain bisa diatur, angka bawaannya juga diperbaiki. Prinsipnya sekarang: **kalau huruf baru
+diperkenalkan, tekanan lain justru diturunkan** — biar yang sulit cuma satu hal pada satu waktu.
+
+- Huruf melebar **dua-dua**, bukan langsung satu baris. JILID 6 cuma menambah **E** dan **I**
+  (jari telunjuk naik), bukan `Q W E R T` sekaligus.
+- Di JILID 6 jumlah peluru boss justru **turun** dari 5 jadi 2, dan meteornya dibuat lebih renggang.
+- JILID 6 dan 7 meteornya dibuat lebih lambat (7,5 detik), supaya ada waktu mencari huruf baru.
+
+Kalau ternyata masih terlalu berat atau malah terlalu gampang, semuanya bisa langsung diubah
+dari halaman Admin tanpa menyentuh kode lagi.
+
+**Berkas yang disentuh**
+
+- 2 migrasi baru: 4 tabel master + penyambungan JILID ke master & kolom kecepatan
+- Model baru `MeteorTheme`, `MeteorEffect`, `MeteorBullet`, `MeteorBoss`
+- `MeteorGameLevel` — semua pengaturan dirakit di satu method `gameConfig()`
+- `Admin\MeteorGameController` + view `admin/meteor/index.blade.php` (baru)
+- `learner/meteor/play.blade.php` — berhenti menebak dari nomor JILID, semua dari data
+- `routes/web.php`, `layouts/admin.blade.php`, `MeteorGameLevelSeeder`
+
+**Perintah yang perlu dijalankan setelah menarik perubahan ini**
+
+```
+php artisan migrate --force
+php artisan db:seed --class=MeteorGameLevelSeeder --force
+php artisan optimize:clear
+```
+
+Migrasinya **memindahkan data JILID yang sudah ada** ke bentuk baru, jadi JILID 1–10 di server
+tidak akan hilang. Seeder tetap perlu dijalankan untuk mengisi daftar Nuansa, Efek, Peluru, dan
+Boss, sekaligus menerapkan keseimbangan baru.
+
+**Yang perlu dicoba**
+
+- Buka **Admin → Game 10 Jari** → harus muncul 5 tab dengan data terisi.
+- Ubah satu JILID (misal huruf atau lama jatuhnya) → simpan → mainkan sebagai murid, perubahannya
+  harus langsung terasa.
+- Buat **Nuansa** baru dengan warna bebas, pasang ke satu JILID → langit dan markasnya harus berubah.
+- Buat **Boss** baru bernama apa saja dengan gambar pilihan sendiri → pasang ke JILID.
+- Hapus satu master yang sedang dipakai → JILID-nya **tidak ikut terhapus**, hanya kembali ke
+  tampilan bawaan.
+- Coba isi huruf dengan yang dobel (misal `aabbcc`) → harus otomatis dirapikan jadi `abc`.
+
+**Catatan pengujian**
+
+Diuji di Chrome tanpa jendela: **27/27** untuk permainannya setelah dirombak (termasuk bukti
+bahwa nuansa "Senja" yang tidak pernah ada di kode bisa tampil hanya dari data), dan **27/27**
+untuk logika form di halaman admin (tambah vs ubah, isian tidak bersisa saat ganti mode,
+konfirmasi hapus).
+
+Seperti biasa, **sisi PHP/Laravel belum dijalankan** di komputer pengerjaan karena PHP tidak
+terpasang — migrasi, controller, dan halaman admin perlu dicoba sekali di server.
+
+**Belum dikerjakan**
+
+- Gambar boss masih dipilih dari 10 yang sudah ada; menggambar boss baru lewat form belum bisa.
+- Progres game belum masuk Raport.
+
+---
+
 ## 18 September 2026 — Game 10 Jari: JILID 6–10 (suasana pagi, boss modern, peluru memantul)
 
 **Yang dikerjakan**

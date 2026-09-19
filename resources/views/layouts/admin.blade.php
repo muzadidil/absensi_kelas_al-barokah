@@ -115,6 +115,13 @@
           </a>
       </li>
       <li class="nav-item mb-1">
+          <a href="{{ route('admin.meteor.index') }}"
+            class="menu-item nav-link {{ request()->routeIs('admin.meteor.*') ? 'active' : '' }}"
+            data-tooltip="Atur JILID, huruf, kecepatan, boss, nuansa & efek">
+              <i class="bi bi-rocket-takeoff me-2"></i><span> Game 10 Jari</span>
+          </a>
+      </li>
+      <li class="nav-item mb-1">
           <a href="{{ route('admin.settings.index') }}"
             class="menu-item nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
             data-tooltip="Pengaturan Situs (logo, favicon, alamat)">

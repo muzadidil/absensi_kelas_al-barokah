@@ -8,6 +8,7 @@ use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\ClassSettingController;
+use App\Http\Controllers\Admin\MeteorGameController as AdminMeteorGameController;
 use App\Http\Controllers\Admin\RaportController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SettingController;
@@ -167,6 +168,29 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/sections', [ClassSettingController::class, 'storeSection'])->name('admin.sections.store');
         Route::put('/admin/sections/{section}', [ClassSettingController::class, 'updateSection'])->name('admin.sections.update');
         Route::delete('/admin/sections/{section}', [ClassSettingController::class, 'destroySection'])->name('admin.sections.destroy');
+
+        // Pengaturan Game 10 Jari — JILID + master nuansa/efek/peluru/boss
+        Route::get('/admin/game-jari', [AdminMeteorGameController::class, 'index'])->name('admin.meteor.index');
+
+        Route::post('/admin/game-jari/jilid', [AdminMeteorGameController::class, 'storeLevel'])->name('admin.meteor.levels.store');
+        Route::put('/admin/game-jari/jilid/{meteorGameLevel}', [AdminMeteorGameController::class, 'updateLevel'])->name('admin.meteor.levels.update');
+        Route::delete('/admin/game-jari/jilid/{meteorGameLevel}', [AdminMeteorGameController::class, 'destroyLevel'])->name('admin.meteor.levels.destroy');
+
+        Route::post('/admin/game-jari/nuansa', [AdminMeteorGameController::class, 'storeTheme'])->name('admin.meteor.themes.store');
+        Route::put('/admin/game-jari/nuansa/{meteorTheme}', [AdminMeteorGameController::class, 'updateTheme'])->name('admin.meteor.themes.update');
+        Route::delete('/admin/game-jari/nuansa/{meteorTheme}', [AdminMeteorGameController::class, 'destroyTheme'])->name('admin.meteor.themes.destroy');
+
+        Route::post('/admin/game-jari/efek', [AdminMeteorGameController::class, 'storeEffect'])->name('admin.meteor.effects.store');
+        Route::put('/admin/game-jari/efek/{meteorEffect}', [AdminMeteorGameController::class, 'updateEffect'])->name('admin.meteor.effects.update');
+        Route::delete('/admin/game-jari/efek/{meteorEffect}', [AdminMeteorGameController::class, 'destroyEffect'])->name('admin.meteor.effects.destroy');
+
+        Route::post('/admin/game-jari/peluru', [AdminMeteorGameController::class, 'storeBullet'])->name('admin.meteor.bullets.store');
+        Route::put('/admin/game-jari/peluru/{meteorBullet}', [AdminMeteorGameController::class, 'updateBullet'])->name('admin.meteor.bullets.update');
+        Route::delete('/admin/game-jari/peluru/{meteorBullet}', [AdminMeteorGameController::class, 'destroyBullet'])->name('admin.meteor.bullets.destroy');
+
+        Route::post('/admin/game-jari/boss', [AdminMeteorGameController::class, 'storeBoss'])->name('admin.meteor.bosses.store');
+        Route::put('/admin/game-jari/boss/{meteorBoss}', [AdminMeteorGameController::class, 'updateBoss'])->name('admin.meteor.bosses.update');
+        Route::delete('/admin/game-jari/boss/{meteorBoss}', [AdminMeteorGameController::class, 'destroyBoss'])->name('admin.meteor.bosses.destroy');
 
         // Learners (data murid) — was public with no auth at all, now admin-only
         Route::resource('learners', LearnerController::class)->names('admin.learners');
